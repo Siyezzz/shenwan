@@ -1,0 +1,10 @@
+# 原始披露文件体积大且受版权约束，默认不入库；仅入库索引
+source_documents/**/*.pdf
+source_documents/**/*.PDF
+
+# 运行期产物
+output/**/raw/
+**/__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
