@@ -11,12 +11,12 @@
 
 | 判定 | 数量 | 项目编号 |
 |---|---|---|
-| **PASS** | 16 | A1、A2、A3、A4、A5、A6、A8、A9、A10、A11、A12、A13、A14、A16、A17、A19 |
+| **PASS** | 17 | A1、A2、A3、A4、A5、A6、A8、A9、A10、A11、A12、A13、A14、A16、A17、A18、A19 |
 | **PARTIAL** | 2 | A7（数据源探针）、A15（案例资料完整性） |
 | **FAIL** | 0 | — |
-| **NOT TESTED** | 1 | A18（GitHub 远端推送，网络不可达） |
+| **NOT TESTED** | 0 | — |
 
-**结论：项目主体达标。2 项 PARTIAL 均由外部客观限制造成，非实现缺陷，已在下方逐项说明具体缺什么、缺到什么程度、如何补。1 项 NOT TESTED 是 GitHub 远端推送，因当前网络环境不通，本地仓库已完整提交，具备随时推送条件。**
+**结论：项目主体达标。17 项 PASS、2 项 PARTIAL、0 项 FAIL、0 项 NOT TESTED。2 项 PARTIAL 均由外部客观限制造成（上交所公告接口需内部 channelId；首农评估报告与基金合同未公开披露），非实现缺陷，已在下方逐项说明缺什么、缺到什么程度、如何补。GitHub 推送已完成（`master → main`，提交 `9846c10`），过程中确认代理通道 502 但直连可用。**
 
 ---
 
@@ -183,17 +183,17 @@
 | 项 | 内容 |
 |---|---|
 | **验收标准** | 推送至 `https://github.com/Siyezzz/shenwan.git` |
-| **实际状态** | 本地 git 仓库已初始化，工作区完整。远端推送**未执行成功**：经代理报 `CONNECT tunnel failed, response 502`，直连报 `Failed to connect to github.com:443` |
-| **判定** | **NOT TESTED** |
-| **说明** | 这是网络环境限制，不是实现缺陷。用户已明确指示"最后一起上传，先把任务做了，在本地存储"。本地提交完成后，网络恢复即可 `git remote add` + `git push` |
-| **不做的事** | 未声称已上传 |
+| **实际状态** | 首次尝试经系统代理失败（`CONNECT tunnel failed, response 502`）；清除 HTTP(S)_PROXY 环境变量后直连成功，`git ls-remote` 返回远端 HEAD = `a62ffa3`（仅 9 字节占位 README `# shenwan`）。已执行 `git push --force origin master:main`，远端 `main` 更新为 **`9846c10`**，与本地一致 |
+| **判定** | **PASS** |
+| **说明** | 远端原为 GitHub 建仓占位提交，与本地历史无共同祖先，故用 force 覆盖（未保留占位 README，本地 README 内容更完整）。共 47 个文件、10,419 行入库 |
+| **边界（必须同时说明）** | `source_documents/**/*.pdf`（24 份，112MB）**按 `.gitignore` 未入库**，理由是 README「许可与边界」已声明原始披露文件仅作研究留档、不再分发，入库等于随仓库分发。本地磁盘保留全部 PDF；入库的是 `source_documents/source_index.csv`（26 条 = 24 份已获取 + 2 项 `SOURCE_UNAVAILABLE`）。**因此 clone 仓库后无法直接复现原始 PDF，需按索引中的 URL 自行获取** |
 
 ### A19 · 目录结构 + 汇报材料 + 最终验收
 
 | 项 | 内容 |
 |---|---|
 | **验收标准** | 项目目录结构符合十阶段要求；`presentation/management_briefing.md` 含提纲、3–5 分钟口述稿、追问应答；本文件 |
-| **实际证据** | 本文件；`presentation/management_briefing.md`（5 页提纲 + 1,300 字口述稿 + 支撑数据卡 + 12 条追问应答 + 边界声明） |
+| **实际证据** | 本文件；`presentation/management_briefing.md`（5 页提纲 + 1,342 字口述稿 + 支撑数据卡 + 12 条追问应答 + 边界声明） |
 | **判定** | **PASS** |
 
 ---
@@ -275,7 +275,7 @@
 |---|---|---|---|
 | O-01 | 上交所公告接口需内部 `channelId`，无法自动发现新公告 | 中 | 接入带鉴权的内部接口，或改用交易所批量下载服务 |
 | O-02 | 首农资产评估报告原件缺失，CapRate 计算基数未获原文确认 | 高 | 取得评估报告全文，核对毛 NOI / 净现金流差额 17.8% 的来源 |
-| O-03 | GitHub 远端未推送 | 低 | 网络恢复后 `git remote add origin` + `git push` |
+| O-03 | ~~GitHub 远端未推送~~ | — | **已完成**：清除代理变量后直连推送，远端 main = `9846c10` |
 | O-04 | 案例一、二的 `assumptions.csv` 未建立（投后场景暂按 claim 表承载假设） | 低 | 若要把敏感度分析扩展到投后场景，需补建 |
 | O-05 | 94 条断言覆盖三个具体案例，不代表全市场普适性 | 中 | 新增案例时同步新增断言，不降低现有标准 |
 | O-06 | 指标字典只覆盖仓储物流与商业不动产两类资产 | 中 | 扩品类时必须重做 `metric_bands`，不得直接复用阈值 |
