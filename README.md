@@ -32,7 +32,9 @@ reits-research-skills/
 ├── models/                               # 现金流模型、数据矩阵
 ├── tests/                                # 数据质量 / 计算 / 执行 / 回归测试记录
 ├── iteration_log/ITERATION_LOG.md        # 三轮以上迭代留痕
-└── presentation/management_briefing.md   # 上级汇报材料
+└── presentation/                         # 两版汇报材料
+    ├── management_briefing.md            # 面向管理层（提纲+口述稿+追问应答）
+    └── teacher_briefing.md               # 面向老师（纯口语：流程/思路/亮点/疑惑）
 ```
 
 ## 当前进度
@@ -47,7 +49,7 @@ reits-research-skills/
 | 六、三轮以上迭代 | **完成（4 轮）** | `iteration_log/ITERATION_LOG.md`，Iteration 1 可执行性 / 2 研究质量 / 3 鲁棒性 / 4 自检可信度，每轮含修改前后数值对比 |
 | 七、GitHub | **完成** | 已推送至 `github.com/Siyezzz/shenwan`（`main` 分支，首次提交 47 文件 / 10,419 行）。经代理报 502，清除 `HTTP(S)_PROXY` 后直连成功。**原始 PDF（24 份 / 112MB）按 `.gitignore` 不入库**，仅入库 `source_index.csv`——与「许可与边界」中「不再分发」一致 |
 | 八、最终目录 | **完成** | 见上节目录结构 |
-| 九、汇报材料 | **完成** | `presentation/management_briefing.md`（5 页提纲 + 1,300 字口述稿 + 支撑数据卡 + 12 条追问应答 + 边界声明） |
+| 九、汇报材料 | **完成（两版）** | `presentation/management_briefing.md`（管理层版：5 页提纲 + 1,342 字口述稿 + 数据卡 + 12 条追问 + 边界声明）；`presentation/teacher_briefing.md`（老师版：纯口语 2,928 字，按「流程/思路/亮点/疑惑」四段，含 3 档时长裁剪 + 7 条追问备用） |
 | 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（19 项：16 PASS / 2 PARTIAL / 0 FAIL / 1 NOT TESTED） |
 
 ## 自检
