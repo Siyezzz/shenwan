@@ -16,7 +16,9 @@
 | **FAIL** | 0 | — |
 | **NOT TESTED** | 0 | — |
 
-**结论：项目主体达标。17 项 PASS、2 项 PARTIAL、0 项 FAIL、0 项 NOT TESTED。2 项 PARTIAL 均由外部客观限制造成（上交所公告接口需内部 channelId；首农评估报告与基金合同未公开披露），非实现缺陷，已在下方逐项说明缺什么、缺到什么程度、如何补。GitHub 推送已完成（`master → main`），过程中确认代理通道 502、清除 `HTTP(S)_PROXY` 后直连可用。**以 `git ls-remote origin` 的返回为准**，本文不锁定具体提交哈希——文档每次修订都会产生新提交，锁定哈希必然过期。**
+**结论：项目主体达标。17 项 PASS、2 项 PARTIAL、0 项 FAIL、0 项 NOT TESTED。** 2 项 PARTIAL 均由外部客观限制造成（上交所公告接口需内部 channelId；首农评估报告与基金合同未公开披露），非实现缺陷，已在下方逐项说明缺什么、缺到什么程度、如何补。
+
+GitHub 推送已完成（`master → main`）：过程中确认代理通道 502，清除 `HTTP(S)_PROXY` 后直连可用。以 `git ls-remote origin` 的返回为准——本文不锁定具体提交哈希，因为文档每次修订都会产生新提交，锁定哈希必然过期。
 
 ---
 
