@@ -1,4 +1,7 @@
 # 原始披露文件体积大且受版权约束，默认不入库；仅入库索引
+# 理由：README「许可与边界」写明原始文件仅作研究留档、不再分发；
+#      入库即等于随仓库分发，与声明冲突。本地磁盘保留全部 24 份 PDF 供复核，
+#      source_documents/source_index.csv 逐份记录文件名、披露日、URL 与本地路径。
 source_documents/**/*.pdf
 source_documents/**/*.PDF
 
@@ -8,3 +11,8 @@ output/**/raw/
 *.pyc
 .DS_Store
 Thumbs.db
+
+# Office / 临时文件
+~$*
+*.tmp
+.venv/

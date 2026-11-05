@@ -40,19 +40,33 @@ reits-research-skills/
 | 阶段 | 状态 | 产出 |
 |---|---|---|
 | 一、附件审计与模板研究 | **完成** | `outputs/research_flow_audit/attachment_study.md`、`research_flow_audit.xlsx`、`template/template_convention_audit.md` |
-| 二、研报转 FLOW 方法论 Skill | 未开始 | — |
-| 三、两个 REITs 业务 Skill | 未开始 | — |
-| 四、真实资料获取 | 部分（复用上一轮已下载的上交所文件，需复核） | `source_documents/` |
-| 五、三案例实跑 | 未开始 | — |
-| 六、三轮迭代 | 未开始 | — |
-| 七、GitHub | 本地 git 已初始化，**无远端**（环境无 gh CLI） | — |
-| 八、最终目录 | 骨架已建 | — |
-| 九、汇报材料 | 未开始 | — |
-| 十、最终验收 | 未开始 | — |
+| 二、研报转 FLOW 方法论 Skill | **完成** | `skills/research-report-to-flow/`（SKILL + METADATA + FLOW #1–#18 + raw，可逆一致） |
+| 三、两个 REITs 业务 Skill | **完成** | `skills/reits-post-investment-monitor/`（FLOW #1–#22）、`skills/reits-pre-investment-analysis/`（FLOW #1–#26） |
+| 四、真实资料获取 | **部分** | `source_documents/` 共 **24 份 PDF** + `source_index.csv`。上交所公告接口需内部 `channelId`，公开请求不可用，已登记 `SOURCE_UNAVAILABLE` 并配置东方财富备用源；首农另有 2 项不可得（资产评估报告、基金合同） |
+| 五、三案例实跑 | **完成** | 三份报告（4,230 / 3,728 / **17,559** 中文字符）+ `run_log.md` + `claims_verdict.csv` + `source_index.csv`；案例三另有 `assumptions.csv`（20 条）与 `figures/` |
+| 六、三轮以上迭代 | **完成（4 轮）** | `iteration_log/ITERATION_LOG.md`，Iteration 1 可执行性 / 2 研究质量 / 3 鲁棒性 / 4 自检可信度，每轮含修改前后数值对比 |
+| 七、GitHub | **未完成** | 本地 git 已提交，远端推送因网络限制失败（代理 502 / 直连超时）。**未声称已上传** |
+| 八、最终目录 | **完成** | 见上节目录结构 |
+| 九、汇报材料 | **完成** | `presentation/management_briefing.md`（5 页提纲 + 1,300 字口述稿 + 支撑数据卡 + 12 条追问应答 + 边界声明） |
+| 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（19 项：16 PASS / 2 PARTIAL / 0 FAIL / 1 NOT TESTED） |
+
+## 自检
+
+```bash
+python tools/build_raw.py      # 重建并校验 _raw_response.txt 可逆性（期望 ALL_MATCH）
+python tests/run_tests.py      # 94 条断言（期望 PASS 94 / FAIL 0）
+```
+
+| 测试组 | 条数 | 说明文档 |
+|---|---|---|
+| T-CALC 计算与对账 | 22 | `tests/test_calculations.md` |
+| T-DQ 数据质量 | 24 | `tests/test_data_quality.md` |
+| T-SKILL Skill 结构 | 31 | `tests/test_skill_execution.md` |
+| T-REG 回归 | 17 | `tests/regression_tests.md` |
 
 ## 数据来源
 
-全部案例文件来自上海证券交易所 REITs 公告页（`www.sse.com.cn`）与基金管理人官网披露的原始 PDF，逐份记录在 `source_documents/*/SOURCE_INDEX.md`。不引用搜索引擎摘要。
+全部案例文件来自上海证券交易所 REITs 公告页（`www.sse.com.cn`）与基金管理人官网披露的原始 PDF，逐份记录在 `source_documents/source_index.csv`。不引用搜索引擎摘要。
 
 ## 许可与边界
 

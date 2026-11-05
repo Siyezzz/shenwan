@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" font-family="Microsoft YaHei, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#1F4E79"/>
+    </marker>
+    <marker id="arrowR" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#C00000"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="720" fill="#FFFFFF"/>
+  <text x="24" y="34" font-size="20" font-weight="bold" fill="#1F4E79">中信建投首农商业REIT（508601）交易结构与现金流路径</text>
+  <text x="24" y="58" font-size="12" fill="#595959">底层资产：北京昌平龙德广场（购物中心）｜规模：募集 27.40 亿元 / 评估 27.03 亿元｜存续期 20 年｜制图依据：招募说明书（更新）2026-10-28、法律意见书（封卷稿）2026-04-24</text>
+
+  <!-- 持有人 -->
+  <rect x="330" y="84" width="300" height="56" rx="6" fill="#E8F1FA" stroke="#1F4E79" stroke-width="1.5"/>
+  <text x="480" y="108" font-size="14" font-weight="bold" fill="#1F4E79" text-anchor="middle">基金份额持有人</text>
+  <text x="480" y="128" font-size="11" fill="#404040" text-anchor="middle">10 亿份 · 原始权益人及关联方战配 34%（锁定 60 个月）</text>
+
+  <line x1="480" y1="140" x2="480" y2="176" stroke="#1F4E79" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="492" y="163" font-size="11" fill="#1F4E79">认购 / 分派</text>
+
+  <!-- 基金 -->
+  <rect x="280" y="176" width="400" height="60" rx="6" fill="#DDEBF7" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="480" y="200" font-size="14" font-weight="bold" fill="#1F4E79" text-anchor="middle">公募基金（契约型封闭式）</text>
+  <text x="480" y="222" font-size="11" fill="#404040" text-anchor="middle">管理人：中信建投基金｜托管人：华夏银行｜上市地：上交所</text>
+
+  <line x1="480" y1="236" x2="480" y2="272" stroke="#1F4E79" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="492" y="259" font-size="11" fill="#1F4E79">持有 100% 资产支持证券</text>
+
+  <!-- 专项计划 -->
+  <rect x="280" y="272" width="400" height="60" rx="6" fill="#DDEBF7" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="480" y="296" font-size="14" font-weight="bold" fill="#1F4E79" text-anchor="middle">资产支持专项计划</text>
+  <text x="480" y="318" font-size="11" fill="#404040" text-anchor="middle">中信建投-首农商业不动产 1 期｜计划管理人：中信建投证券</text>
+
+  <line x1="480" y1="332" x2="480" y2="368" stroke="#1F4E79" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="492" y="355" font-size="11" fill="#1F4E79">100% 股权 + 股东借款</text>
+
+  <!-- 项目公司 -->
+  <rect x="280" y="368" width="400" height="60" rx="6" fill="#DDEBF7" stroke="#2E75B6" stroke-width="1.5"/>
+  <text x="480" y="392" font-size="14" font-weight="bold" fill="#1F4E79" text-anchor="middle">项目公司：龙德置地有限公司</text>
+  <text x="480" y="414" font-size="11" fill="#404040" text-anchor="middle">持有房屋所有权 + 国有建设用地使用权</text>
+
+  <line x1="480" y1="428" x2="480" y2="464" stroke="#1F4E79" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="492" y="451" font-size="11" fill="#1F4E79">租金及物业管理费</text>
+
+  <!-- 资产 -->
+  <rect x="250" y="464" width="460" height="76" rx="6" fill="#FFF2CC" stroke="#BF8F00" stroke-width="1.8"/>
+  <text x="480" y="488" font-size="14" font-weight="bold" fill="#7F6000" text-anchor="middle">基础设施资产：龙德广场</text>
+  <text x="480" y="508" font-size="11" fill="#404040" text-anchor="middle">北京昌平区立汤路 186 号院 1 号楼｜购物中心｜建面 222,681.57 ㎡｜宗地 62,972.30 ㎡</text>
+  <text x="480" y="526" font-size="11" fill="#404040" text-anchor="middle">商业用地至 2045-03-29（剩余 19.24 年）｜地下车库至 2055-03-29</text>
+
+  <!-- 左侧：原始权益人 -->
+  <rect x="24" y="272" width="210" height="88" rx="6" fill="#F2F2F2" stroke="#7F7F7F" stroke-width="1.2"/>
+  <text x="129" y="294" font-size="12" font-weight="bold" fill="#404040" text-anchor="middle">原始权益人</text>
+  <text x="129" y="314" font-size="10.5" fill="#404040" text-anchor="middle">北京粮食集团（主要）</text>
+  <text x="129" y="332" font-size="10.5" fill="#404040" text-anchor="middle">北京元创联商业企业管理中心</text>
+  <text x="129" y="350" font-size="10.5" fill="#404040" text-anchor="middle">（有限合伙）</text>
+  <line x1="234" y1="316" x2="278" y2="316" stroke="#7F7F7F" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="240" y="308" font-size="10" fill="#7F7F7F">转让股权</text>
+
+  <!-- 右侧：运营管理机构 -->
+  <rect x="726" y="272" width="210" height="88" rx="6" fill="#F2F2F2" stroke="#7F7F7F" stroke-width="1.2"/>
+  <text x="831" y="294" font-size="12" font-weight="bold" fill="#404040" text-anchor="middle">运营管理机构</text>
+  <text x="831" y="314" font-size="10.5" fill="#404040" text-anchor="middle">统筹：北京首农食品集团</text>
+  <text x="831" y="332" font-size="10.5" fill="#404040" text-anchor="middle">实施：北京龙德商业管理</text>
+  <text x="831" y="350" font-size="10.5" fill="#C00000" text-anchor="middle">均属原始权益人同一控制</text>
+  <line x1="724" y1="316" x2="682" y2="316" stroke="#7F7F7F" stroke-width="1.4" marker-end="url(#arrow)"/>
+  <text x="690" y="308" font-size="10" fill="#7F7F7F">委托运营</text>
+
+  <!-- 现金流路径 -->
+  <path d="M 700 500 C 800 500, 840 430, 840 360" fill="none" stroke="#C00000" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#arrowR)"/>
+  <text x="806" y="440" font-size="10.5" fill="#C00000">租金</text>
+
+  <path d="M 236 540 C 150 540, 60 500, 60 400" fill="none" stroke="#C00000" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#arrowR)"/>
+  <text x="70" y="500" font-size="10.5" fill="#C00000">关联租赁/物业</text>
+
+  <!-- 税负与费用节点 -->
+  <rect x="24" y="580" width="912" height="112" rx="6" fill="#FDF2F2" stroke="#C00000" stroke-width="1.2"/>
+  <text x="40" y="604" font-size="12.5" font-weight="bold" fill="#C00000">现金流路径上的扣减节点（决定"可供分配"与"募集规模"的差距）</text>
+  <text x="40" y="626" font-size="11" fill="#404040">① 项目公司层：增值税及附加、房产税、城镇土地使用税、企业所得税；股东借款利息（税前可列支，形成税盾）</text>
+  <text x="40" y="646" font-size="11" fill="#404040">② 专项计划层：资产支持证券利息支出、计划管理费、托管费、评级及审计等中介费用</text>
+  <text x="40" y="666" font-size="11" fill="#404040">③ 基金层：基金管理费（按资产净值）、托管费、上市年费、审计费、信息披露费；分配前需预留未来合理支出</text>
+  <text x="40" y="686" font-size="11" fill="#C00000">④ 关联节点：运营管理费支付给原始权益人同一控制方——费率是否与业绩挂钩，是治理上最需盯的一处</text>
+</svg>
