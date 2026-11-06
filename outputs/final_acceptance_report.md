@@ -190,7 +190,7 @@ GitHub 推送已完成（`master → main`）：过程中确认代理通道 502�
 | **验收标准** | 推送至 `https://github.com/Siyezzz/shenwan.git` |
 | **实际状态** | 首次尝试经系统代理失败（`CONNECT tunnel failed, response 502`）；清除 HTTP(S)_PROXY 环境变量后直连成功，`git ls-remote` 返回远端 HEAD = `a62ffa3`（仅 9 字节占位 README `# shenwan`）。已执行 `git push --force origin master:main` 覆盖占位历史，此后每次 `git push origin master:main` 增量更新；远端 `main` 与本地 `master` 保持一致 |
 | **判定** | **PASS** |
-| **说明** | 远端原为 GitHub 建仓占位提交，与本地历史无共同祖先，故用 force 覆盖（未保留占位 README，本地 README 内容更完整）。首次入库 47 个文件、10,419 行；**第六轮重构的提交 SHA 记录在 `iteration_log/COMMITS.md`**（本文件每次修订都会产生新提交，故不在此处锁定单一哈希，以免给出一个必然过期的值） |
+| **说明** | 远端原为 GitHub 建仓占位提交，与本地历史无共同祖先，故用 force 覆盖（未保留占位 README，本地 README 内容更完整）。首次入库 47 个文件、10,419 行；**第六轮重构的提交 SHA 记录在 `iteration_log/COMMITS.md`**（本文件每次修订都会产生新提交，故不在此处锁定单一哈希，以免给出一个必然过期的值）。**第六轮已推送**：远端 `main` = `a0e48d6`，`git ls-remote` 实测与本地一致；推送因代理对 `github.com` 概率性 502 而失败三次，最终以 TLS 1.2 + 重试循环成功 |
 | **边界（必须同时说明）** | `source_documents/**/*.pdf`（60 份，305MB）**按 `.gitignore` 未入库**，理由是 README「许可与边界」已声明原始披露文件仅作研究留档、不再分发，入库等于随仓库分发。本地磁盘保留全部 PDF；入库的是 `source_documents/source_index.csv`（62 条 = 60 份已获取 + 2 项标注）。**因此 clone 仓库后无法直接复现原始 PDF，需按索引中的 URL 自行获取** |
 
 ### A19 · 目录结构 + 汇报材料 + 最终验收
