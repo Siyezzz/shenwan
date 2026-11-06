@@ -32,6 +32,29 @@
 | 更正表述 | `README.md`（数据来源渠道、进度表、测试数）、`.gitignore`（24→60 份注释）、`outputs/final_acceptance_report.md`（19→25 项） |
 | 迭代留痕 | `iteration_log/ITERATION_LOG.md`（追加 Iteration 6，含两轮审稿记录） |
 
+## 推送状态（如实记录）
+
+**本地提交已完成，远端推送未成功。**
+
+| 时间 | 尝试方式 | 结果 |
+|---|---|---|
+| 2026-11-07 | 清空代理变量直连（`HTTP_PROXY= ... git push`） | `Recv failure: Connection was reset` |
+| 2026-11-07 | 直连 + `GIT_HTTP_VERSION=HTTP/1.1` | `Failed to connect to github.com:443 after 21112 ms: Could not connect to server` |
+| 2026-11-07 | 经本地代理 `127.0.0.1:61071` | `CONNECT tunnel failed, response 502`（两次重试同结果） |
+
+**结论**：当前网络环境下 GitHub 不可达（直连无路由、代理拒绝 CONNECT）。**两笔提交已在本地 `master` 分支就绪**：
+
+- `892da8f` — 第六轮重构主体
+- `ae690ce` — 新增本文件
+
+**未做的事**：没有声称"已推送"。项目原则第 10 条要求"所有修改须提交 GitHub 并记录 Commit SHA"——前半句（提交 + SHA）已完成，后半句（推送到远端）受网络限制未完成。恢复网络后执行：
+
+```bash
+git push origin master:main
+```
+
+不需要任何额外操作，本地历史与远端是快进关系（远端当前为第 5 轮的 `c89fbb1` 之后状态，本地在其之上追加两笔）。
+
 ## 如何复核这一轮
 
 ```bash
