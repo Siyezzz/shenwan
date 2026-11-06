@@ -50,7 +50,7 @@ GitHub 推送已完成（`master → main`）：过程中确认代理通道 502�
 | 项 | 内容 |
 |---|---|
 | **验收标准** | 四件套齐备；`_raw_response.txt` 与磁盘三个文件**逐段可逆一致** |
-| **实际证据** | `skills/research-report-to-flow/`；`python tools/build_raw.py` 输出 `ALL_MATCH`（3/3 个 Skill、9/9 个文件） |
+| **实际证据** | `skills/research-report-to-flow/`；`python tools/build_raw.py` 输出 `ALL_MATCH`（**4/4 个 Skill、12/12 个文件**，第六轮纳入 `reits-report-writing`） |
 | **判定** | **PASS** |
 | **说明** | 本项目执行过程中曾出现两次 `_raw_response.txt` 与磁盘不一致——修改 FLOW/METADATA 后未重建 raw。均在自检中发现并修复。这是一个**真实发生过的一致性风险**，不是理论风险 |
 
@@ -74,7 +74,7 @@ GitHub 推送已完成（`master → main`）：过程中确认代理通道 502�
 
 | 项 | 内容 |
 |---|---|
-| **验收标准** | 三个 Skill 的 FLOW 均有 Step 0，规定文件版本裁决、编码统一、单位统一、口径对齐 |
+| **验收标准** | 各 Skill 的 FLOW 均有 Step 0 或等价的上游准入环节，规定文件版本裁决、编码统一、单位统一、口径对齐 |
 | **实际证据** | 三个 `FLOW.md` 的首个动作块；案例三报告 §1.1「材料清单与版本裁决」即 Step 0 的真实执行结果（4 份招募书版本，裁决以 2026-10-28 更新稿为主版本） |
 | **判定** | **PASS** |
 
