@@ -134,8 +134,8 @@ def glp(wb):
           "四季度可供分配合计 337,472,828.59 元，年报审计口径 335,181,671.99 元，差异 2,291,156.60 元（0.68%）——以年报为准，季报累计值记 DATA_QUALITY_WARNING。")
     header(ws3, 3, ["项目", "2025Q1", "2025Q2", "2025Q3", "2025Q4", "2025FY（年报）", "口径", "锚点"])
     q = ["2025Q1", "2025Q2", "2025Q3", "2025Q4"]
-    rev = [num(d[(p, "overall")].get("revenue_cum")) for p in q]
-    cfo = [num(d[(p, "overall")].get("cfo_cum")) for p in q]
+    rev = [num(d[(p, "overall")].get("revenue_q")) for p in q]
+    cfo = [num(d[(p, "overall")].get("cfo_q")) for p in q]
     dist = [num(d[(p, "overall")].get("distributable_q")) for p in q]
     distr = [num(d[(p, "overall")].get("distributed_q")) for p in q]
     put(ws3, 4, ["营业收入（单季）"] + rev + [422500807.91, "单季", "季报§3.1 / 年报§3.1"], "#,##0.00")

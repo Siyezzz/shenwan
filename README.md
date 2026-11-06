@@ -44,19 +44,19 @@ reits-research-skills/
 | 一、附件审计与模板研究 | **完成** | `outputs/research_flow_audit/attachment_study.md`、`research_flow_audit.xlsx`、`template/template_convention_audit.md` |
 | 二、研报转 FLOW 方法论 Skill | **完成** | `skills/research-report-to-flow/`（SKILL + METADATA + FLOW #1–#18 + raw，可逆一致） |
 | 三、两个 REITs 业务 Skill | **完成** | `skills/reits-post-investment-monitor/`（FLOW #1–#22）、`skills/reits-pre-investment-analysis/`（FLOW #1–#26） |
-| 四、真实资料获取 | **部分** | `source_documents/` 共 **24 份 PDF** + `source_index.csv`。上交所公告接口需内部 `channelId`，公开请求不可用，已登记 `SOURCE_UNAVAILABLE` 并配置东方财富备用源；首农另有 2 项不可得（资产评估报告、基金合同） |
+| 四、真实资料获取 | **部分** | `source_documents/` 共 **60 份 PDF**（305MB）+ `source_index.csv`（62 条）。上交所公告接口需内部 `channelId`，公开请求不可用；改用东方财富公告接口 `type=3`（定期报告）分类后，季报/半年报/年报/年度评估/年度审计可完整枚举。首农资产评估报告原件确为不可得（`SOURCE_UNAVAILABLE`）；基金合同已补（此前误记为不可得） |
 | 五、三案例实跑 | **完成** | 三份报告（4,230 / 3,728 / **17,559** 中文字符）+ `run_log.md` + `claims_verdict.csv` + `source_index.csv`；案例三另有 `assumptions.csv`（20 条）与 `figures/` |
 | 六、三轮以上迭代 | **完成（4 轮）** | `iteration_log/ITERATION_LOG.md`，Iteration 1 可执行性 / 2 研究质量 / 3 鲁棒性 / 4 自检可信度，每轮含修改前后数值对比 |
-| 七、GitHub | **完成** | 已推送至 `github.com/Siyezzz/shenwan`（`main` 分支，首次提交 47 文件 / 10,419 行）。经代理报 502，清除 `HTTP(S)_PROXY` 后直连成功。**原始 PDF（24 份 / 112MB）按 `.gitignore` 不入库**，仅入库 `source_index.csv`——与「许可与边界」中「不再分发」一致 |
+| 七、GitHub | **完成** | 已推送至 `github.com/Siyezzz/shenwan`（`main` 分支，首次提交 47 文件 / 10,419 行）。经代理报 502，清除 `HTTP(S)_PROXY` 后直连成功。**原始 PDF（60 份 / 305MB）按 `.gitignore` 不入库**，仅入库 `source_index.csv`——与「许可与边界」中「不再分发」一致 |
 | 八、最终目录 | **完成** | 见上节目录结构 |
-| 九、汇报材料 | **完成（两版）** | `presentation/management_briefing.md`（管理层版：5 页提纲 + 1,342 字口述稿 + 数据卡 + 12 条追问 + 边界声明）；`presentation/teacher_briefing.md`（老师版：纯口语 2,928 字，按「流程/思路/亮点/疑惑」四段，含 3 档时长裁剪 + 7 条追问备用） |
+| 九、汇报材料 | **完成（两版）** | `presentation/management_briefing.md`（管理层版：5 页提纲 + 1,342 字口述稿 + 数据卡 + 12 条追问 + 边界声明）；`presentation/teacher_briefing.md`（老师版：纯口语 3,204 字，按「流程/思路/亮点/疑惑」四段，约 14 分钟，含 3 档时长裁剪 + 7 条追问备用） |
 | 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（19 项：16 PASS / 2 PARTIAL / 0 FAIL / 1 NOT TESTED） |
 
 ## 自检
 
 ```bash
 python tools/build_raw.py      # 重建并校验 _raw_response.txt 可逆性（期望 ALL_MATCH）
-python tests/run_tests.py      # 94 条断言（期望 PASS 94 / FAIL 0）
+python tests/run_tests.py      # 95 条断言（期望 PASS 95 / FAIL 0）
 ```
 
 | 测试组 | 条数 | 说明文档 |

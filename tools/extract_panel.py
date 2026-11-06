@@ -9,8 +9,10 @@ TXT = os.path.join(os.path.dirname(BASE), "reits", "_txt")
 
 NUM = r"-?[\d,]+\.?\d*"
 QMAP = {"q2025Q1": "2025Q1", "q2025Q2": "2025Q2", "q2025Q3": "2025Q3", "q2025Q4": "2025Q4",
-        "q2024Q3": "2024Q3", "q2024Q4": "2024Q4", "q2026Q3": "2026Q3",
-        "h2025": "2025H1", "y2025": "2025FY", "y2024": "2024FY"}
+        "q2024Q1": "2024Q1", "q2024Q2": "2024Q2", "q2024Q3": "2024Q3", "q2024Q4": "2024Q4",
+        "q2026Q1": "2026Q1", "q2026Q2": "2026Q2", "q2026Q3": "2026Q3",
+        "h2024": "2024H1", "h2025": "2025H1", "h2026": "2026H1",
+        "y2025": "2025FY", "y2024": "2024FY"}
 
 
 def f(s):
@@ -42,9 +44,13 @@ def get_period(fname):
 def parse_fin(text):
     out = {}
     pats = {
-        "revenue_cum": r"1\.\s*本期收入\s+(" + NUM + r")",
-        "net_profit_cum": r"2\.\s*本期净利润\s+(" + NUM + r")",
-        "cfo_cum": r"3\.\s*本期经营活动产生的现金流量净额\s+(" + NUM + r")",
+        # 注意：季报 §3.1 只披露"本期"数（单季），没有本年累计收入。
+        # 早期版本把这三个键写成 *_cum，与 metric_naming 规范里 `_cum`=本年累计
+        # 直接冲突——2025Q4 的 revenue_cum=2,462 万会被读成"全年收入"，
+        # 而实际全年是四季之和 1.115 亿，差 4.5 倍。见 ITERATION_LOG 第 5 轮 F-6。
+        "revenue_q": r"1\.\s*本期收入\s+(" + NUM + r")",
+        "net_profit_q": r"2\.\s*本期净利润\s+(" + NUM + r")",
+        "cfo_q": r"3\.\s*本期经营活动产生的现金流量净额\s+(" + NUM + r")",
     }
     for k, p in pats.items():
         m = re.search(p, text)

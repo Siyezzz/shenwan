@@ -242,6 +242,38 @@ def t_dq():
         noagg = [r["claim_id"] for r in cr if not r["aggregation"]]
         chk("T-DQ-11", "每条 claim 在建表时写死 aggregation %s" % d, not noagg, "缺聚合：%s" % noagg)
 
+    # 累计类指标年内必须单调不减。
+    # 存在的理由：revenue_cum / net_profit_cum / cfo_cum 曾装的是季报 §3.1 的
+    # "本期"数（单季），却用 _cum 后缀，2025Q4 的 revenue_cum=2,462 万会被
+    # 读成"全年收入"（实为 1.115 亿，差 4.5 倍）。这类错误肉眼看不出来，
+    # 但累计值的单调性是硬约束——单季数几乎不可能逐季递增。
+    quarters = {"Q1": 1, "Q2": 2, "Q3": 3, "Q4": 4}
+    viol = []
+    for fn in ("508056_raw.csv", "180302_raw.csv"):
+        rows = load_panel(fn)
+        if rows is None:
+            continue
+        agg = {}
+        for r in rows:
+            m = re.match(r"^(\d{4})(Q[1-4])$", r["period"] or "")
+            if not m or not r["metric"].endswith("_cum"):
+                continue
+            try:
+                v = float(r["value"])
+            except (TypeError, ValueError):
+                continue
+            agg.setdefault((fn, r["metric"], r["dim"], m.group(1)), []).append(
+                (quarters[m.group(2)], v))
+        for k, seq in agg.items():
+            seq.sort()
+            vals = [x[1] for x in seq]
+            for i in range(len(vals) - 1):
+                if vals[i + 1] < vals[i] - 1:      # 容忍 1 元舍入
+                    viol.append("%s %s %s/%s" % (k[0][:7], k[1], k[3], k[2]))
+                    break
+    chk("T-DQ-12", "_cum 指标年内单调不减（累计语义）", not viol,
+        "违例：%s" % viol[:4])
+
 
 # ============================================================
 # T-SKILL Skill 四件套结构
