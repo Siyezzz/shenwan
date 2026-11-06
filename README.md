@@ -1,6 +1,8 @@
 # reits-research-skills
 
-公募 REITs 投研 Skills 仓库：**研报方法论迁移 + 两个业务 Skill（投后跟踪 / 投前分析）+ 三个真实案例验证**。
+公募 REITs 投研 Skills 仓库：**研报方法论迁移 + 三个业务 Skill（投后跟踪 / 投前分析 / 研报撰写）+ 三个真实案例验证**。
+
+核心命题：**一份 REITs 研究报告该长什么样，才能让投资研究员拿它做决策**——而不是让读者看见流程跑了多少步。
 
 ## 这个仓库解决什么问题
 
@@ -18,20 +20,26 @@
 reits-research-skills/
 ├── README.md
 ├── skills/
-│   ├── reits-post-investment-monitor/    # Skill A 投后定期跟踪
-│   ├── reits-pre-investment-analysis/    # Skill B 投前深度分析
-│   └── research-report-to-flow/          # Skill C 研报转 FLOW 方法论
+│   ├── reits-post-investment-monitor/    # Skill A 投后定期跟踪（FLOW #1–#22）
+│   ├── reits-pre-investment-analysis/    # Skill B 投前深度分析（FLOW #1–#26）
+│   ├── research-report-to-flow/          # Skill C 研报转 FLOW 方法论（FLOW #1–#18）
+│   └── reits-report-writing/             # Skill D 研报撰写（FLOW #1–#15，与 A/B 搭配）
 ├── template/
-│   └── template_convention_audit.md      # 继承规范（写作约束 + 机器校验清单）
+│   ├── template_convention_audit.md      # 继承规范（写作约束 + 机器校验清单）
+│   ├── report_style_analysis.md          # 11 份卖方研报的文风统计（规则出处）
+│   ├── investment_report_template.md     # 投前十章模板
+│   └── post_investment_report_template.md # 投后八节模板
 ├── source_documents/                     # 三案例原始披露文件（PDF）
 ├── outputs/
 │   ├── research_flow_audit/              # 附件学习与 FLOW 审计
+│   ├── report_quality_audit.md           # 项目审计（31 条问题清单 + 不修改清单）
+│   ├── source_data_audit.md              # 来源与数据真实性十项全量核验
 │   ├── case_01_glp_reit/
 │   ├── case_02_huaxia_shen_international/
 │   └── case_03_sinofarm_reit/
 ├── models/                               # 现金流模型、数据矩阵
 ├── tests/                                # 数据质量 / 计算 / 执行 / 回归测试记录
-├── iteration_log/ITERATION_LOG.md        # 三轮以上迭代留痕
+├── iteration_log/                       # 六轮迭代留痕 + 提交记录
 └── presentation/                         # 两版汇报材料
     ├── management_briefing.md            # 面向管理层（提纲+口述稿+追问应答）
     └── teacher_briefing.md               # 面向老师（纯口语：流程/思路/亮点/疑惑）
@@ -43,20 +51,22 @@ reits-research-skills/
 |---|---|---|
 | 一、附件审计与模板研究 | **完成** | `outputs/research_flow_audit/attachment_study.md`、`research_flow_audit.xlsx`、`template/template_convention_audit.md` |
 | 二、研报转 FLOW 方法论 Skill | **完成** | `skills/research-report-to-flow/`（SKILL + METADATA + FLOW #1–#18 + raw，可逆一致） |
-| 三、两个 REITs 业务 Skill | **完成** | `skills/reits-post-investment-monitor/`（FLOW #1–#22）、`skills/reits-pre-investment-analysis/`（FLOW #1–#26） |
-| 四、真实资料获取 | **部分** | `source_documents/` 共 **60 份 PDF**（305MB）+ `source_index.csv`（62 条）。上交所公告接口需内部 `channelId`，公开请求不可用；改用东方财富公告接口 `type=3`（定期报告）分类后，季报/半年报/年报/年度评估/年度审计可完整枚举。首农资产评估报告原件确为不可得（`SOURCE_UNAVAILABLE`）；基金合同已补（此前误记为不可得） |
-| 五、三案例实跑 | **完成** | 三份报告（4,230 / 3,728 / **17,559** 中文字符）+ `run_log.md` + `claims_verdict.csv` + `source_index.csv`；案例三另有 `assumptions.csv`（20 条）与 `figures/` |
-| 六、三轮以上迭代 | **完成（4 轮）** | `iteration_log/ITERATION_LOG.md`，Iteration 1 可执行性 / 2 研究质量 / 3 鲁棒性 / 4 自检可信度，每轮含修改前后数值对比 |
+| 三、REITs 业务 Skill | **完成** | `skills/reits-post-investment-monitor/`（FLOW #1–#22）、`skills/reits-pre-investment-analysis/`（FLOW #1–#26） |
+| 四、真实资料获取 | **部分** | `source_documents/` 共 **60 份 PDF**（305MB）+ `source_index.csv`（**62 条记录 = 60 条实体 + 2 条缺口登记**）。上交所公告接口需内部 `channelId`，公开请求不可用；改用东方财富基金公告接口 `type=3`（定期报告）分类后，季报/半年报/年报/年度评估/年度审计可完整枚举。**60 份页数已逐份回填并复核（60/60 一致），52 份有可用文字层，8 份为扫描件（已标 `OCR_NEEDED`，未冒充已识别）。** 首农资产评估报告原件确为不可得（`SOURCE_UNAVAILABLE`）；基金合同已补（此前误记为不可得）。详见 `outputs/source_data_audit.md` |
+| 五、三案例实跑 | **完成** | 三份报告（**6,210 / 6,839 / 22,314** 中文字符，正文口径）+ `run_log.md` + `claims_verdict.csv` + `source_index.csv`；案例三另有 `assumptions.csv`（25 条）与 `figures/` |
+| 五之二、研报撰写 Skill | **完成（第六轮新增）** | `skills/reits-report-writing/`（FLOW #1–#15）+ `template/investment_report_template.md` + `template/post_investment_report_template.md` + `template/report_style_analysis.md`（11 份卖方研报文风统计）+ `tools/count_report_words.py`。三份报告按新体例重写，正文 FLOW 编号 0 处、状态码 0 处 |
+| 六、三轮以上迭代 | **完成（6 轮）** | `iteration_log/ITERATION_LOG.md`（667 行）：1 可执行性 / 2 研究质量 / 3 鲁棒性 / 4 自检可信度 / 5 材料完备性 / 6 **产品形态（报告重构，含两轮审稿记录）**，每轮含修改前后数值对比 |
 | 七、GitHub | **完成** | 已推送至 `github.com/Siyezzz/shenwan`（`main` 分支，首次提交 47 文件 / 10,419 行）。经代理报 502，清除 `HTTP(S)_PROXY` 后直连成功。**原始 PDF（60 份 / 305MB）按 `.gitignore` 不入库**，仅入库 `source_index.csv`——与「许可与边界」中「不再分发」一致 |
 | 八、最终目录 | **完成** | 见上节目录结构 |
 | 九、汇报材料 | **完成（两版）** | `presentation/management_briefing.md`（管理层版：5 页提纲 + 1,342 字口述稿 + 数据卡 + 12 条追问 + 边界声明）；`presentation/teacher_briefing.md`（老师版：纯口语 3,204 字，按「流程/思路/亮点/疑惑」四段，约 14 分钟，含 3 档时长裁剪 + 7 条追问备用） |
-| 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（19 项：16 PASS / 2 PARTIAL / 0 FAIL / 1 NOT TESTED） |
+| 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（**25 项：22 PASS / 3 PARTIAL / 0 FAIL**）；来源真实性另有 `outputs/source_data_audit.md` 十项全量核验 |
 
 ## 自检
 
 ```bash
 python tools/build_raw.py      # 重建并校验 _raw_response.txt 可逆性（期望 ALL_MATCH）
-python tests/run_tests.py      # 95 条断言（期望 PASS 95 / FAIL 0）
+python tools/count_report_words.py outputs/case_03_sinofarm_reit/report_508601.md --min 15000
+python tests/run_tests.py      # 153 条断言（期望 PASS 151 / FAIL 0 / SKIP 2）
 ```
 
 | 测试组 | 条数 | 说明文档 |
@@ -65,10 +75,15 @@ python tests/run_tests.py      # 95 条断言（期望 PASS 95 / FAIL 0）
 | T-DQ 数据质量 | 24 | `tests/test_data_quality.md` |
 | T-SKILL Skill 结构 | 31 | `tests/test_skill_execution.md` |
 | T-REG 回归 | 17 | `tests/regression_tests.md` |
+| **T-REPORT 报告形态** | **58** | 新增：正文口径字数与封面声明一致性、FLOW 编号残留、运行日志混入、来源锚点、未登记假设、可供分配 vs 实际分派、分派率 vs IRR、IRR 可重算、EBITDA 桥闭合、来源可追溯、缺失披露、估值敏感性 |
+
+> **测试通过不代表结论正确。** 153 条断言拦的是"计算错、口径混、报告像运行日志"这三类可机检问题；"这个判断对不对"只能靠人工复核，记录见 `iteration_log/ITERATION_LOG.md` Iteration 6 的两轮审稿。
 
 ## 数据来源
 
-全部案例文件来自上海证券交易所 REITs 公告页（`www.sse.com.cn`）与基金管理人官网披露的原始 PDF，逐份记录在 `source_documents/source_index.csv`。不引用搜索引擎摘要。
+全部案例文件通过**东方财富基金公告接口**（`api.fund.eastmoney.com/f10/JJGG`，`type=3` 定期报告分类）获取**公告原文 PDF**，逐份 URL 记录在 `source_documents/source_index.csv`。**获取渠道是第三方平台，不是交易所直连**——上交所公告查询接口需内部 `channelId`，公开请求不可用。文件为原样披露件、未改写，但不引用搜索引擎摘要。
+
+**可复现性边界**：原始 PDF 按 `.gitignore` 不入库（305MB 且受版权约束），因此 **clone 后不能直接复现原始文件**；能复现的是①计算过程（`models/`、`tools/` 可从披露数值重算全部结论）、②报告结构（`template/` + `skills/*/FLOW.md`）、③数值溯源路径（文件 + 页码）。原始文件需按索引 URL 自行下载。
 
 ## 许可与边界
 

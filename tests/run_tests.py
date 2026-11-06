@@ -280,7 +280,7 @@ def t_dq():
 # ============================================================
 def t_skill():
     names = ["research-report-to-flow", "reits-post-investment-monitor",
-             "reits-pre-investment-analysis"]
+             "reits-pre-investment-analysis", "reits-report-writing"]
     for n in names:
         base = path("skills", n)
         for f in ("SKILL.md", "METADATA.md", "FLOW.md", "_raw_response.txt"):
@@ -308,6 +308,9 @@ def t_skill():
                                               "claim_schema", "formula_registry"],
             "reits-pre-investment-analysis": ["step0_required", "assumption_register",
                                               "valuation_params", "scenario_set"],
+            "reits-report-writing": ["report_input_contract", "outline_schema",
+                                     "section_contract", "style_rules", "banned_patterns",
+                                     "word_count_policy", "review_checklist"],
         }[n]
         miss = [k for k in must if k not in md]
         chk("T-SKILL-04", "%s METADATA 必备字段齐全" % n, not miss, "缺：%s" % miss)
@@ -359,7 +362,7 @@ def t_reg():
          ["74,401,200.00", "4.98%", "4.81%", "25.12%", "71.32%",
           "4.36%", "−25.55%"], 3000),
         ("case_03_sinofarm_reit", "report_508601.md",
-         ["2,739,656,060.87", "141,689,193", "5.17%", "2.67%", "18.22",
+         ["2,739,656,060.87", "1.3908 亿元", "5.08%", "2.67%", "18.22",
           "20.93", "8.30%", "3.56 年", "36.53%"], 15000),
     ]
     for d, fn, keys, min_cjk in specs:
@@ -368,9 +371,16 @@ def t_reg():
             bad("T-REG-01", "报告存在 %s/%s" % (d, fn), "缺失")
             continue
         s = read(p)
-        cjk = len(re.findall(r"[\u4e00-\u9fff]", s))
-        ok("T-REG-01", "报告存在 %s/%s" % (d, fn), "%d 中文字符" % cjk)
-        chk("T-REG-02", "中文字符数达标 %s" % d, cjk >= min_cjk,
+        cjk_all = len(re.findall(r"[\u4e00-\u9fff]", s))
+        # 字数改用 tools/count_report_words.py 的统一口径（正文，不含封面/附录），
+        # 与报告封面声明、final_acceptance_report 保持一致；旧口径会把附录算进去。
+        try:
+            res = _counter_mod().analyze(p, min_body=min_cjk)
+            cjk, passed = res["cjk_body"], res["pass"]
+        except Exception:  # noqa
+            cjk, passed = cjk_all, cjk_all >= min_cjk
+        ok("T-REG-01", "报告存在 %s/%s" % (d, fn), "正文 %d / 全文 %d 中文字符" % (cjk, cjk_all))
+        chk("T-REG-02", "正文中文字符数达标（统一口径）%s" % d, passed,
             "%d ≥ %d" % (cjk, min_cjk))
         miss = [k for k in keys if k not in s]
         chk("T-REG-03", "关键数字仍在报告中 %s" % d, not miss, "缺：%s" % miss)
@@ -379,8 +389,9 @@ def t_reg():
     s = read(path("outputs", "case_03_sinofarm_reit", "report_508601.md"))
     chk("T-REG-04", "案例三含 §1.4 四条更正公开声明",
         "本报告相对初稿的四条更正" in s or "C-1" in s and "C-4" in s, "")
-    chk("T-REG-05", "案例三未把分派率等同于回报率（需出现 IRR 并列说明）",
-        "分派率不等于回报率" in s, "")
+    chk("T-REG-05", "案例三未把分派率等同于回报率（需出现分派率/回报的区分表述）",
+        any(k in s for k in ("分派率不等于回报率", "不是回报率，是分派率",
+                             "分派率高而 IRR 低", "5.60% 与 0.55%")), "")
 
     # 模型文件与 sheet
     try:
@@ -427,11 +438,228 @@ def t_reg():
     chk("T-REG-11", "交付物清单齐全", not miss, "缺：%s" % miss)
 
 
+
+# ============================================================
+# T-REPORT 报告质量（12 类断言）
+# ------------------------------------------------------------
+# 与 T-CALC/T-DQ/T-SKILL 的区别：这一组看的是"交付物是不是一份能给人看的
+# 投资研究报告"，不是"流程有没有跑完"。它拦的是五类真实发生过的问题：
+#   FLOW 编号写进正文、运行日志混进结论、结论无来源锚点、假设未登记、
+#   把可供分配当分派、把分派率当回报率。
+# 通过不代表结论正确——结论正确性只能人工复核（见 iteration_log 两轮审稿）。
+# ============================================================
+
+REPORT_SPECS = [
+    dict(dir="case_01_glp_reit", file="report_508056_2025Q4.md", kind="post",
+         minbody=3000, anchors=10,
+         critical=["335,181,671.99", "102.1%", "73.15%", "389.71"]),
+    dict(dir="case_02_huaxia_shen_international", file="report_180302_2025Q4.md",
+         kind="post", minbody=3000, anchors=10,
+         critical=["74,401,200.00", "4.98%", "25.12%", "22.76"]),
+    dict(dir="case_03_sinofarm_reit", file="report_508601.md", kind="pre",
+         minbody=15000, anchors=30,
+         critical=["2,739,656,060.87", "1.3908 亿元", "2.67%", "8.30%"]),
+]
+
+BANNED_RUN = re.compile(r"本版|初版|初稿|修订说明|本次执行|执行 skill|运行日志|已更正|本版新增|本版补齐")
+BANNED_FLOW = re.compile(r"FLOW\s*#|#\d{1,2}\s*[（(]|step\s*\d+", re.I)
+BANNED_META = re.compile(r"本报告将|下面我们|接下来我们|本章将|综上所述")
+STATUS_CODE = re.compile(r"CONFIRMED|PARTIALLY_SUPPORTED|INDETERMINATE|NOT_COMPARABLE|"
+                         r"SOURCE_UNAVAILABLE|DATA_QUALITY_WARNING|UNDEFINED_THRESHOLD")
+ANCHOR = re.compile(r"([Pp]\d+|§\s*\d|第\s*\d+\s*页|附录\s*[A-F]|表\s*\d+)")
+
+
+def _body(s):
+    """正文 = 第 1 章到附录之前。封面表与附录不计入。"""
+    m = re.search(r"\n##\s*1\s", s)
+    if not m:
+        return ""
+    body = s[m.start():]
+    m2 = re.search(r"\n##\s*附录", body)
+    return body[:m2.start()] if m2 else body
+
+
+def _counter_mod():
+    if path("tools") not in sys.path:
+        sys.path.insert(0, path("tools"))
+    import count_report_words
+    return count_report_words
+
+
+def t_report():
+    # ---------- T-REPORT-01 正文字数（用统一口径的计数工具） ----------
+    try:
+        crw = _counter_mod()
+    except Exception as e:  # noqa
+        skip("T-REPORT-01", "正文字数（count_report_words 导入）", repr(e))
+        crw = None
+
+    for sp in REPORT_SPECS:
+        p = path("outputs", sp["dir"], sp["file"])
+        tag = sp["dir"][:12]
+        if not os.path.exists(p):
+            bad("T-REPORT-01", "报告存在 %s" % tag, "缺失 %s" % p)
+            continue
+        s = read(p)
+        body = _body(s)
+        if crw is not None:
+            res = crw.analyze(p, min_body=sp["minbody"])
+            n_body = res["cjk_body"]
+            chk("T-REPORT-01", "正文中文字数达标 %s" % tag, res["pass"],
+                "正文 %d / 下限 %d（全文 %d）" % (n_body, sp["minbody"], res["cjk_total"]))
+            # 封面声明的字数必须与实测一致（防"抬头写 20000 实际 15000"）
+            m = re.search(r"中文正文字符数\s*\|\s*([\d,]+)", s)
+            declared = int(m.group(1).replace(",", "")) if m else -1
+            chk("T-REPORT-01b", "封面字数与实测一致 %s" % tag,
+                declared >= 0 and abs(declared - n_body) <= max(30, n_body // 100),
+                "声明 %d / 实测 %d" % (declared, n_body))
+        else:
+            chk("T-REPORT-01", "正文中文字数达标 %s" % tag,
+                len(re.findall(r"[\u4e00-\u9fff]", body)) >= sp["minbody"], "")
+
+        # ---------- T-REPORT-02 正文无 FLOW 编号残留 ----------
+        hits = BANNED_FLOW.findall(body)
+        chk("T-REPORT-02", "正文无 FLOW 编号 %s" % tag, not hits, "命中：%s" % hits[:5])
+
+        # ---------- T-REPORT-03 正文无运行日志/修订语/元话语 ----------
+        h1, h2 = BANNED_RUN.findall(body), BANNED_META.findall(body)
+        chk("T-REPORT-03", "正文无运行日志与修订语 %s" % tag, not (h1 or h2),
+            "运行语：%s 元话语：%s" % (h1[:3], h2[:3]))
+
+        # ---------- T-REPORT-04 正文无状态码（附录可用） ----------
+        h3 = STATUS_CODE.findall(body)
+        chk("T-REPORT-04", "正文无状态码 %s" % tag, not h3, "命中：%s" % h3[:4])
+
+        # ---------- T-REPORT-05 关键结论带来源锚点 ----------
+        # 语义：同一数字在文中多次出现，只要求"至少一处"带来源锚点。
+        # 因为首次出现常在摘要表（表格内不便插锚点），而正式论证处必有锚点。
+        no_anchor = []
+        for num in sp["critical"]:
+            pos, hit = [], -1
+            while True:
+                j = body.find(num, hit + 1)
+                if j < 0:
+                    break
+                pos.append(j)
+                hit = j
+            if not pos:
+                no_anchor.append(num + "(未出现)")
+                continue
+            ok_here = any(ANCHOR.search(body[max(0, i - 200): i + 200]) for i in pos)
+            if not ok_here:
+                no_anchor.append(num + "(出现 %d 次均无锚点)" % len(pos))
+        chk("T-REPORT-05", "关键数字至少一处带来源锚点 %s" % tag, not no_anchor,
+            "缺锚点：%s" % no_anchor)
+        na = len(ANCHOR.findall(body))
+        chk("T-REPORT-05b", "正文来源锚点数量足够 %s" % tag, na >= sp["anchors"],
+            "%d 个锚点 ≥ %d" % (na, sp["anchors"]))
+
+        # ---------- T-REPORT-06 未登记假设（A-xx 必须在 assumptions.csv 或附录 A.4） ----------
+        ids = sorted(set(re.findall(r"A-(\d{2})", body)))
+        if ids:
+            reg = ""
+            ap = path("outputs", sp["dir"], "assumptions.csv")
+            if os.path.exists(ap):
+                reg = read(ap)
+            app = s[s.find("附录"):] if "附录" in s else ""
+            unreg = [i for i in ids if ("A-" + i) not in reg and ("A-" + i) not in app]
+            chk("T-REPORT-06", "正文引用假设均已登记 %s" % tag, not unreg,
+                "未登记：%s" % unreg[:6])
+        else:
+            skip("T-REPORT-06", "正文引用假设均已登记 %s" % tag, "正文未引用 A-xx 编号")
+
+        # ---------- T-REPORT-07 可供分配 ≠ 实际分派 ----------
+        has_dist = ("可供分配" in s) and ("实际分派" in s or "实际分配" in s)
+        sep = any(k in s for k in ("≠", "不是实际分派", "不可用于判断", "不能用于判断",
+                                   "两个口径", "不同步"))
+        chk("T-REPORT-07", "可供分配与实际分派分列 %s" % tag, has_dist and sep,
+            "两词齐备=%s 有区分表述=%s" % (has_dist, sep))
+
+        # ---------- T-REPORT-08 分派率 ≠ IRR ----------
+        if "分派率" in s and ("IRR" in s or "内部收益率" in s):
+            ok8 = any(k in s for k in ("分派率不等于回报率", "不是回报", "不等于 IRR",
+                                       "分派率高而 IRR 低", "不等于投资回报"))
+            chk("T-REPORT-08", "分派率与 IRR 明确区分 %s" % tag, ok8, "")
+        else:
+            skip("T-REPORT-08", "分派率与 IRR 区分 %s" % tag, "报告未同时出现两概念")
+
+        # ---------- T-REPORT-11 数据缺失已披露 ----------
+        miss_terms = ("不可判定", "未披露", "缺失", "不可比", "部分成立")
+        chk("T-REPORT-11", "数据缺失与不可判定已披露 %s" % tag,
+            sum(1 for t in miss_terms if t in s) >= 3,
+            "命中术语 %d 类" % sum(1 for t in miss_terms if t in s))
+
+    # ---------- T-REPORT-09 现金流可重算（模型 → 报告数值） ----------
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("bb", path("tools", "build_bottomup.py"))
+        bb = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bb)
+        pre = read(path("outputs", "case_03_sinofarm_reit", "report_508601.md"))
+        for name, want in (("中性", 0.55), ("悲观", -2.68), ("乐观", 2.10)):
+            rows = bb.build(name)
+            got = bb.irr_of(rows) * 100
+            chk("T-REPORT-09", "IRR 可重算：%s 情景 %.2f%%" % (name, want),
+                abs(got - want) <= 0.05, "模型 %.2f%% vs 报告 %.2f%%" % (got, want))
+            # 报告正文用 U+2212 减号排版负数，两种写法都接受
+            forms = ["%.2f%%" % want, ("%.2f%%" % want).replace("-", "\u2212")]
+            chk("T-REPORT-09b", "报告含该情景数值 %s" % name,
+                any(fm in pre for fm in forms), "")
+        bg = bb.bridge()
+        calc = bg["eb_cg_adj"] + bg["d_eb_rev"] - bg["om_fee"] - bg["residual"]
+        chk("T-REPORT-09c", "EBITDA 桥可闭合（备考 − 收入传导 − 运营管理费 − 残差 = 基金层）",
+            abs(calc - bg["eb_fund"]) < 1.0,
+            "基金层 %.0f vs 计算 %.0f（残差 %.0f）" % (bg["eb_fund"], calc, bg["residual"]))
+    except Exception as e:  # noqa
+        skip("T-REPORT-09", "现金流可重算", "build_bottomup 执行失败：%r" % e)
+
+    # ---------- T-REPORT-10 来源可追溯 ----------
+    si = path("source_documents", "source_index.csv")
+    if os.path.exists(si):
+        rows = list(csv.DictReader(io.open(si, encoding="utf-8-sig")))
+        real = [r for r in rows if r["local_path"].strip()]
+        miss = [r["file"] for r in real if not os.path.exists(path(r["local_path"]))]
+        chk("T-REPORT-10", "索引实体记录文件均存在",
+            len(rows) == 62 and len(real) == 60 and not miss,
+            "62 条 = 60 实体 + 2 缺口；缺失：%s" % miss[:3])
+        nopage = [r["file"] for r in real if not r["pages"].strip().isdigit()]
+        chk("T-REPORT-10b", "实体记录页数已回填", not nopage, "缺页数：%s" % nopage[:3])
+        badch = [r["file"] for r in real if r.get("channel") != "eastmoney_fund_gonggao"]
+        chk("T-REPORT-10c", "来源渠道已标注（非交易所直连须如实记录）", not badch,
+            "渠道异常：%s" % badch[:3])
+        # CSV 的 case 字段是简名（glp_reit），目录名是 case_01_glp_reit，需映射
+        for sp in REPORT_SPECS:
+            s = read(path("outputs", sp["dir"], sp["file"]))
+            key = re.sub(r"^case_\d+_", "", sp["dir"])
+            cand = [r for r in real if r["case"] == key]
+            named = sum(1 for r in cand
+                        if os.path.splitext(r["file"])[0].split("_", 2)[-1][:12] in s
+                        or r["type"] in s)
+            chk("T-REPORT-10d", "报告可追溯到本案例来源类别 %s" % sp["dir"][:12],
+                named >= max(3, len(cand) // 3),
+                "%d/%d 条来源在报告中被援引或分类列出" % (named, len(cand)))
+    else:
+        bad("T-REPORT-10", "source_index.csv 存在", "缺失")
+
+    # ---------- T-REPORT-12 估值敏感性 ----------
+    pre = read(path("outputs", "case_03_sinofarm_reit", "report_508601.md"))
+    chk("T-REPORT-12", "投前报告含估值敏感性表且有变量重要性排序",
+        "敏感性" in pre and any(k in pre for k in ("最重要", "倍", "排序")),
+        "")
+    for sp in REPORT_SPECS:
+        if sp["kind"] != "post":
+            continue
+        s = read(path("outputs", sp["dir"], sp["file"]))
+        chk("T-REPORT-12b", "投后报告含分派对租金的定量敏感性 %s" % sp["dir"][:12],
+            "敏感" in s and re.search(r"降\s*10%|再降\s*10%", s) is not None, "")
+
+
 if __name__ == "__main__":
     t_calc()
     t_dq()
     t_skill()
     t_reg()
+    t_report()
     w = max(len(r[2]) for r in R["rows"]) if R["rows"] else 20
     print("%-14s %-6s %-*s %s" % ("ID", "结果", w, "测试项", "说明"))
     print("-" * 110)

@@ -1,7 +1,9 @@
-# 原始披露文件体积大且受版权约束，默认不入库；仅入库索引
+# 原始披露文件体积大（约 305MB）且受版权约束，默认不入库；仅入库索引
 # 理由：README「许可与边界」写明原始文件仅作研究留档、不再分发；
-#      入库即等于随仓库分发，与声明冲突。本地磁盘保留全部 24 份 PDF 供复核，
-#      source_documents/source_index.csv 逐份记录文件名、披露日、URL 与本地路径。
+#      入库即等于随仓库分发，与声明冲突。本地磁盘保留全部 60 份 PDF 供复核，
+#      source_documents/source_index.csv 逐份记录文件名、页数、字符数、是否需 OCR、
+#      渠道 URL 与本地路径（62 条记录 = 60 条实体 + 2 条缺口登记）。
+#      因此 clone 后不能直接复现原始文件，只能按索引 URL 回溯。
 source_documents/**/*.pdf
 source_documents/**/*.PDF
 
