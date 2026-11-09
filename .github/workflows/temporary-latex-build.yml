@@ -22,7 +22,6 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y pandoc texlive-xetex texlive-lang-chinese texlive-latex-recommended fonts-noto-cjk python3-matplotlib
       - name: Build charts and PDFs
         run: |
