@@ -15,20 +15,15 @@
 \definecolor{Line}{HTML}{D8E0E7}
 \definecolor{Muted}{HTML}{667788}
 \usepackage{amsmath,amssymb}
-\usepackage{booktabs,longtable,tabularx,array,multirow,makecell}
-\usepackage{graphicx,float,caption,subcaption}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{graphicx,float,caption}
 \usepackage{enumitem}
 \usepackage{fancyhdr,lastpage}
 \usepackage{titlesec}
-\usepackage[most]{tcolorbox}
-\usepackage{tikz}
 \usepackage{hyperref}
 \usepackage{bookmark}
 \usepackage{microtype}
 \usepackage{setspace}
-\usepackage{etoolbox}
-\usepackage{pdflscape}
-\usepackage{needspace}
 \hypersetup{colorlinks=true,linkcolor=Blue,urlcolor=Blue,citecolor=Teal,pdftitle={$title$},pdfauthor={研究部}}
 \setstretch{1.22}
 \setlength{\parindent}{2em}
@@ -38,8 +33,8 @@
 \setlist[enumerate]{leftmargin=2.4em,itemsep=3pt,topsep=4pt}
 \renewcommand{\arraystretch}{1.22}
 \captionsetup{font=small,labelfont={bf,color=Navy},textfont={color=Muted},skip=7pt}
-\titleformat{\section}{\Needspace{5\baselineskip}\Large\bfseries\color{Navy}}{\thesection}{0.8em}{}[\vspace{2pt}\color{Blue}\titlerule]
-\titleformat{\subsection}{\Needspace{3\baselineskip}\large\bfseries\color{Blue}}{\thesubsection}{0.8em}{}
+\titleformat{\section}{\Large\bfseries\color{Navy}}{\thesection}{0.8em}{}[\vspace{2pt}\color{Blue}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{Blue}}{\thesubsection}{0.8em}{}
 \titleformat{\subsubsection}{\normalsize\bfseries\color{Ink}}{\thesubsubsection}{0.7em}{}
 \titlespacing*{\section}{0pt}{2.0em}{0.8em}
 \titlespacing*{\subsection}{0pt}{1.35em}{0.45em}
@@ -51,8 +46,6 @@
 \fancyfoot[R]{\footnotesize\color{Muted}\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0pt}
-\newtcolorbox{researchbox}{enhanced,breakable,colback=Paper,colframe=Line,boxrule=0.45pt,arc=1.5mm,left=4mm,right=4mm,top=3mm,bottom=3mm,borderline west={2pt}{0pt}{Teal}}
-\newtcolorbox{riskbox}{enhanced,breakable,colback=Red!3,colframe=Red!25,boxrule=0.45pt,arc=1.5mm,left=4mm,right=4mm,top=3mm,bottom=3mm,borderline west={2pt}{0pt}{Red}}
 \newcommand{\reportrule}{\noindent\color{Blue}\rule{\textwidth}{1.2pt}}
 \makeatletter
 \renewcommand{\maketitle}{}
@@ -71,14 +64,14 @@
 \vspace{13mm}
 {\large\color{Ink}$if(reporttype)$$reporttype$$endif$\par}
 \vfill
-\begin{tcolorbox}[colback=Paper,colframe=Line,boxrule=0.5pt,arc=1mm,left=5mm,right=5mm,top=4mm,bottom=4mm]
+\begin{quote}\color{Navy}
 \begin{tabularx}{\linewidth}{>{\color{Muted}\bfseries}p{30mm}X}
 研究对象 & $title$\\
 研究类型 & $if(reporttype)$$reporttype$$else$公开市场投资研究$endif$\\
 资料截止 & 以各章节披露文件日期为准\\
 研究口径 & 历史披露事实、文件预测与独立研究假设分别标识\\
 \end{tabularx}
-\end{tcolorbox}
+\end{quote}
 \vspace{7mm}
 {\small\color{Muted}本报告基于公开披露资料及明确列示的研究假设编制。数据口径、来源锚点、不可判定事项与模型限制均在正文或附录中说明。投资判断不构成收益承诺。\par}
 \vspace{10mm}
