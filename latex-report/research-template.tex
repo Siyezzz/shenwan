@@ -1,0 +1,100 @@
+$if(title)$\title{$title$}$endif$
+\documentclass[UTF8,11pt,a4paper,oneside]{ctexart}
+\usepackage[a4paper,top=25mm,bottom=24mm,left=23mm,right=23mm,headheight=16pt,footskip=12mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Noto Serif CJK SC}
+\setsansfont{Noto Sans CJK SC}
+\setmonofont{Noto Sans Mono CJK SC}
+\usepackage{xcolor}
+\definecolor{Ink}{HTML}{172B4D}
+\definecolor{Navy}{HTML}{12304A}
+\definecolor{Blue}{HTML}{2D668A}
+\definecolor{Teal}{HTML}{2B7A78}
+\definecolor{Red}{HTML}{A94442}
+\definecolor{Gold}{HTML}{B18A45}
+\definecolor{Paper}{HTML}{F3F6F8}
+\definecolor{Line}{HTML}{D8E0E7}
+\definecolor{Muted}{HTML}{667788}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable,tabularx,array,multirow,makecell}
+\usepackage{graphicx,float,caption,subcaption}
+\usepackage{enumitem}
+\usepackage{fancyhdr,lastpage}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{etoolbox}
+\usepackage{pdflscape}
+\usepackage{needspace}
+\hypersetup{colorlinks=true,linkcolor=Blue,urlcolor=Blue,citecolor=Teal,pdftitle={$title$},pdfauthor={研究部}}
+\setstretch{1.22}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{4pt plus 1pt}
+\setlength{\emergencystretch}{3em}
+\setlist[itemize]{leftmargin=2.2em,itemsep=2pt,topsep=4pt}
+\setlist[enumerate]{leftmargin=2.4em,itemsep=3pt,topsep=4pt}
+\renewcommand{\arraystretch}{1.22}
+\captionsetup{font=small,labelfont={bf,color=Navy},textfont={color=Muted},skip=7pt}
+\titleformat{\section}{\Needspace{5\baselineskip}\Large\bfseries\color{Navy}}{\thesection}{0.8em}{}[\vspace{2pt}\color{Blue}\titlerule]
+\titleformat{\subsection}{\Needspace{3\baselineskip}\large\bfseries\color{Blue}}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{Ink}}{\thesubsubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{2.0em}{0.8em}
+\titlespacing*{\subsection}{0pt}{1.35em}{0.45em}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{Muted}公募 REITs \enspace / \enspace 研究报告}
+\fancyhead[R]{\small\color{Muted}$if(reporttype)$$reporttype$$else$投资研究$endif$}
+\fancyfoot[L]{\footnotesize\color{Muted}仅供研究交流｜资料与口径见正文及附录}
+\fancyfoot[R]{\footnotesize\color{Muted}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\newtcolorbox{researchbox}{enhanced,breakable,colback=Paper,colframe=Line,boxrule=0.45pt,arc=1.5mm,left=4mm,right=4mm,top=3mm,bottom=3mm,borderline west={2pt}{0pt}{Teal}}
+\newtcolorbox{riskbox}{enhanced,breakable,colback=Red!3,colframe=Red!25,boxrule=0.45pt,arc=1.5mm,left=4mm,right=4mm,top=3mm,bottom=3mm,borderline west={2pt}{0pt}{Red}}
+\newcommand{\reportrule}{\noindent\color{Blue}\rule{\textwidth}{1.2pt}}
+\makeatletter
+\renewcommand{\maketitle}{}
+\makeatother
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+\vspace*{13mm}
+{\large\bfseries\color{Teal}研究部 \hfill $date$ \par}
+\vspace{18mm}
+{\color{Blue}\rule{\textwidth}{1.5pt}\par}
+\vspace{13mm}
+{\fontsize{27}{35}\selectfont\bfseries\color{Navy}$title$\par}
+\vspace{7mm}
+{\fontsize{17}{25}\selectfont\color{Blue}$subtitle$\par}
+\vspace{13mm}
+{\large\color{Ink}$if(reporttype)$$reporttype$$endif$\par}
+\vfill
+\begin{tcolorbox}[colback=Paper,colframe=Line,boxrule=0.5pt,arc=1mm,left=5mm,right=5mm,top=4mm,bottom=4mm]
+\begin{tabularx}{\linewidth}{>{\color{Muted}\bfseries}p{30mm}X}
+研究对象 & $title$\\
+研究类型 & $if(reporttype)$$reporttype$$else$公开市场投资研究$endif$\\
+资料截止 & 以各章节披露文件日期为准\\
+研究口径 & 历史披露事实、文件预测与独立研究假设分别标识\\
+\end{tabularx}
+\end{tcolorbox}
+\vspace{7mm}
+{\small\color{Muted}本报告基于公开披露资料及明确列示的研究假设编制。数据口径、来源锚点、不可判定事项与模型限制均在正文或附录中说明。投资判断不构成收益承诺。\par}
+\vspace{10mm}
+{\color{Blue}\rule{\textwidth}{0.6pt}\par}
+\end{titlepage}
+\pagenumbering{roman}
+$if(toc)$
+\renewcommand{\contentsname}{目录}
+\tableofcontents
+\clearpage
+$endif$
+\pagenumbering{arabic}
+$body$
+\vfill
+\begin{center}
+{\footnotesize\color{Muted}—— 报告完 ——}
+\end{center}
+\end{document}
