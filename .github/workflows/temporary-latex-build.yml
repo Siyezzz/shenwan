@@ -1,4 +1,7 @@
 name: Temporary LaTeX report build
+concurrency:
+  group: reits-latex-pdf-build
+  cancel-in-progress: true
 on:
   push:
     paths:
@@ -18,7 +21,7 @@ jobs:
       - name: Install TeX and fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex texlive-lang-chinese texlive-latex-extra texlive-fonts-recommended fonts-noto-cjk fonts-noto-cjk-extra python3-matplotlib
+          sudo apt-get install -y pandoc texlive-xetex texlive-lang-chinese texlive-latex-recommended fonts-noto-cjk python3-matplotlib
       - name: Build charts and PDFs
         run: |
           mkdir -p artifacts
