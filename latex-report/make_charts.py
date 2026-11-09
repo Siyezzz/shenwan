@@ -3,11 +3,17 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import font_manager
+import subprocess
+
+font_path=subprocess.check_output(['fc-match','-f','%{file}','sans:lang=zh-cn'],text=True).strip()
+font_manager.fontManager.addfont(font_path)
+CJK_FONT=font_manager.FontProperties(fname=font_path).get_name()
 
 OUT="latex-report/figures"
 os.makedirs(OUT, exist_ok=True)
 plt.rcParams.update({
-    "font.family":"Noto Sans CJK SC",
+    "font.family":CJK_FONT,
     "font.size":9,
     "axes.titlesize":12,
     "axes.labelsize":9,
