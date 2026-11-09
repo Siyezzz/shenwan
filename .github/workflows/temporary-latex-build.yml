@@ -1,0 +1,34 @@
+name: Temporary LaTeX report build
+on:
+  push:
+    paths:
+      - ".github/workflows/temporary-latex-build.yml"
+      - "outputs/case_01_glp_reit/report_508056_2025Q4.md"
+      - "outputs/case_02_huaxia_shen_international/report_180302_2025Q4.md"
+      - "outputs/case_03_sinofarm_reit/report_508601.md"
+      - "latex-report/**"
+permissions:
+  contents: read
+  actions: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install TeX and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex texlive-lang-chinese texlive-latex-extra texlive-fonts-recommended fonts-noto-cjk fonts-noto-cjk-extra python3-matplotlib
+      - name: Build charts and PDFs
+        run: |
+          mkdir -p artifacts
+          python3 latex-report/make_charts.py
+          pandoc outputs/case_01_glp_reit/report_508056_2025Q4.md --from=gfm+tex_math_dollars --lua-filter=latex-report/research-filter.lua --template=latex-report/research-template.tex --pdf-engine=xelatex --toc --number-sections --metadata title="中金普洛斯仓储物流REIT（508056）" --metadata subtitle="2025年度投后跟踪报告" --metadata reporttype="公募REITs｜年度运营跟踪" --metadata date="2026年11月" --resource-path=.:latex-report --output=artifacts/01_GLPR_REIT_2025Q4.pdf
+          pandoc outputs/case_02_huaxia_shen_international/report_180302_2025Q4.md --from=gfm+tex_math_dollars --lua-filter=latex-report/research-filter.lua --template=latex-report/research-template.tex --pdf-engine=xelatex --toc --number-sections --metadata title="华夏深国际仓储物流REIT（180302）" --metadata subtitle="2025年度投后跟踪报告" --metadata reporttype="公募REITs｜年度运营跟踪" --metadata date="2026年11月" --resource-path=.:latex-report --output=artifacts/02_Huaxia_ShenInternational_2025Q4.pdf
+          pandoc outputs/case_03_sinofarm_reit/report_508601.md --from=gfm+tex_math_dollars --lua-filter=latex-report/research-filter.lua --template=latex-report/research-template.tex --pdf-engine=xelatex --toc --number-sections --metadata title="中信建投首农食品集团封闭式商业不动产REIT（508601）" --metadata subtitle="投前深度投资分析报告" --metadata reporttype="公募REITs｜首次覆盖与估值分析" --metadata date="2026年11月" --resource-path=.:latex-report --output=artifacts/03_Sinofarm_508601_PreInvestment.pdf
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: reits-professional-reports
+          path: artifacts/*.pdf
+          retention-days: 7
