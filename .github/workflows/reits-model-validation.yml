@@ -1,5 +1,9 @@
 name: REIT 508601 model validation
 
+concurrency:
+  group: reit-508601-model-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches: [main]
@@ -66,6 +70,8 @@ jobs:
           git add models/cash_flow_model.xlsx models/scenario_2028.csv outputs/case_03_sinofarm_reit/report_metrics.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: regenerate 508601 model artifacts [skip ci]"
+            git fetch origin "${HEAD_REF}"
+            git rebase "origin/${HEAD_REF}"
             git push origin "HEAD:${HEAD_REF}"
           else
             echo "Generated model artifacts are already up to date."
