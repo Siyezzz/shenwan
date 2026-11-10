@@ -2,7 +2,7 @@ type: flow
 
 name: reits-pre-investment-analysis
 
-version: 1.0.0
+version: 1.1.0
 
 description: "公募REITs投前深度分析：基于招募说明书、法律意见书、基金合同、资产评估报告，完成产品概况、交易结构、基础资产、运营、收入成本、可供分配测算、估值、投资价值、风险与结论十部分分析，配套可复核现金流模型、情景与敏感性分析。"
 
@@ -238,6 +238,7 @@ assumption_register:
   status_enum: [CONFIRMED, UNVERIFIED, INDETERMINATE, SOURCE_UNAVAILABLE, DATA_QUALITY_WARNING]
   traceability_rule: |
     凡不能标注「文件 + 页码 + 表格名」的数字，一律进 assumptions.csv，不得在正文中作为披露值引用。
+    阈值/判断标尺须区分：法规或合同明示、历史观测、可比市场数据、研究者预警线；不得把研究者阈值称为行业标准。
     反例（必须避免）：用「评估值 × CapRate」反推 NOI，再把 NOI − capex − 可供分配 的残差命名为
     「税费及预留」，并据此宣称发现「2026 年预留仅 75 万元、2027 年 3,059 万元，差 40 倍」。
     招募书并无该科目；该残差只是把口径误差塞进了一个不存在的行。见 ITERATION_LOG R3/C-2。
@@ -274,14 +275,14 @@ formula_registry:
     freq: 年
     valid_from: 2021-06
     valid_to: null
-    caliber_note: "不含折旧摊销与利息，不含资本性支出"
+    caliber_note: "本项目按披露口径定义；不得将 NOI 与 EBITDA、项目公司现金流或基金可供分配金额互换。仅在组成项与层级一致时使用。"
   - formula_id: F_EBITDA
     expression: 仅在 NOI 定义及折旧摊销处理明确时勾稽，不机械套用
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
-    caliber_note: "若披露口径已为 EBITDA，直接引用并注明"
+    caliber_note: "必须按报表/评估报告的具体组成项复核；折旧摊销回加不自动解决税费、管理费和层级差异。"
   - formula_id: F_DIST
     expression: 以招募说明书披露的可供分配金额测算表为准，逐项复原调整项
     unit: 元
@@ -302,7 +303,7 @@ formula_registry:
     freq: 年
     valid_from: 2021-06
     valid_to: null
-    caliber_note: "TV 可为期末价值或永续增长；商业不动产常用剩余年限内现金流+期末价值"
+    caliber_note: "先匹配估值对象与现金流层级，再选折现率、收益期限和终值；物业层现金流不得直接与基金层可供分配现金流比较。"
 
 source_registry:
   - source_id: SRC_SSE_REIT
