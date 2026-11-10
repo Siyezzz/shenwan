@@ -8,7 +8,7 @@ description: "公募REITs投前深度分析：基于招募说明书、法律意�
 
 domain: 公募REITs投前
 
-source_report: "内部方法论（口径依据《公开募集基础设施证券投资基金指引》、沪深交易所REITs业务办法、资产评估执业准则）"
+source_report: "内部方法论；具体监管规则、交易所业务办法及评估准则须在每次运行的 REFERENCE_MAP/来源清单中登记全称、发布机构、文号或版本、生效日期、条款及官方 URL。不得将此描述当作已完成的法规引用。"
 
 script_permission: true
 
@@ -27,6 +27,10 @@ inputs:
     description: 投资者要求的分派率下限（%），用于 #21 判断是否满足投资门槛。为空时不作门槛判断
   - name: holding_years
     description: 拟持有期（年），默认 3。用于 #22 持有期回报测算
+
+# 注意：data_requirements 中的 source_id 是来源渠道/发现入口映射，不是具体文件证据 ID。
+# 每次运行必须将字段映射到 source_manifest.csv 中真实存在的 source_id，并记录文件名、页码/表格及原文定位。
+# 未完成该映射的字段不得标记为 CONFIRMED。
 
 data_requirements:
   - name: 基金募集规模
@@ -222,11 +226,11 @@ data_requirements:
     source_id: SRC_CSINDEX
 
 step0_required:
-  - 版本裁决：同一文件多版本时按 封卷稿 > 更新稿 > 反馈回复稿 > 申报稿 取值，并记录全部版本号与日期
-  - 口径统一：金额元、面积平方米、比率 %
-  - 期间对齐：历史期（近3年及一期）与预测期（未来若干年）分表存放
-  - 事实分层：历史事实 / 文件预测 / 独立假设 三类标注
-  - 缺失状态：NA / 0 / 未披露 / 不适用 / SOURCE_UNAVAILABLE
+  - 确认基金名称、代码、分析基准日及输入文件真实存在、可读取
+  - 按文件类型和用途裁决版本；记录候选版本、选用理由和基准日后信息
+  - 关键事实记录具体文件名、PDF页码、章节/表格、单位、期间及事实类型
+  - 区分历史披露、文件预测、独立研究假设；区分时点值、单季值和累计值
+  - 缺失、扫描件、冲突和不适用分别登记，并说明对结论的影响
 
 assumption_register:
   fields: [assumption_id, category, value, basis, sensitivity, owner, source_ref, status]
@@ -265,35 +269,35 @@ scenario_set:
 
 formula_registry:
   - formula_id: F_NOI
-    expression: NOI = 营业收入 − 运营成本 − 管理费用 − 税金及附加
+    expression: 按底层资产经营口径逐项定义，不作为所有 REIT 通用的统一公式
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "不含折旧摊销与利息，不含资本性支出"
   - formula_id: F_EBITDA
-    expression: EBITDA = NOI + 折旧摊销（回加）
+    expression: 仅在 NOI 定义及折旧摊销处理明确时勾稽，不机械套用
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "若披露口径已为 EBITDA，直接引用并注明"
   - formula_id: F_DIST
-    expression: 可供分配 = EBITDA − 资本性支出 − 税费调整 ± 应收应付变动 ± 预收租金变动 − 预留
+    expression: 以招募说明书披露的可供分配金额测算表为准，逐项复原调整项
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "以招募说明书可供分配测算表的调整项为准，逐项对齐"
   - formula_id: F_YIELD
-    expression: 分派率 = 可供分配金额 ÷ 募集规模
+    expression: 发行规模口径分派率 = 可供分配金额 ÷ 实际募集规模；其他分母必须另行命名
     unit: "%"
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "分母为募集规模（含扩募）；用评估值作分母时须改名为"评估值分派率""
   - formula_id: F_DCF
-    expression: 评估值 = Σ CFt/(1+r)^t + TV/(1+r)^n
+    expression: 按评估方法、现金流口径、收益期限和终值方法计算；DCF 仅适用于相应假设成立时
     unit: 元
     freq: 年
     valid_from: 2021-06
