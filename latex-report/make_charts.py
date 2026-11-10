@@ -94,7 +94,7 @@ finish("huaxia_sensitivity")
 
 fig,ax=plt.subplots(figsize=(7.8,3.4))
 sc=["悲观","中性","乐观","评估假设"]
-vals=[-2.68,.55,2.10,2.67]
+vals=[-2.68,.46,2.10,2.66]
 ax.bar(sc,vals,color=[RED,BLUE,TEAL,GOLD],width=.58)
 ax.axhline(0,color="#596579",lw=.8)
 ax.set_ylabel("持有到期 IRR（%）"); ax.set_title("首农 REIT：有限土地期限下的持有到期回报",loc="left",fontweight="bold",color=NAVY,pad=12)

@@ -25,7 +25,7 @@ description: Use when 需要把一份卖方研究报告（PDF/文本）转化为
 
 ## 与附件旧模板的差异（继承关系说明）
 
-继承：四件套命名（SKILL/FLOW/METADATA/_raw_response）、YAML frontmatter、`--{abstract}--` 包裹、`#N --{动作}-- [数据|非数据]` 动作格式、`[输出]/[输出示例]` 逐动作声明、METADATA 原有 11 个字段名不变。
+继承：四件套命名（SKILL/FLOW/METADATA/_raw_response）、YAML frontmatter、`--{abstract}--` 包裹、`#N --{动作}-- [数据|非数据]` 动作格式、`[输出]/[输出示例]` 逐动作声明、METADATA 原有 10 个字段名不变。
 
 修改（有实测依据，见 `template/template_convention_audit.md`）：
 1. `required` 拆成 `execution_required` + `thesis_required`，因为旧模板中 `role` 与 `required` 36/36 一一对应，导致 15 处核心论据被降级为 `false`。

@@ -13,7 +13,10 @@ on:
       - "tools/validate_model.py"
       - "tests/run_tests.py"
       - "models/**"
-      - "outputs/case_03_sinofarm_reit/**"
+      - "outputs/**"
+      - "skills/**"
+      - "template/**"
+      - "tools/count_report_words.py"
       - ".github/workflows/reits-model-validation.yml"
   push:
     branches: [main]
@@ -23,7 +26,10 @@ on:
       - "tools/validate_model.py"
       - "tests/run_tests.py"
       - "models/**"
-      - "outputs/case_03_sinofarm_reit/**"
+      - "outputs/**"
+      - "skills/**"
+      - "template/**"
+      - "tools/count_report_words.py"
       - ".github/workflows/reits-model-validation.yml"
 
 permissions:

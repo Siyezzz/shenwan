@@ -1,7 +1,8 @@
 # 模板规范审计（template_convention_audit）
 
-> 用途：作为本项目三个新 Skill 的**写作约束**。凡与本文冲突的写法，一律以本文为准。
+> 用途：保留早期模板研究与结构规范的审计依据。执行以各业务 Skill 当前的 SKILL.md、METADATA.md、FLOW.md 为准；本文的历史形式约束不得覆盖后续通用化修订。
 > 依据：11 套附件（`_ref/2026_08/531887…532411`）的逐份统计，统计口径见 `outputs/research_flow_audit/research_flow_audit.xlsx` → `规范一致性统计`。
+> 适用边界：以下条文记录早期研究取数层 schema；`reits-report-writing` 使用独立的写作层 schema，以其当前输入合同、章节、字数和审稿规则为准，不套用此处的指标字段、固定输出文件或形式配额。
 
 ---
 
