@@ -106,16 +106,17 @@ def t_calc():
 
     eb26, cx26, it26 = 170437399.69, 15460400.00, 13287806.33
     eb27, cx27, it27 = 174883323.29, 8827400.00, 13745968.83
-    d26 = eb26 - cx26 - it26
-    d27 = eb27 - cx27 - it27
-    close(d26, 141689193.36, 1.0, "T-CALC-07",
-          "508601 2026 规范化可供分配 = EBITDA − capex − 利息所得税")
-    close(d26 / 2739656060.87, 0.05171, 0.00005, "T-CALC-08",
-          "508601 2026 规范化分派率 = 5.17%（披露 6.22% 含募集资金沉淀）")
-    close((153304398.41 - d27) / 153304398.41, 0.00649, 0.0002, "T-CALC-09",
-          "508601 2027 披露值与规范化值差 0.65%（说明 2027 已是规范口径）")
-    close(d27 / 2739656060.87, 0.0556, 0.00005, "T-CALC-10",
-          "508601 2027 规范化分派率 = 5.56%")
+    wc26, wc27, cashadj27 = 2_609_355.18, 44_572.42, 1_036_616.37
+    d26 = eb26 - cx26 - it26 - wc26
+    d27 = eb27 - cx27 - it27 - wc27 + cashadj27
+    close(d26, 139079838.18, 1.0, "T-CALC-07",
+          "508601 2026 规范化可供分配 = EBITDA − capex − 利息所得税 − WC")
+    close(d26 / 2739656060.87, 0.05077, 0.00005, "T-CALC-08",
+          "508601 2026 规范化分派率 = 5.08%（按 WC 调整）")
+    close(abs(153304398.41 - d27), 2400.0, 1.0, "T-CALC-09",
+          "508601 2027 披露值与规范化值差约 2,400 元（含 WC 与期初现金调节）")
+    close(d27 / 2739656060.87, 0.05596, 0.00005, "T-CALC-10",
+          "508601 2027 规范化分派率 = 5.60%")
 
     # --- 508601 模型与 IRR ---
     try:
@@ -398,7 +399,7 @@ def t_reg():
         from openpyxl import load_workbook
         wb = load_workbook(path("models", "cash_flow_model.xlsx"))
         chk("T-REG-06", "cash_flow_model.xlsx 含 5 个 sheet（说明/假设/模型/输出/敏感性）",
-            len(wb.sheetnames) == 5 and wb.sheetnames[:3] == ["0_说明", "1_假设", "2_模型"],
+            len(wb.sheetnames) == 7 and wb.sheetnames[:3] == ["0_说明", "1_假设", "2_模型"] and wb.sheetnames[-2:] == ["5_到期重定价", "6_情景回报"],
             str(wb.sheetnames))
         wm = wb["2_模型"]
         chk("T-REG-07", "2_模型 为 19 期（2026–2044）",
@@ -596,7 +597,7 @@ def t_report():
         bb = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(bb)
         pre = read(path("outputs", "case_03_sinofarm_reit", "report_508601.md"))
-        for name, want in (("中性", 0.55), ("悲观", -2.68), ("乐观", 2.10)):
+        for name, want in (("中性", 0.46), ("悲观", -2.68), ("乐观", 2.10)):
             rows = bb.build(name)
             got = bb.irr_of(rows) * 100
             chk("T-REPORT-09", "IRR 可重算：%s 情景 %.2f%%" % (name, want),
