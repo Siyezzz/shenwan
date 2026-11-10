@@ -64,11 +64,13 @@
 | `source_index.csv` | 已与根目录 508601 索引同步 |
 | `models/scenario_2028.csv` | 已重建，三情景共 57 个年度观测 |
 | `tools/build_bottomup.py` | 已更新中性情景假设 |
-| `tools/build_model.py` | 已修正 WC/现金调节公式；待本地执行 |
-| `models/cash_flow_model.xlsx` | **旧版工作簿，待重建；不可作为本版报告已验证模型** |
-| `report_metrics.json` | 已标记 v1.2 待重计；旧版人工估算不可作为正式验收 |
+| `tools/build_model.py` | 已执行并生成 7-sheet 工作簿；通过独立 Python 情景引擎校验 |
+| `models/cash_flow_model.xlsx` | 已重建，7 个工作表；三情景现金流逐年与 Python 引擎对账，Excel IRR 3/3 一致 |
+| `report_metrics.json` | 已由 `tools/count_report_words.py` 重计；正文中文 23,993 字，达到 15,000 字要求 |
 
-**未完成事项**：本轮没有在本地 PDF 环境执行全部脚本，也没有重建 XLSX 工作簿。因此本版的报告文字、来源索引和 CSV 情景模型已更新，但端到端可复算验收仍为 PARTIAL，不宣称全部通过。
+**模型执行验收（2026-11-10）**：GitHub Actions `REIT 508601 model validation` 全流程成功。`tools/build_bottomup.py` 重建 57 行情景 CSV；`tools/build_model.py` 生成 7-sheet Excel；LibreOffice 重新计算公式；`tools/validate_model.py` 逐年比较 57 行 × 三情景，Excel IRR 与 Python 独立计算 3/3 一致，公式错误 0；`tests/run_tests.py` 为 150 PASS / 0 FAIL / 3 SKIP；`tools/count_report_words.py` 统计正文中文字符 23,993，达到 15,000 字要求。
+
+**仍未完成事项**：本次验证是基于仓库中已整理的 508601 披露锚点与模型参数进行的模型/报告回归，不等于重新下载并逐页 OCR 原始 PDF 的全量端到端复核。原始 PDF 不在仓库提交内容中；需要在运行环境提供 `doc_root` 后，才能完成材料逐份可读性与事实重新抽取。二级市场 XIRR 仍因缺少实际买入、分派支付和退出日期而不计算。
 
 
 ## 5. Iteration 4 — 投资决策导向与报告一致性（2026-11-10）
@@ -97,3 +99,26 @@
 - `models/cash_flow_model.xlsx` 仍是旧版，尚未在本地重新生成；因此模型工作簿与最新情景 CSV 未完成逐项对账。
 - `report_metrics.json` 尚未用 `tools/count_report_words.py` 对 v1.2 正文重计。
 - 未在本地原始 PDF 环境完成端到端重跑；本轮修订依据现有报告、来源索引、假设表、claims 和情景 CSV，不声称完成原文逐页复核。
+
+
+## 6. 最终执行验收（2026-11-10；覆盖前文待重建状态）
+
+本节为最终状态。第 2 节、第 5 节中“工作簿待重建”“字数待重计”的历史记录已被本节执行结果取代，不再代表当前状态。
+
+| 检查项 | 最终结果 | 证据 |
+|---|---|---|
+| 三情景 CSV | PASS：57 条年度记录 | `models/scenario_2028.csv`，由 `tools/build_bottomup.py` 生成 |
+| Excel 工作簿 | PASS：7 个工作表 | `models/cash_flow_model.xlsx`，由 `tools/build_model.py` 生成 |
+| Excel 公式重算 | PASS：LibreOffice 重算，无公式错误 | GitHub Actions run 42811384643 |
+| 三情景逐年对账 | PASS：57 行 × 3 情景 | `tools/validate_model.py` 对照独立 Python 引擎 |
+| IRR 独立复算 | PASS：3/3 一致 | 悲观 −2.675895%；中性 0.458121%；乐观 2.102230% |
+| 仓库回归测试 | PASS：150 PASS / 0 FAIL / 3 SKIP | `tests/run_tests.py` |
+| 正文长度 | PASS：23,993 个中文正文字符 | `report_metrics.json`，`pass=true` |
+
+**模型口径说明**：
+- `2_模型` / `3_输出` 保留评估假设下的平滑增长基准。
+- `5_到期重定价` / `6_情景回报` 纳入 2028 年集中到期租约的悲观、中性、乐观情景。
+- `4_敏感性` 的 2028 基准改为中性到期重定价情景，不再误用平滑增长基准。
+- 年度期数 IRR 不等于真实支付日期 XIRR；二级市场 XIRR 仍待真实买入、分派支付和退出日期。
+
+**未完成边界**：原始 PDF 文件未提交至 Git 仓库，故本轮 PASS 证明的是现有披露锚点、模型代码、情景 CSV、Excel 公式与报告数字之间的可复算一致性；不代表已重新下载、逐页阅读或 OCR 全部原始 PDF。新的基金案例必须提供可访问的 `doc_root`，并完成来源文件可读性核验后，才可宣称完成全流程投前研究。

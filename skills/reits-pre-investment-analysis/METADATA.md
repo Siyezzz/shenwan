@@ -2,9 +2,9 @@ type: flow
 
 name: reits-pre-investment-analysis
 
-version: 1.2.1
+version: 1.3.0
 
-description: "公募REITs投资分析报告：基于正式披露和市场数据，分析资产质量、交易结构、运营现金流、可供分配、估值定价、投资者回报与风险，最终给出有价格条件的投资评级和决策结论。"
+description: "公募REITs投资分析报告：以真实披露资料和可复算模型为依据，完成资产、运营、现金流、估值、投资者回报与投资决策分析；输出路径必须与仓库/运行环境实际文件一致。"
 
 domain: 公募REITs投前
 
@@ -12,9 +12,11 @@ source_report: "内部方法论；具体监管规则、交易所业务办法及�
 
 script_permission: true
 
-output_dir: ./output
+output_dir: outputs/{case_dir}
 
-report_output: "正式投资分析报告 report_<fund_code>.md；写作阶段衔接 skills/reits-report-writing，不得以模型或数据表代替报告。"
+case_dir: "由 fund_code + fund_slug 生成，例如 case_03_sinofarm_reit；不得使用未创建的 ./output 目录。"
+
+report_output: "outputs/{case_dir}/report_<fund_code>.md；写作阶段衔接 skills/reits-report-writing，不得以模型或数据表代替报告。"
 
 inputs:
   - name: fund_name
@@ -47,7 +49,7 @@ investment_decision_contract:
   decision_rule: "资产质量、现金流、估值、安全边际和投资者期限必须共同支持评级；不得仅凭分派率给出买入建议。"
 
 # 注意：data_requirements 中的 source_id 是来源渠道/发现入口映射，不是具体文件证据 ID。
-# 每次运行按 source_index.csv 既有字段定位具体文件，记录文件名、页码/表格及原文位置；不假定索引含 source_id 列。
+# 每次运行按 outputs/{case_dir}/source_index.csv 的真实字段定位具体文件，记录文件名、页码/表格及原文位置；不假定索引含 source_id 列。
 # 未完成该映射的字段不得标记为 CONFIRMED。
 
 data_requirements:
