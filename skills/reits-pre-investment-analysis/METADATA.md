@@ -238,6 +238,7 @@ assumption_register:
   status_enum: [CONFIRMED, UNVERIFIED, INDETERMINATE, SOURCE_UNAVAILABLE, DATA_QUALITY_WARNING]
   traceability_rule: |
     凡不能标注「文件 + 页码 + 表格名」的数字，一律进 assumptions.csv，不得在正文中作为披露值引用。
+    阈值/判断标尺须区分：法规或合同明示、历史观测、可比市场数据、研究者预警线；不得把研究者阈值称为行业标准。
     反例（必须避免）：用「评估值 × CapRate」反推 NOI，再把 NOI − capex − 可供分配 的残差命名为
     「税费及预留」，并据此宣称发现「2026 年预留仅 75 万元、2027 年 3,059 万元，差 40 倍」。
     招募书并无该科目；该残差只是把口径误差塞进了一个不存在的行。见 ITERATION_LOG R3/C-2。
