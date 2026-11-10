@@ -1,15 +1,10 @@
 {
   "report": "outputs/case_03_sinofarm_reit/report_508601.md",
-  "cjk_body": 23440,
-  "cjk_total": 27841,
-  "latin_body": 1040,
-  "digit_body": 8287,
-  "md_total_chars": 60602,
-  "figures": 3,
-  "tables": 25,
-  "we_think_count": 0,
-  "longest_paragraph_cjk": 198,
-  "duplicate_30char": 71,
+  "cjk_body_estimate": 23440,
+  "cjk_total_estimate": 27841,
+  "markdown_total_chars_estimate": 60602,
   "min_required": 15000,
-  "pass": true
+  "count_status": "PROVISIONAL_MANUAL_COUNT_NOT_VERIFIED_BY_tools/count_report_words.py",
+  "report_word_count_pass": null,
+  "notes": "The report remains above the requested 15,000-character threshold by a manual count; run tools/count_report_words.py before claiming formal count acceptance."
 }
