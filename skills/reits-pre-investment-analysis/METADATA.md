@@ -12,9 +12,11 @@ source_report: "内部方法论；具体监管规则、交易所业务办法及�
 
 script_permission: true
 
-output_dir: ./output
+output_dir: outputs/{case_dir}
 
-report_output: "正式投资分析报告 report_<fund_code>.md；写作阶段衔接 skills/reits-report-writing，不得以模型或数据表代替报告。"
+case_dir: "由 fund_code + fund_slug 生成，例如 case_03_sinofarm_reit；不得使用未创建的 ./output 目录。"
+
+report_output: "outputs/{case_dir}/report_<fund_code>.md；写作阶段衔接 skills/reits-report-writing，不得以模型或数据表代替报告。"
 
 inputs:
   - name: fund_name
@@ -47,8 +49,9 @@ investment_decision_contract:
   decision_rule: "资产质量、现金流、估值、安全边际和投资者期限必须共同支持评级；不得仅凭分派率给出买入建议。"
 
 # 注意：data_requirements 中的 source_id 是来源渠道/发现入口映射，不是具体文件证据 ID。
-# 每次运行必须将字段映射到 source_manifest.csv 中真实存在的 source_id，并记录文件名、页码/表格及原文定位。
+# 每次运行必须将字段映射到 outputs/{case_dir}/source_index.csv 中真实存在的来源记录，并记录文件名、页码/表格及原文定位。
 # 未完成该映射的字段不得标记为 CONFIRMED。
+# 本 Skill 当前不生成 dataset/facts.yaml、dataset/facts.csv 或 source_manifest.csv；不得引用这些未实现路径。
 
 data_requirements:
   - name: 基金募集规模
