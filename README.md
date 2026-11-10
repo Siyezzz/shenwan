@@ -23,7 +23,7 @@ reits-research-skills/
 │   ├── reits-post-investment-monitor/    # Skill A 投后定期跟踪（FLOW #1–#22）
 │   ├── reits-pre-investment-analysis/    # Skill B 投前深度分析（FLOW #1–#26）
 │   ├── research-report-to-flow/          # Skill C 研报转 FLOW 方法论（FLOW #1–#18）
-│   └── reits-report-writing/             # Skill D 研报撰写（FLOW #1–#15，与 A/B 搭配）
+│   └── reits-report-writing/             # Skill D 研报撰写（FLOW #1–#13，与 A/B 搭配）
 ├── template/
 │   ├── template_convention_audit.md      # 继承规范（写作约束 + 机器校验清单）
 │   ├── report_style_analysis.md          # 11 份卖方研报的文风统计（规则出处）
@@ -54,7 +54,7 @@ reits-research-skills/
 | 三、REITs 业务 Skill | **完成** | `skills/reits-post-investment-monitor/`（FLOW #1–#22）、`skills/reits-pre-investment-analysis/`（FLOW #1–#26） |
 | 四、真实资料获取 | **部分** | `source_documents/` 共 **60 份 PDF**（305MB）+ `source_index.csv`（**62 条记录 = 60 条实体 + 2 条缺口登记**）。上交所公告接口需内部 `channelId`，公开请求不可用；改用东方财富基金公告接口 `type=3`（定期报告）分类后，季报/半年报/年报/年度评估/年度审计可完整枚举。**60 份页数已逐份回填并复核（60/60 一致），52 份有可用文字层，8 份为扫描件（已标 `OCR_NEEDED`，未冒充已识别）。** 首农资产评估报告原件确为不可得（`SOURCE_UNAVAILABLE`）；基金合同已补（此前误记为不可得）。详见 `outputs/source_data_audit.md` |
 | 五、三案例实跑 | **完成** | 三份报告（**6,210 / 6,839 / 24,488** 中文字符，正文口径）+ `run_log.md` + `claims_verdict.csv` + `source_index.csv`；案例三另有 `assumptions.csv`（30 条）与 `figures/` |
-| 五之二、研报撰写 Skill | **完成（第六轮新增）** | `skills/reits-report-writing/`（FLOW #1–#15）+ `template/investment_report_template.md` + `template/post_investment_report_template.md` + `template/report_style_analysis.md`（11 份卖方研报文风统计）+ `tools/count_report_words.py`。三份报告按新体例重写，正文 FLOW 编号 0 处、状态码 0 处 |
+| 五之二、研报撰写 Skill | **完成（第六轮新增）** | `skills/reits-report-writing/`（FLOW #1–#13）+ `template/investment_report_template.md` + `template/post_investment_report_template.md` + `template/report_style_analysis.md`（11 份卖方研报文风统计）+ `tools/count_report_words.py`。三份报告按新体例重写，正文 FLOW 编号 0 处、状态码 0 处 |
 | 六、三轮以上迭代 | **完成（6 轮）** | `iteration_log/ITERATION_LOG.md`（667 行）：1 可执行性 / 2 研究质量 / 3 鲁棒性 / 4 自检可信度 / 5 材料完备性 / 6 **产品形态（报告重构，含两轮审稿记录）**，每轮含修改前后数值对比 |
 | 七、GitHub | **完成** | 已推送至 `github.com/Siyezzz/shenwan`（`main` 分支，首次提交 47 文件 / 10,419 行）。经代理报 502，清除 `HTTP(S)_PROXY` 后直连成功。**原始 PDF（60 份 / 305MB）按 `.gitignore` 不入库**，仅入库 `source_index.csv`——与「许可与边界」中「不再分发」一致 |
 | 八、最终目录 | **完成** | 见上节目录结构 |
@@ -76,6 +76,8 @@ python tests/run_tests.py      # 153 条断言（当前基线 PASS 151 / FAIL 0 
 | T-SKILL Skill 结构 | 31 | `tests/test_skill_execution.md` |
 | T-REG 回归 | 17 | `tests/regression_tests.md` |
 | **T-REPORT 报告形态** | **58** | 新增：正文口径字数与封面声明一致性、FLOW 编号残留、运行日志混入、来源锚点、未登记假设、可供分配 vs 实际分派、分派率 vs IRR、IRR 可重算、EBITDA 桥闭合、来源可追溯、缺失披露、估值敏感性 |
+
+> 当前交付不生成独立 review 文件，也不要求固定审稿轮次；来源、计算和论证核验并入写作流程，未解决的实质问题进入报告。历史审稿版本由 Git 保留。
 
 > **测试通过不代表结论正确。** 153 条断言拦的是"计算错、口径混、报告像运行日志"这三类可机检问题；"这个判断对不对"只能靠人工复核，记录见 `iteration_log/ITERATION_LOG.md` Iteration 6 的两轮审稿。
 
