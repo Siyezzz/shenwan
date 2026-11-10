@@ -12,11 +12,14 @@ v2.0 相对 v1.0 的三处结构性修正（依据招募说明书 2026-10-28 更
 新增：IRR（持有到期、不设终值）与"终值—IRR"对照，这是分派率与回报率之差的量化来源。
 """
 import os
+import sys
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE)
+from tools import build_bottomup as bottomup
 OUT = os.path.join(BASE, "models", "cash_flow_model.xlsx")
 
 YELLOW = PatternFill("solid", fgColor="FFF2CC")
@@ -151,8 +154,8 @@ wb = Workbook()
 ws0 = wb.active
 ws0.title = "0_说明"
 title(ws0, "中信建投首农商业REIT（508601）现金流与估值模型  v2.0", 3,
-      "口径：EBITDA − 资本性支出 − 利息及所得税 − 经营性应收应付变动 + 披露的期初现金调节；2028 年起按评估假设外推。
-      "2026/2027 按披露调整项规范化；2028 年起本表仅作评估增长假设基准，不替代到期重定价三情景（见 models/scenario_2028.csv）；不设终值。")
+      "口径：EBITDA − 资本性支出 − 利息及所得税 − 经营性应收应付变动 + 披露的期初现金调节；2028 年起按评估假设平滑外推。"
+      "本工作簿 2_模型/3_输出 是评估增长基准，不是租约重定价中性预测；到期重定价三情景另列 5_到期重定价/6_情景回报。")
 notes = [
     ("模型版本", "v2.0 / 2026-11-05（v1.0 已废止，修正口径见下列第 ④⑤⑥ 条）"),
     ("标的", "中信建投首农食品集团封闭式商业不动产证券投资基金（508601）；底层资产：北京昌平龙德广场"),
@@ -162,8 +165,9 @@ notes = [
      "是余额法结果：年末货币资金 330,144,418.05 − 预留安全现金 3,424,854.22 − 预留经营性负债 156,335,515.79。"
      "首年募集资金沉淀覆盖了 capex 与所得税，故该数与 EBITDA 仅差 5.3 万元，不可作稳态口径。"),
     ("② 规范化口径（本模型采用）",
-     "可供分配 = EBITDA − 资本性支出 − 支付利息及所得税。2026：170,437,399.69 − 15,460,400.00 − 13,287,806.33 "
-     "= 139,079,838 元（5.08%）；2027：EBITDA − capex − 利息所得税 − WC + 期初现金调节 = 153,301,998 元（5.60%），与披露值差 2,400 元。"),
+     "可供分配 = EBITDA − 资本性支出 − 支付利息及所得税 − 经营性应收应付变动 + 披露的期初现金调节。2026："
+     "170,437,399.69 − 15,460,400.00 − 13,287,806.33 − 2,609,355.18 = 139,079,838 元（5.08%）；"
+     "2027 再加期初现金调节后为 153,301,998 元（5.60%），与披露值差 2,400 元。"),
     ("③ 披露 2027E 与规范化值仅差 2,400 元",
      "2027 年披露值与规范化值实质相等；2026 年仍需剔除首年余额法中的一次性资金沉淀。"),
     ("④ 资本性支出口径修正",
@@ -482,9 +486,9 @@ title(ws, "Sensitivity｜双因素敏感性（2028E 分派率）", 8,
       "方法：收入乘数 m =（1+出租率变动）×（1+租金变动）；EBITDA = EBITDA2028 × [1+弹性×(m−1)]，弹性约 1.18；"
       "capex = capex2028 × m；利息所得税不变。弹性 = 传导系数 0.81 ÷ EBITDA 率 68.65%（1_假设 最后一行）。"
       "所有单元格为公式，改 1_假设 即联动。")
-base_eb = "='2_模型'!C%d" % (MODEL_FIRST + 2)
-base_cx = "='2_模型'!E%d" % (MODEL_FIRST + 2)
-base_it = "='2_模型'!F%d" % (MODEL_FIRST + 2)
+base_eb = "='5_到期重定价'!D26"
+base_cx = "='5_到期重定价'!E26"
+base_it = "='5_到期重定价'!F26"
 
 # 辅助区（放在右下，避免遮挡）
 ws.cell(row=4, column=10, value="辅助：2028E 基数").font = Font(bold=True, size=9)
@@ -521,7 +525,7 @@ for od in occs:
     ws.cell(row=r, column=1).border = BORDER
     r += 1
 ws.cell(row=r + 1, column=1,
-        value="读法：绿色 ≥6.00%；黄色 5.20%–6.00%；红色 <5.20%。基准情形（出租率 0%、租金 0%）为 5.71%。").font = Font(size=9, italic=True)
+        value="读法：绿色 ≥6.00%；黄色 5.20%–6.00%；红色 <5.20%。基准情形使用 2028 年中性到期重定价情景的 EBITDA、capex 与利息所得税，不使用评估增长基准。").font = Font(size=9, italic=True)
 
 # 表 2 折现率 × 增长率（模型估值，亿元）
 r += 3
@@ -546,6 +550,69 @@ ws.cell(row=r, column=1,
               "表中假设全期单一增长率，故与 2_模型 的两段增长率结果略有差异。" % (PV5 / 1e8)).font = Font(size=9, italic=True)
 for i, w in enumerate([20, 14, 14, 14, 14, 16, 4, 4, 4, 22, 18], 1):
     ws.column_dimensions[get_column_letter(i)].width = w
+
+
+# ================= 5 到期重定价情景（来自 build_bottomup.py） =================
+ws5 = wb.create_sheet("5_到期重定价")
+title(ws5, "Maturity repricing scenarios｜2028 年租约到期重定价", 9,
+      "本表直接读取 tools/build_bottomup.py 的悲观/中性/乐观三情景。2026–2027 为披露数据规范化，2028 起为研究情景；不得将情景当作管理人预测。")
+hdr(ws5, 4, ["情景", "年份", "营业收入", "EBITDA", "资本性支出", "利息及所得税", "可供分配", "分派率", "数据性质"])
+scenario_rows = {}
+rr = 5
+for scenario_name in ("悲观", "中性", "乐观"):
+    scenario_rows[scenario_name] = []
+    for item in bottomup.build(scenario_name):
+        vals = [scenario_name, item["year"], item["rev"], item["ebitda"],
+                item["capex"], item["intax"], item["dist"], item["rate"], item["src"]]
+        for cc, value in enumerate(vals, 1):
+            cell = ws5.cell(row=rr, column=cc, value=value)
+            cell.border = BORDER
+            cell.font = Font(size=9)
+            if cc in (3, 4, 5, 6, 7):
+                cell.number_format = "#,##0"
+            elif cc == 8:
+                cell.number_format = "0.00%"
+        scenario_rows[scenario_name].append(rr)
+        rr += 1
+for cc, width in enumerate([14, 10, 18, 18, 18, 18, 18, 12, 18], 1):
+    ws5.column_dimensions[get_column_letter(cc)].width = width
+ws5.freeze_panes = "A5"
+ws5.auto_filter.ref = "A4:I%d" % (rr - 1)
+
+# ================= 6 情景回报（Excel IRR） =================
+ws6 = wb.create_sheet("6_情景回报")
+title(ws6, "Scenario returns｜三情景发行价年度期数 IRR", 6,
+      "t=0 为募集规模流出，2026–2044 每年可供分配为流入，期末无终值。此为年度期数 IRR，不是实际支付日期 XIRR。")
+hdr(ws6, 4, ["情景", "年度期数 IRR", "19 年累计可供分配", "2028 可供分配", "2028 分派率", "现金流说明"])
+cashflow_start = 12
+for idx, scenario_name in enumerate(("悲观", "中性", "乐观")):
+    data_rows = scenario_rows[scenario_name]
+    summary_row = 5 + idx
+    cf_row = cashflow_start + idx
+    ws6.cell(row=summary_row, column=1, value=scenario_name)
+    ws6.cell(row=summary_row, column=2, value="=IRR(B%d:U%d)" % (cf_row, cf_row))
+    ws6.cell(row=summary_row, column=2).number_format = "0.00%"
+    ws6.cell(row=summary_row, column=3, value="=SUM(C%d:U%d)" % (cf_row, cf_row))
+    ws6.cell(row=summary_row, column=3).number_format = "#,##0"
+    ws6.cell(row=summary_row, column=4, value="='5_到期重定价'!G%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=4).number_format = "#,##0"
+    ws6.cell(row=summary_row, column=5, value="='5_到期重定价'!H%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=5).number_format = "0.00%"
+    ws6.cell(row=summary_row, column=6, value="t=0 募集规模流出；2026–2044 年度分派流入")
+    for cc in range(1, 7):
+        ws6.cell(row=summary_row, column=cc).border = BORDER
+    ws6.cell(row=cf_row, column=1, value=scenario_name)
+    ws6.cell(row=cf_row, column=2, value=-A["raise"])
+    for j, data_row in enumerate(data_rows):
+        ws6.cell(row=cf_row, column=3 + j, value="='5_到期重定价'!G%d" % data_row)
+        ws6.cell(row=cf_row, column=3 + j).number_format = "#,##0"
+    for cc in range(1, 22):
+        ws6.cell(row=cf_row, column=cc).border = BORDER
+ws6.cell(row=10, column=1, value="现金流复算区（IRR 公式引用下方 20 期现金流）")
+for cc, width in enumerate([14, 16, 18, 18, 14, 48], 1):
+    ws6.column_dimensions[get_column_letter(cc)].width = width
+ws6.column_dimensions["G"].width = 16
+ws6.freeze_panes = "A5"
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 wb.save(OUT)
