@@ -274,14 +274,14 @@ formula_registry:
     freq: 年
     valid_from: 2021-06
     valid_to: null
-    caliber_note: "不含折旧摊销与利息，不含资本性支出"
+    caliber_note: "本项目按披露口径定义；不得将 NOI 与 EBITDA、项目公司现金流或基金可供分配金额互换。仅在组成项与层级一致时使用。"
   - formula_id: F_EBITDA
     expression: 仅在 NOI 定义及折旧摊销处理明确时勾稽，不机械套用
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
-    caliber_note: "若披露口径已为 EBITDA，直接引用并注明"
+    caliber_note: "必须按报表/评估报告的具体组成项复核；折旧摊销回加不自动解决税费、管理费和层级差异。"
   - formula_id: F_DIST
     expression: 以招募说明书披露的可供分配金额测算表为准，逐项复原调整项
     unit: 元
@@ -302,7 +302,7 @@ formula_registry:
     freq: 年
     valid_from: 2021-06
     valid_to: null
-    caliber_note: "TV 可为期末价值或永续增长；商业不动产常用剩余年限内现金流+期末价值"
+    caliber_note: "先匹配估值对象与现金流层级，再选折现率、收益期限和终值；物业层现金流不得直接与基金层可供分配现金流比较。"
 
 source_registry:
   - source_id: SRC_SSE_REIT
