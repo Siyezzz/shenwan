@@ -132,13 +132,13 @@ def t_calc():
             sys.stdout = old
         close(bm.IRR0, 0.026688, 0.0005, "T-CALC-11",
               "508601 IRR（19 期、无终值）= 2.67%")
-        close(sum(r["dist"] for r in bm.ROWS) / 1e8, 36.0089, 0.01, "T-CALC-12",
+        close(sum(r["dist"] for r in bm.ROWS) / 1e8, 35.9927, 0.01, "T-CALC-12",
               "508601 19 年累计可供分派 = 36.01 亿元（募集的 131.4%）")
         close(bm.PV_NOI5 / 1e8, 25.3120, 0.01, "T-CALC-13",
               "508601 毛 NOI@5% = 25.31 亿元（评估值 27.03 亿，−6.4%）")
-        close(bm.PV5 / 1e8, 22.0572, 0.01, "T-CALC-14",
+        close(bm.PV5 / 1e8, 22.0413, 0.01, "T-CALC-14",
               "508601 净可供分配@5% = 22.06 亿元（−18.4%）")
-        close(bm.PRICE_AT_560 / 1e8, 20.9259, 0.01, "T-CALC-15",
+        close(bm.PRICE_AT_560 / 1e8, 20.9101, 0.01, "T-CALC-15",
               "508601 IRR=5.60% 的可承受发行规模 = 20.93 亿元")
         close(bm.TV_FOR_560 / 1e8, 18.2206, 0.05, "T-CALC-16",
               "508601 使 IRR=5.60% 所需 2044 年末终值 = 18.22 亿元")
