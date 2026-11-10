@@ -7,14 +7,14 @@ description: Use when 需要对拟发行或新发行的公募REITs做投前深�
 
 本 skill 是一个 flow（可执行分析流程）。
 
-**执行方式**：阅读同目录下的 FLOW.md，按 `#1 → #26` 顺序执行。`#3` 产出的 `dataset/facts.yaml` 是全流程唯一事实源；`#14` 产出的 `model/cashflow.xlsx` 是全部测算的唯一模型。
+**执行方式**：先执行 FLOW.md 的 `Step -1：Reference Gate`，验收通过后再按 `#1 → #26` 执行。`dataset/facts.yaml` 是唯一事实底稿，`dataset/facts.csv` 仅为导出视图；`model/cash_flow_model.xlsx` 是唯一测算模型。所有输入材料必须先在 `source_manifest.csv` 中确认真实存在、可读取并完成版本裁决。
 
 **运行前检查**：
 1. METADATA.md 的 `inputs` 必须确认：`fund_name`、`doc_root`、`analysis_date`、`discount_rate_scenarios`。缺 `discount_rate_scenarios` 时使用 `#18` 的默认三档并注明为研究假设。
 2. `data_requirements` 中 `thesis_required: true` 的条目若在文件中取不到，报告中必须出现对应 `INDETERMINATE`，**不得用行业均值替代且不声明**。
 3. 区分三类数字：`历史事实`（募集说明书披露的实际数）/ `文件预测`（评估报告或管理人预测）/ `独立研究假设`（本报告自设）。三者不得混列在同一列。
 
-**输出位置**：`output/YYYYMMDD_HHMMSS/`（可在 METADATA.md 的 `output_dir` 修改）。产出 7 个文件，清单见 FLOW `#26`。
+**输出位置**：`output/YYYYMMDD_HHMMSS/`（可在 METADATA.md 的 `output_dir` 修改）。产出清单以 FLOW 的“执行一致性补充”为准；无法生成的项目必须登记，不得声称完整交付。
 
 ---
 
