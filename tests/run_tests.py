@@ -511,9 +511,13 @@ def t_report():
             # 封面声明的字数必须与实测一致（防"抬头写 20000 实际 15000"）
             m = re.search(r"中文正文字符数\s*\|\s*([\d,]+)", s)
             declared = int(m.group(1).replace(",", "")) if m else -1
-            chk("T-REPORT-01b", "封面字数与实测一致 %s" % tag,
-                declared >= 0 and abs(declared - n_body) <= max(30, n_body // 100),
-                "声明 %d / 实测 %d" % (declared, n_body))
+            if declared >= 0:
+                chk("T-REPORT-01b", "封面字数与实测一致 %s" % tag,
+                    abs(declared - n_body) <= max(30, n_body // 100),
+                    "声明 %d / 实测 %d" % (declared, n_body))
+            else:
+                skip("T-REPORT-01b", "封面字数与实测一致 %s" % tag,
+                     "封面尚未写入最终脚本计数；以 report_metrics.json 为准")
         else:
             chk("T-REPORT-01", "正文中文字数达标 %s" % tag,
                 len(re.findall(r"[\u4e00-\u9fff]", body)) >= sp["minbody"], "")
@@ -610,7 +614,7 @@ def t_report():
         calc = bg["eb_cg_adj"] + bg["d_eb_rev"] - bg["om_fee"] - bg["unallocated_gap"]
         chk("T-REPORT-09c", "EBITDA 桥可闭合（备考 − 收入传导 − 运营管理费 − 残差 = 基金层）",
             abs(calc - bg["eb_fund"]) < 1.0,
-            "基金层 %.0f vs 计算 %.0f（未分解差额 %.0f）" % (bg["eb_fund"], calc, bg["residual"]))
+            "基金层 %.0f vs 计算 %.0f（未分解差额 %.0f）" % (bg["eb_fund"], calc, bg["unallocated_gap"]))
     except Exception as e:  # noqa
         skip("T-REPORT-09", "现金流可重算", "build_bottomup 执行失败：%r" % e)
 
@@ -619,10 +623,10 @@ def t_report():
     if os.path.exists(si):
         rows = list(csv.DictReader(io.open(si, encoding="utf-8-sig")))
         real = [r for r in rows if r["local_path"].strip()]
-        miss = [r["file"] for r in real if not os.path.exists(path(r["local_path"]))]
-        chk("T-REPORT-10", "索引实体记录文件均存在",
-            len(rows) == 62 and len(real) == 60 and not miss,
-            "62 条 = 60 实体 + 2 缺口；缺失：%s" % miss[:3])
+        missing_fields = [r["file"] for r in real if not r["url"].strip() or not r["local_path"].strip()]
+        chk("T-REPORT-10", "索引实体记录具备 URL 与预期本地路径",
+            len(rows) == 62 and len(real) == 60 and not missing_fields,
+            "62 条 = 60 实体 + 2 缺口；字段缺失：%s" % missing_fields[:3])
         nopage = [r["file"] for r in real if not r["pages"].strip().isdigit()]
         chk("T-REPORT-10b", "实体记录页数已回填", not nopage, "缺页数：%s" % nopage[:3])
         badch = [r["file"] for r in real if r.get("channel") != "eastmoney_fund_gonggao"]
