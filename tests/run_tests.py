@@ -392,13 +392,13 @@ def t_reg():
         "本报告相对初稿的四条更正" in s or "C-1" in s and "C-4" in s, "")
     chk("T-REG-05", "案例三未把分派率等同于回报率（需出现分派率/回报的区分表述）",
         any(k in s for k in ("分派率不等于回报率", "不是回报率，是分派率",
-                             "分派率高而 IRR 低", "5.60% 与 0.55%")), "")
+                             "分派率高而 IRR 低", "5.60% 与 0.46%")), "")
 
     # 模型文件与 sheet
     try:
         from openpyxl import load_workbook
         wb = load_workbook(path("models", "cash_flow_model.xlsx"))
-        chk("T-REG-06", "cash_flow_model.xlsx 含 5 个 sheet（说明/假设/模型/输出/敏感性）",
+        chk("T-REG-06", "cash_flow_model.xlsx 含 7 个 sheet（评估基准 + 到期重定价情景 + 情景回报）",
             len(wb.sheetnames) == 7 and wb.sheetnames[:3] == ["0_说明", "1_假设", "2_模型"] and wb.sheetnames[-2:] == ["5_到期重定价", "6_情景回报"],
             str(wb.sheetnames))
         wm = wb["2_模型"]
@@ -607,10 +607,10 @@ def t_report():
             chk("T-REPORT-09b", "报告含该情景数值 %s" % name,
                 any(fm in pre for fm in forms), "")
         bg = bb.bridge()
-        calc = bg["eb_cg_adj"] + bg["d_eb_rev"] - bg["om_fee"] - bg["residual"]
+        calc = bg["eb_cg_adj"] + bg["d_eb_rev"] - bg["om_fee"] - bg["unallocated_gap"]
         chk("T-REPORT-09c", "EBITDA 桥可闭合（备考 − 收入传导 − 运营管理费 − 残差 = 基金层）",
             abs(calc - bg["eb_fund"]) < 1.0,
-            "基金层 %.0f vs 计算 %.0f（残差 %.0f）" % (bg["eb_fund"], calc, bg["residual"]))
+            "基金层 %.0f vs 计算 %.0f（未分解差额 %.0f）" % (bg["eb_fund"], calc, bg["residual"]))
     except Exception as e:  # noqa
         skip("T-REPORT-09", "现金流可重算", "build_bottomup 执行失败：%r" % e)
 
