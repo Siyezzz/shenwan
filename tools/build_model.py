@@ -42,6 +42,9 @@ A = {
     "cx27": 8827400.00,
     "it26": 13287806.33,         # 支付利息及所得税费用
     "it27": 13745968.83,
+    "wc26": 2609355.18,          # 经营性应收应付变动
+    "wc27": 44572.42,
+    "cashadj27": 1036616.37,      # 期初现金调节
     "g1": 0.0278,
     "g2": 0.0225,
     "cxr": 0.035,                # 2027 起 capex = 收入 × 3.5%（评估取值）
@@ -69,7 +72,10 @@ def series(eb_rate=None, g1=None, g2=None, cxr=None):
             rev = rev * (1 + (g1 if y <= 2035 else g2))
             eb, cx = rev * rate, rev * cxr
             it = it * (1 + A["itg"])
-        out.append(dict(year=y, rev=rev, eb=eb, cx=cx, it=it, dist=eb - cx - it))
+        wc = A["wc26"] if y == 2026 else (A["wc27"] if y == 2027 else 0.0)
+        cashadj = A["cashadj27"] if y == 2027 else 0.0
+        out.append(dict(year=y, rev=rev, eb=eb, cx=cx, it=it, wc=wc, cashadj=cashadj,
+                        dist=eb - cx - it - wc + cashadj))
     return out
 
 
@@ -157,9 +163,9 @@ notes = [
      "首年募集资金沉淀覆盖了 capex 与所得税，故该数与 EBITDA 仅差 5.3 万元，不可作稳态口径。"),
     ("② 规范化口径（本模型采用）",
      "可供分配 = EBITDA − 资本性支出 − 支付利息及所得税。2026：170,437,399.69 − 15,460,400.00 − 13,287,806.33 "
-     "= 141,689,193 元（分派率 5.17%）；2027：174,883,323.29 − 8,827,400.00 − 13,745,968.83 = 152,309,954 元（5.56%）。"),
-    ("③ 披露 2027E 与规范化值仅差 99 万元（0.65%）",
-     "说明 2027 年已是规范口径，5.60% 可作为稳态分派率；2026 年的 6.22% 不可外推。"),
+     "= 139,079,838 元（5.08%）；2027：EBITDA − capex − 利息所得税 − WC + 期初现金调节 = 153,301,998 元（5.60%），与披露值差 2,400 元。"),
+    ("③ 披露 2027E 与规范化值仅差 2,400 元",
+     "2027 年披露值与规范化值实质相等；2026 年仍需剔除首年余额法中的一次性资金沉淀。"),
     ("④ 资本性支出口径修正",
      "测算表口径 2026 年 15,460,400.00 元（不含税），2027 年起为收入的 3.5%（约 886 万元/年）；"
      "现金流量表的 21,047,778.55 元为含税/含长期待摊口径，两者相差 5,587,378.55 元，不可混用。"),
@@ -210,6 +216,9 @@ items = [
     ("资本性支出 2027E", A["cx27"], "锚点", "测算表附注五（不含税）"),
     ("支付利息及所得税 2026E", A["it26"], "锚点", "测算表调整项"),
     ("支付利息及所得税 2027E", A["it27"], "锚点", "测算表调整项"),
+    ("经营性应收应付变动 2026E", A["wc26"], "锚点", "招募书可供分配测算表调整项"),
+    ("经营性应收应付变动 2027E", A["wc27"], "锚点", "同上"),
+    ("期初现金调节 2027E", A["cashadj27"], "锚点", "招募书可供分配测算表调整项"),
     ("收入增长率 2026–2035", A["g1"], "锚点", "招募书：预测现金流年复合增长率 2.78%"),
     ("收入增长率 2036–2045", A["g2"], "锚点", "招募书：长期增长率 2.25%（同业 2.25%–2.75% 下沿）"),
     ("资本性支出占收入比", A["cxr"], "锚点", "评估取值：2027 年起 3.5%"),
@@ -240,7 +249,7 @@ wa.column_dimensions["D"].width = 84
 # 行号映射（供公式引用）
 R = {k: 5 + i for i, k in enumerate([
     "raise", "app", "disc", "years", "rev26", "rev27", "eb26", "eb27",
-    "cx26", "cx27", "it26", "it27", "g1", "g2", "cxr", "itg", "m", "den", "pt", "lev"])}
+    "cx26", "cx27", "it26", "it27", "wc26", "wc27", "cashadj27", "g1", "g2", "cxr", "itg", "m", "den", "pt", "lev"])}
 H = "'1_假设'!"
 
 # ================= 2 模型 =================
@@ -271,7 +280,13 @@ for i, row in enumerate(ROWS):
         wm.cell(row=r, column=5, value="=B%d*%s$B$%d" % (r, H, R["cxr"]))
         wm.cell(row=r, column=6, value="=F%d*(1+%s$B$%d)" % (r - 1, H, R["itg"]))
     wm.cell(row=r, column=4, value="=C%d/B%d" % (r, r))
-    wm.cell(row=r, column=7, value="=C%d-E%d-F%d" % (r, r, r))
+    if y == 2026:
+        formula = "=C%d-E%d-F%d-%s$B$%d" % (r, r, r, H, R["wc26"])
+    elif y == 2027:
+        formula = "=C%d-E%d-F%d-%s$B$%d+%s$B$%d" % (r, r, r, H, R["wc27"], H, R["cashadj27"])
+    else:
+        formula = "=C%d-E%d-F%d" % (r, r, r)
+    wm.cell(row=r, column=7, value=formula)
     wm.cell(row=r, column=8, value=i + 1)
     wm.cell(row=r, column=9, value="=1/(1+%s$B$%d)^H%d" % (H, R["disc"], r))
     wm.cell(row=r, column=10, value="=G%d*I%d" % (r, r))
@@ -330,7 +345,9 @@ rows1 = [
     ("EBITDA", A["eb26"], A["eb27"], ROWS[2]["eb"], "—"),
     ("资本性支出（不含税）", A["cx26"], A["cx27"], ROWS[2]["cx"], "2026 用测算表口径"),
     ("支付利息及所得税", A["it26"], A["it27"], ROWS[2]["it"], "—"),
-    ("规范化可供分配", ROWS[0]["dist"], ROWS[1]["dist"], ROWS[2]["dist"], "= EBITDA − capex − 利息所得税"),
+    ("经营性应收应付变动", A["wc26"], A["wc27"], 0, "2026/27 披露调整项"),
+     ("期初现金调节", 0, A["cashadj27"], 0, "2027 披露调整项"),
+     ("规范化可供分配", ROWS[0]["dist"], ROWS[1]["dist"], ROWS[2]["dist"], "= EBITDA − capex − 利息所得税 − WC + 现金调节"),
     ("披露可供分配", 170384048.05, 153304398.41, None, "招募书口径（余额法）"),
     ("分派率（规范化）", ROWS[0]["dist"] / A["raise"], ROWS[1]["dist"] / A["raise"],
      ROWS[2]["dist"] / A["raise"], "分母 = 募集规模"),
