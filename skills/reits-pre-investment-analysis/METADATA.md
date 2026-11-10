@@ -2,17 +2,19 @@ type: flow
 
 name: reits-pre-investment-analysis
 
-version: 1.1.0
+version: 1.2.0
 
-description: "公募REITs投前深度分析：基于招募说明书、法律意见书、基金合同、资产评估报告，完成产品概况、交易结构、基础资产、运营、收入成本、可供分配测算、估值、投资价值、风险与结论十部分分析，配套可复核现金流模型、情景与敏感性分析。"
+description: "公募REITs投资分析报告：基于正式披露和市场数据，分析资产质量、交易结构、运营现金流、可供分配、估值定价、投资者回报与风险，最终给出有价格条件的投资评级和决策结论。"
 
 domain: 公募REITs投前
 
-source_report: "内部方法论；具体监管规则、交易所业务办法及评估准则须在每次运行的 REFERENCE_MAP/来源清单中登记全称、发布机构、文号或版本、生效日期、条款及官方 URL。不得将此描述当作已完成的法规引用。"
+source_report: "内部方法论；具体监管规则、交易所业务办法及评估准则须在每次运行的来源清单中登记全称、发布机构、文号或版本、生效日期、条款及官方 URL。不得将此描述当作已完成的法规引用。"
 
 script_permission: true
 
 output_dir: ./output
+
+report_output: "正式投资分析报告 report_<fund_code>.md；写作阶段衔接 skills/reits-report-writing，不得以模型或数据表代替报告。"
 
 inputs:
   - name: fund_name
@@ -20,13 +22,29 @@ inputs:
   - name: doc_root
     description: 披露文件根目录，需包含招募说明书、法律意见书、基金合同、资产评估报告；缺失项在报告中登记
   - name: analysis_date
-    description: 分析基准日（YYYY-MM-DD）。用于确定可用的最新披露版本与份额参考价
+    description: 分析基准日（YYYY-MM-DD）。用于确定可用披露版本、市场价格和投资者可获得的信息集
+  - name: investment_case
+    description: IPO 发行定价复盘 / 上市后二级市场投资分析 / 两者比较。已上市基金未指定时默认上市后二级市场分析
+  - name: purchase_date
+    description: 特定投资者的假设或实际买入日期；未提供时不得将分析基准日误写为实际成交日
+  - name: purchase_price
+    description: 特定投资者的实际或假设买入价格（元/份）；未提供时只能用分析基准日市场参考价做条件测算
   - name: discount_rate_scenarios
     description: 折现率情景，格式 "低,中,高"，如 "5.5,6.0,6.5"。为空时使用 #18 默认三档并标为研究假设
   - name: target_yield
     description: 投资者要求的分派率下限（%），用于 #21 判断是否满足投资门槛。为空时不作门槛判断
   - name: holding_years
     description: 拟持有期（年），默认 3。用于 #22 持有期回报测算
+
+investment_decision_contract:
+  required_outputs:
+    - investment_rating: 积极 / 中性 / 谨慎 / 回避，并说明适用投资者与持有期限
+    - valuation_range: 说明估值对象、方法、关键参数和证据限制
+    - entry_condition: 基于要求回报率和投资者现金流推导价格条件；无法推导时说明缺失数据
+    - return_profile: 分派收益率与 IRR/XIRR 分开，IPO 与二级市场分别测算
+    - catalysts_and_risks: 上行催化、主要风险、可监测触发条件
+    - invalidation: 可观测的投资逻辑失效条件
+  decision_rule: "资产质量、现金流、估值、安全边际和投资者期限必须共同支持评级；不得仅凭分派率给出买入建议。"
 
 # 注意：data_requirements 中的 source_id 是来源渠道/发现入口映射，不是具体文件证据 ID。
 # 每次运行必须将字段映射到 source_manifest.csv 中真实存在的 source_id，并记录文件名、页码/表格及原文定位。
@@ -255,6 +273,7 @@ valuation_params:
   rule: "两组参数必须同时给出；只给一组的，另一组标 NOT_COMPARABLE"
 
 scenario_set:
+  # 以下为压力测试起点，不是管理人预测，也不代表发生概率；必须按当前资产与合同证据校准。
   pessimistic:
     occupancy_delta: -3
     rent_growth: 0.0
@@ -311,9 +330,10 @@ source_registry:
     endpoint: https://www.sse.com.cn/disclosure/fund/announcement/
     access_method: HTTP
     auth_required: false
-    probe_status: VERIFIED
+    probe_status: DEGRADED
     probe_time: "2026-11-05"
     fallback_source_id: SRC_EM_ANN
+    note: "公开查询接口需内部 channelId，当前案例原始 PDF 实际通过东方财富基金公告接口获取；不得声称交易所直连已验证。"
   - source_id: SRC_EM_ANN
     provider: 东方财富基金公告
     endpoint: https://api.fund.eastmoney.com/f10/JJGG
