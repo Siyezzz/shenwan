@@ -2,7 +2,7 @@ type: flow
 
 name: reits-pre-investment-analysis
 
-version: 1.0.0
+version: 1.1.0
 
 description: "公募REITs投前深度分析：基于招募说明书、法律意见书、基金合同、资产评估报告，完成产品概况、交易结构、基础资产、运营、收入成本、可供分配测算、估值、投资价值、风险与结论十部分分析，配套可复核现金流模型、情景与敏感性分析。"
 
