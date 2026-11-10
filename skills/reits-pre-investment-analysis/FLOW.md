@@ -1,3 +1,72 @@
+# Step -1：Reference Gate（强制前置步骤，先于 #1）
+
+> 本步骤解决“流程引用了材料，但材料是否真实存在、是否可读取、是否适用于当前基金”这一问题。未通过 Reference Gate，不得开始抽取事实或生成投资结论。
+
+## A. 先识别输入目录，不得假定 doc_root 存在
+
+1. 读取 METADATA.md 的 `fund_name`、`doc_root`、`analysis_date`。若未提供 `doc_root`，先检查仓库的 `source_documents/source_index.csv`；该文件是材料目录索引，不是 PDF 原件。
+2. 在 `source_index.csv` 中按基金简称/代码筛选记录，使用 `local_path` 检查本地文件是否真实存在；同时核对 `status`、`pages`、`text_chars`、`ocr`。
+3. 当前仓库的原始 PDF 不随 Git 仓库分发（见 `.gitignore` 与 `outputs/source_data_audit.md`）。因此，索引记录不等于本地文件存在。若本地文件缺失，按索引中的 `url` 下载至 `doc_root`，并记录下载时间、HTTP 结果、文件大小及 SHA-256；无法下载则登记 `SOURCE_UNAVAILABLE`，不得假称已阅读。
+4. 若用户提供的文件目录与索引不一致，以实际文件系统检查结果为准；不得按文件名猜测文件存在。
+
+## B. 建立逐份文件的 Source Manifest
+
+为每份实际材料生成一条记录，至少包含：
+
+`source_id, fund_code, file_name, document_type, version, disclosure_date, period, local_path, source_url, exists, readable, page_count, text_layer, sha256, selected_for_use, selection_reason`
+
+- `source_id` 必须是本次运行内唯一 ID（如 `SRC-001`），不可把交易所/东方财富等机构名当作具体文件 ID。
+- 文件存在性：`exists=true` 只能由文件系统检查确认；仅有 URL 或索引行时为 `exists=false/UNVERIFIED`。
+- 可读性：检查文本层和页数；扫描件必须标 `OCR_NEEDED`，不得将 OCR 未完成的内容作为已核实证据。
+- 文件哈希：对下载/本地文件计算 SHA-256，用于识别同名不同版本或文件被替换。
+- 记录所有候选版本，不得只保留最终选用版本。
+
+## C. 版本裁决：按文件类型分别判断，禁止全局机械排序
+
+优先考虑正式披露状态、披露日期、适用期间及文件用途。招募说明书、基金合同、法律意见书、评估报告、审计报告和运营公告分别裁决；“封卷稿 > 更新稿 > 反馈稿 > 申报稿”只适用于确属同一文件链的候选版本，不能用一份较早封卷法律意见书覆盖后续更新的招募说明书。
+
+每项裁决写明：候选版本、选用版本、日期、理由、被替代版本及其差异。分析基准日之后披露的材料不得用于基准日时点的判断，除非明确标注为事后信息。
+
+## D. 字段级引用必须落到真实证据
+
+所有进入 `facts.yaml` 的数值和关键事实必须具有：
+
+`source_id + file_name + PDF页码 + 章节/表格 + 原文摘录或定位文本 + 单位 + 事实类型`
+
+PDF 页码与文件印刷页码不一致时，两者都记录。网页公告可作来源入口，但若数据来自 PDF 正文，引用应落到 PDF 页码；网页发布时间不能替代文件披露日期。
+
+下列引用一律判为不合格：
+- 只写“招募说明书”“法律意见书”而无具体文件名和页码；
+- 只写 `SRC_SSE_REIT`、`SRC_CSINDEX` 等机构/数据源代号而无实际文件或数据记录；
+- 只有搜索结果摘要、网页标题或二手报告，没有原始证据定位；
+- 将示例表格中的数字、历史案例数字当作当前标的事实。
+
+## E. 缺失、冲突和降级
+
+- `NOT_FOUND`：索引和目录均未找到；
+- `INDEXED_NOT_DOWNLOADED`：索引有记录但本地文件不存在；
+- `SOURCE_UNAVAILABLE`：原始来源当前无法获取；
+- `OCR_NEEDED`：文件存在但关键页不可检索；
+- `CONFLICTING_SOURCES`：不同正式文件披露不一致，尚未完成裁决；
+- `NOT_APPLICABLE`：该字段确实不适用；
+- `NOT_DISCLOSED`：已检查合理范围但未披露。
+
+每个缺失项必须登记影响的指标、结论和可否替代。不得以行业均值填补标的事实；如使用行业数据，只能作为独立假设/外部比较，并注明来源、日期和可比性。
+
+## F. Reference Gate 验收
+
+只有同时满足以下条件才可进入 #1：
+1. 基金主体与代码已确认；
+2. 所有实际可用材料已进入 Source Manifest；
+3. 关键数据字段均能映射至具体文件及页码，或明确登记缺失；
+4. 版本裁决有记录；
+5. 扫描件、缺页、下载失败和冲突均已登记；
+6. 已生成 `source_manifest.csv` 与 `source_gaps.csv`。
+
+若关键字段（募集规模、发行份额/价格、资产评估值、评估基准日、可供分配预测、土地/特许经营权期限）缺失，流程可以继续做定性研究，但必须将相关估值/回报结论标为 `INDETERMINATE`，不得输出无条件的投资判断。
+
+---
+
 --{abstract}--
 思考路径：
 1. 投前分析的材料是多版本、多口径、多主体的。招募说明书有申报稿/反馈稿/封卷稿/更新稿，法律意见书有四版，评估报告可能只有扫描件。不先做版本裁决，后面每个数字都可能取错稿。所以 Step 0 的第一件事不是读内容，是定版本。
@@ -223,7 +292,7 @@
   - 收入 → 运营成本 → 管理费用 → 税金及附加 = NOI
   - NOI + 折旧摊销回加 = EBITDA（若披露口径已是 EBITDA 则直接引用）
   - EBITDA − 资本性支出 − 税费调整 ± 应收应付变动 ± 预收租金 − 预留 = 可供分配
-- 输出到 `model/cashflow.xlsx`，公式可追溯，假设集中在 `Assumptions` sheet，测算在 `Model` sheet
+- 输出到 `model/cash_flow_model.xlsx`，公式可追溯，假设集中在 `Assumptions` sheet，测算在 `Model` sheet
 - 每个输入单元格标黄，每个公式单元格不写死数字
 [输出]：现金流模型 + 模型说明
 [输出示例]：
@@ -396,3 +465,17 @@
 | 锚点覆盖 | PASS | 抽样 30 条全部有锚点 |
 | 模型可重算 | PASS | 改 Assumptions 后 Output 联动 |
 | 评估报告原件 | FAIL | 缺失，估值章节降为 PARTIALLY_SUPPORTED |
+
+
+---
+
+## 执行一致性补充（强制）
+
+1. **唯一事实底稿**：#2/#3 的唯一事实底稿统一为 `dataset/facts.yaml`；`dataset/facts.csv` 是供表格分析/导出的标准化视图，不得反向覆盖 YAML。若实际运行器不支持 YAML，则须声明替代格式并同步修改本文件，不得双重事实源。
+2. **唯一模型文件**：现金流模型统一命名为 `model/cash_flow_model.xlsx`。禁止在 #15、#26 或 SKILL.md 中另用 `cashflow.xlsx`。
+3. **输出清单**：每次运行必须在 `output/<run_id>/` 下生成 `source_manifest.csv`、`source_gaps.csv`、`facts.yaml`、`facts.csv`、`assumptions.csv`、`claims_verdict.csv`、`cash_flow_model.xlsx`、`figures/transaction_structure.svg`、`report_<fund_code>.md`、`run_log.md`。无法生成的文件必须在 run_log 说明原因，不得静默省略。#26 的“7 个文件”表述应以此清单为准。
+4. **公式口径**：F_NOI、F_EBITDA、F_DIST 仅为待核对的模型框架，不是所有 REIT 通用的法定统一公式。逐项以招募说明书“可供分配金额测算表”、基金合同及审计口径对齐；不得把 NOI、EBITDA、经营活动现金流、可供分配金额互相替代。未能逐项勾稽时，保留原披露口径并标记差异。
+5. **分派率分母**：分别标记“发行价/募集规模口径”“评估值口径”“二级市场价格口径”。不可把三者混称为分派率；市场价格口径必须注明价格日期。
+6. **回报率**：#22 若计算 IRR，必须列明每期实际/预测分派现金流、买入价格、退出价格、交易费用/税费假设和日期频率；不能用“累计分派 + 期末估值变动”的简化百分比直接称为 IRR。
+7. **经验阈值**：如终值占比 60%、剩余土地年限 20 年、差异 10% 等阈值，必须标为本研究预警阈值/经验规则，不得表述为监管规定或普适硬标准，并允许按资产类型调整。
+8. **工具调用**：脚本必须引用仓库内真实存在的路径。运行前检查 `tools/` 文件是否存在及依赖是否满足；未实际执行的脚本不得写成“已运行”。当前工具目录可核对的脚本包括 `tools/ingest_sources.py`、`tools/build_source_index.py`、`tools/build_bottomup.py`、`tools/build_model.py`、`tools/build_matrices.py`、`tools/count_report_words.py`，具体参数以脚本 `--help` 或源码为准，不得猜参数。
