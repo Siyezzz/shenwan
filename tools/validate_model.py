@@ -3,10 +3,12 @@
 """Validate the 508601 REIT model outputs against the independent bottom-up engine."""
 import math
 import os
+import sys
 from openpyxl import load_workbook
-from tools import build_bottomup
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+from tools import build_bottomup
 XLSX = os.path.join(ROOT, "models", "cash_flow_model.xlsx")
 CSV = os.path.join(ROOT, "models", "scenario_2028.csv")
 
