@@ -192,14 +192,14 @@
 - 摘要必须自足，明确产品买的是什么、现金流靠什么、主要分歧、估值/价格条件、预期回报边界、最大风险和评级。每章先给判断，再给证据、机制、反证和投资含义。
 - 关键数字标注原始文件页码或模型位置；管理人预测、独立假设和研究判断明确区分。不得在写作阶段新造数字；需新增测算时退回模型步骤。
 - 用户要求 1.5 万字时，按写作 Skill 的正文统计口径验收，不以附录注水。
-[输出]：`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`
+[输出]：`outputs/{case_dir}/thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`
 
 #26 --{动作}-- [非数据]
 **复核并归档**
 - 核对材料清单、数字锚点、期间/单位/分母口径、模型公式、情景传导、IRR 现金流和结论一致性。
 - 对账报告、assumptions、claims、source_index、run_log、模型工作簿和情景 CSV：基金代码/文件数量/版本日期/章节编号/关键数字必须一致；任何过期索引、旧运行日志、错章节引用或模型输出不一致，都必须修正或明确标为未验证。
 - 抽查关键数字能否从原文复现；检查是否把预测写成事实、缺失写成零、可供分配写成实际分派。
-- 交付到 `outputs/{case_dir}/`：`source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`、`figures/`。模型与情景文件按脚本实际配置路径生成；当前 508601 案例为 `models/cash_flow_model.xlsx` 和 `models/scenario_2028.csv`。
+- 交付到 `outputs/{case_dir}/`：`source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`、`figures/`。模型与情景文件按脚本实际配置路径生成；当前 508601 案例为 `models/cash_flow_model.xlsx` 和 `models/scenario_2028.csv`。
 - 未完成或证据不足的部分明确标记，不以格式完整代替分析完成。
 - 如果模型工作簿仍是旧版、关键数字与权威情景 CSV 不一致，或报告中的二级市场回报没有真实现金流日期，必须标为 PARTIAL；不得以报告已写完代替投资分析已验证。
 [输出]：复核记录与交付文件清单
