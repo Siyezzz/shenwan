@@ -192,7 +192,7 @@ def bridge():
     d_eb_rev = d_rev * (eb_cg_adj / rev_25)
     # 新增运营管理费
     # 管理费用与税金及附加口径差 = 残差
-    residual = eb_cg_adj + d_eb_rev - D["om_fee_2026"] - D["ebitda_2026"]
+    unallocated_gap = eb_cg_adj + d_eb_rev - D["om_fee_2026"] - D["ebitda_2026"]
     return {
         "eb_cg_reported": eb_cg,
         "dep": D["dep_2025"],
@@ -201,7 +201,7 @@ def bridge():
         "d_rev": d_rev,
         "d_eb_rev": d_eb_rev,
         "om_fee": D["om_fee_2026"],
-        "residual": residual,
+        "unallocated_gap": unallocated_gap,
         "eb_fund": D["ebitda_2026"],
     }
 
@@ -257,7 +257,7 @@ def main():
           (b["eb_cg_adj"], b["margin_cg"] * 100))
     print("− 收入下降的传导影响                        %14.0f" % abs(b["d_eb_rev"]))
     print("− 新增运营管理费（结构中原本不存在）        %14.0f" % b["om_fee"])
-    print("− 管理费用与税金及附加口径差（残差）        %14.0f" % b["residual"])
+    print("− 未分解差额（现有披露不足以命名科目）        %14.0f" % b["unallocated_gap"])
     print("= 基金层预测 EBITDA（2026E）                %14.0f" % b["eb_fund"])
 
     print("\n" + "=" * 96)
