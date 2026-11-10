@@ -40,7 +40,7 @@ description: Use when 需要把 FLOW 的执行结果写成一份可交付的正�
 
 | 上游产出 | 本 skill 的用法 | 不得做的事 |
 |---|---|---|
-| `facts.yaml` / 数据矩阵 | 正文所有数字的唯一来源 | 不在正文里重算上游已算过的数 |
+| `source_index.csv` + 页码锚点 | 正文数字的原始证据入口；`assumptions.csv` 区分研究假设 | 不把来源索引误当事实表，不在正文里新造数字 |
 | `models/cash_flow_model.xlsx` | 情景与敏感性的数来自这里 | 不在正文里手改模型结果 |
 | `assumptions.csv` | 每条假设进附录登记表；正文引用时标注"假设" | 不把假设写成"披露" |
 | `claims_verdict.csv` | 裁决结果进正文的结论句，`claim_id` 与状态码进附录 | 不在正文里展示 `claim_id` |
