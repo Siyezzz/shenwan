@@ -226,11 +226,11 @@ data_requirements:
     source_id: SRC_CSINDEX
 
 step0_required:
-  - 版本裁决：同一文件多版本时按 封卷稿 > 更新稿 > 反馈回复稿 > 申报稿 取值，并记录全部版本号与日期
-  - 口径统一：金额元、面积平方米、比率 %
-  - 期间对齐：历史期（近3年及一期）与预测期（未来若干年）分表存放
-  - 事实分层：历史事实 / 文件预测 / 独立假设 三类标注
-  - 缺失状态：NA / 0 / 未披露 / 不适用 / SOURCE_UNAVAILABLE
+  - 确认基金名称、代码、分析基准日及输入文件真实存在、可读取
+  - 按文件类型和用途裁决版本；记录候选版本、选用理由和基准日后信息
+  - 关键事实记录具体文件名、PDF页码、章节/表格、单位、期间及事实类型
+  - 区分历史披露、文件预测、独立研究假设；区分时点值、单季值和累计值
+  - 缺失、扫描件、冲突和不适用分别登记，并说明对结论的影响
 
 assumption_register:
   fields: [assumption_id, category, value, basis, sensitivity, owner, source_ref, status]
