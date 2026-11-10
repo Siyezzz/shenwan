@@ -1,10 +1,107 @@
 {
   "report": "outputs/case_03_sinofarm_reit/report_508601.md",
-  "cjk_body_estimate": 23440,
-  "cjk_total_estimate": 27841,
-  "markdown_total_chars_estimate": 60602,
+  "cjk_body": 23993,
+  "cjk_total": 28444,
+  "latin_body": 1075,
+  "digit_body": 8270,
+  "md_total_chars": 61139,
+  "figures": 3,
+  "tables": 25,
+  "we_think_count": 0,
+  "longest_paragraph_cjk": 202,
+  "duplicate_30char": 71,
   "min_required": 15000,
-  "count_status": "NEEDS_RECOUNT_AFTER_V1_2",
-  "report_word_count_pass": null,
-  "notes": "Version 1.2 edits changed body text; rerun tools/count_report_words.py on the final file before claiming formal count acceptance."
+  "pass": true,
+  "sections": [
+    {
+      "title": "(封面与前置信息)",
+      "cjk": 24,
+      "body": false
+    },
+    {
+      "title": "投资分析报告",
+      "cjk": 331,
+      "body": false
+    },
+    {
+      "title": "1 投资摘要：发行时分派率与上市后买入收益必须分开",
+      "cjk": 2158,
+      "body": true
+    },
+    {
+      "title": "2 产品概况与交易结构：每 100 元租金收入，先被抽走 8.5 元管理费",
+      "cjk": 2160,
+      "body": true
+    },
+    {
+      "title": "3 基础资产与区域市场：位置守得住，租金涨不动",
+      "cjk": 1576,
+      "body": true
+    },
+    {
+      "title": "4 运营表现与租约质量：续租率升到 76.83%，租金连降两年",
+      "cjk": 3343,
+      "body": true
+    },
+    {
+      "title": "5 历史财务：收入、成本与现金流的三个背离",
+      "cjk": 2036,
+      "body": true
+    },
+    {
+      "title": "6 未来经营预测与现金流测算：2028 年集中到期租约是分派率的主要变量",
+      "cjk": 2880,
+      "body": true
+    },
+    {
+      "title": "7 资产估值与发行定价：27.40 亿元比评估值高 1.4%，折现率却只取 5%",
+      "cjk": 2239,
+      "body": true
+    },
+    {
+      "title": "8 分派率与持有期回报：发行价模型 IRR 低，二级市场 XIRR 需按真实日期计算",
+      "cjk": 2233,
+      "body": true
+    },
+    {
+      "title": "9 投资风险：把主要不确定性转化为可监测条件",
+      "cjk": 3494,
+      "body": true
+    },
+    {
+      "title": "10 风险收益比较与投资结论：长期回报取决于现金流、期限与退出价值",
+      "cjk": 1874,
+      "body": true
+    },
+    {
+      "title": "附录 A 数据来源索引",
+      "cjk": 543,
+      "body": false
+    },
+    {
+      "title": "附录 B 关键公式与计算过程",
+      "cjk": 428,
+      "body": false
+    },
+    {
+      "title": "附录 C 假设登记表",
+      "cjk": 893,
+      "body": false
+    },
+    {
+      "title": "附录 D 不可判定事项与数据质量",
+      "cjk": 564,
+      "body": false
+    },
+    {
+      "title": "附录 E 版本变更与纠错记录",
+      "cjk": 715,
+      "body": false
+    },
+    {
+      "title": "附录 F 执行记录与自检",
+      "cjk": 663,
+      "body": false
+    }
+  ]
 }
