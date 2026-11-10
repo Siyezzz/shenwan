@@ -269,35 +269,35 @@ scenario_set:
 
 formula_registry:
   - formula_id: F_NOI
-    expression: NOI = 营业收入 − 运营成本 − 管理费用 − 税金及附加
+    expression: 按底层资产经营口径逐项定义，不作为所有 REIT 通用的统一公式
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "不含折旧摊销与利息，不含资本性支出"
   - formula_id: F_EBITDA
-    expression: EBITDA = NOI + 折旧摊销（回加）
+    expression: 仅在 NOI 定义及折旧摊销处理明确时勾稽，不机械套用
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "若披露口径已为 EBITDA，直接引用并注明"
   - formula_id: F_DIST
-    expression: 可供分配 = EBITDA − 资本性支出 − 税费调整 ± 应收应付变动 ± 预收租金变动 − 预留
+    expression: 以招募说明书披露的可供分配金额测算表为准，逐项复原调整项
     unit: 元
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "以招募说明书可供分配测算表的调整项为准，逐项对齐"
   - formula_id: F_YIELD
-    expression: 分派率 = 可供分配金额 ÷ 募集规模
+    expression: 发行规模口径分派率 = 可供分配金额 ÷ 实际募集规模；其他分母必须另行命名
     unit: "%"
     freq: 年
     valid_from: 2021-06
     valid_to: null
     caliber_note: "分母为募集规模（含扩募）；用评估值作分母时须改名为"评估值分派率""
   - formula_id: F_DCF
-    expression: 评估值 = Σ CFt/(1+r)^t + TV/(1+r)^n
+    expression: 按评估方法、现金流口径、收益期限和终值方法计算；DCF 仅适用于相应假设成立时
     unit: 元
     freq: 年
     valid_from: 2021-06
