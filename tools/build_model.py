@@ -489,6 +489,7 @@ title(ws, "Sensitivity｜双因素敏感性（2028E 分派率）", 8,
 base_eb = "='5_到期重定价'!D26"
 base_cx = "='5_到期重定价'!E26"
 base_it = "='5_到期重定价'!F26"
+neutral_2028 = bottomup.build("中性")[2]
 
 # 辅助区（放在右下，避免遮挡）
 ws.cell(row=4, column=10, value="辅助：2028E 基数").font = Font(bold=True, size=9)
@@ -518,9 +519,9 @@ for od in occs:
         c.font = Font(size=10)
         c.alignment = Alignment(horizontal="center")
         c.border = BORDER
-        v = ROWS[2]["dist"] / A["raise"]
+        v = neutral_2028["dist"] / A["raise"]
         mm = (1 + od / 100) * (1 + rd)
-        calc = (ROWS[2]["eb"] * (1 + PASS_THROUGH / M27 * (mm - 1)) - ROWS[2]["cx"] * mm - ROWS[2]["it"]) / A["raise"]
+        calc = (neutral_2028["ebitda"] * (1 + PASS_THROUGH / M27 * (mm - 1)) - neutral_2028["capex"] * mm - neutral_2028["intax"]) / A["raise"]
         c.fill = GREEN if calc >= 0.060 else (RED if calc < 0.052 else AMBER)
     ws.cell(row=r, column=1).border = BORDER
     r += 1
