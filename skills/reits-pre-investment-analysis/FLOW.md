@@ -10,7 +10,7 @@
 - 若做二级市场判断，明确观察日价格及投资者假设买入日期；用户未给买入日期/价格时，以分析基准日市场价格作为观察参考，不得伪装成实际成交价。若市场价格无法核实，只能给条件式价格判断。
 - 若基准日已晚于上市日，默认研究上市后投资价值；IPO 发行价只作为历史比较基准，不得当作当前买入成本。逐份检查输入目录中的文件是否真实存在、可读取、页数及文字层是否正常。
 - 可参考 `source_documents/source_index.csv` 查找披露文件，但索引/URL 不代表 PDF 已下载。原始 PDF 未随仓库提交；缺失时按 URL 获取，失败则登记，不得声称已阅读。
-- 更新本次基金对应的 `source_index.csv` 记录，保留仓库既有字段，并核对本地路径、存在/可读状态、页数、OCR 状态和选用理由；不另建重复来源清单。
+- 更新 `outputs/{case_dir}/source_index.csv`，保留既有字段，并核对本地路径、存在/可读状态、页数、OCR 状态和选用理由；根目录 `source_documents/source_index.csv` 是跨案例发现索引，不作为案例运行产物重复覆盖。
 [输出]：材料清单与缺失项
 
 #2 --{动作}-- [数据]
@@ -25,8 +25,8 @@
 **形成统一事实底稿**
 - 区分历史披露、管理人/评估机构预测、独立研究假设；统一单位但不混淆单季/累计、时点/期间口径。
 - 每项指标记录定义、分子分母、期间属性和来源。缺失区分未披露、不适用、文件缺失、扫描件未识别和来源冲突，并写明影响的模型/结论。
-- `dataset/facts.yaml` 是唯一事实底稿；`dataset/facts.csv` 仅为导出视图。
-[输出]：事实底稿、标准化数据视图和缺失登记
+- 本流程以案例目录的 `source_index.csv` 作为来源索引、`assumptions.csv` 作为研究假设底稿、`claims_verdict.csv` 作为结论证据裁决；事实数值必须保留具体文件、页码和表格锚点，并在模型输入中标明来源。
+[输出]：案例来源索引、假设登记、关键事实与证据锚点
 
 # Step 1：产品、结构与资产
 
@@ -192,14 +192,14 @@
 - 摘要必须自足，明确产品买的是什么、现金流靠什么、主要分歧、估值/价格条件、预期回报边界、最大风险和评级。每章先给判断，再给证据、机制、反证和投资含义。
 - 关键数字标注原始文件页码或模型位置；管理人预测、独立假设和研究判断明确区分。不得在写作阶段新造数字；需新增测算时退回模型步骤。
 - 用户要求 1.5 万字时，按写作 Skill 的正文统计口径验收，不以附录注水。
-[输出]：`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`
+[输出]：`outputs/{case_dir}/thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`
 
 #26 --{动作}-- [非数据]
 **复核并归档**
 - 核对材料清单、数字锚点、期间/单位/分母口径、模型公式、情景传导、IRR 现金流和结论一致性。
 - 对账报告、assumptions、claims、source_index、run_log、模型工作簿和情景 CSV：基金代码/文件数量/版本日期/章节编号/关键数字必须一致；任何过期索引、旧运行日志、错章节引用或模型输出不一致，都必须修正或明确标为未验证。
 - 抽查关键数字能否从原文复现；检查是否把预测写成事实、缺失写成零、可供分配写成实际分派。
-- 交付：`source_index.csv`、`dataset/facts.yaml`、`dataset/facts.csv`、`assumptions.csv`、`models/cash_flow_model.xlsx`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`。结构图仅在能准确表达交易关系时附上。
+- 交付到 `outputs/{case_dir}/`：`source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`、`figures/`。模型与情景文件按脚本实际配置路径生成；当前 508601 案例为 `models/cash_flow_model.xlsx` 和 `models/scenario_2028.csv`。
 - 未完成或证据不足的部分明确标记，不以格式完整代替分析完成。
 - 如果模型工作簿仍是旧版、关键数字与权威情景 CSV 不一致，或报告中的二级市场回报没有真实现金流日期，必须标为 PARTIAL；不得以报告已写完代替投资分析已验证。
 [输出]：复核记录与交付文件清单

@@ -64,11 +64,13 @@
 | `source_index.csv` | 已与根目录 508601 索引同步 |
 | `models/scenario_2028.csv` | 已重建，三情景共 57 个年度观测 |
 | `tools/build_bottomup.py` | 已更新中性情景假设 |
-| `tools/build_model.py` | 已修正 WC/现金调节公式；待本地执行 |
-| `models/cash_flow_model.xlsx` | **旧版工作簿，待重建；不可作为本版报告已验证模型** |
-| `report_metrics.json` | 已标记 v1.2 待重计；旧版人工估算不可作为正式验收 |
+| `tools/build_model.py` | 已执行并生成 7-sheet 工作簿；通过独立 Python 情景引擎校验 |
+| `models/cash_flow_model.xlsx` | 已重建，7 个工作表；三情景现金流逐年与 Python 引擎对账，Excel IRR 3/3 一致 |
+| `report_metrics.json` | 已由 `tools/count_report_words.py` 重计；正文中文 23,993 字，达到 15,000 字要求 |
 
-**未完成事项**：本轮没有在本地 PDF 环境执行全部脚本，也没有重建 XLSX 工作簿。因此本版的报告文字、来源索引和 CSV 情景模型已更新，但端到端可复算验收仍为 PARTIAL，不宣称全部通过。
+**模型执行验收（2026-11-10）**：GitHub Actions `REIT 508601 model validation` 全流程成功。`tools/build_bottomup.py` 重建 57 行情景 CSV；`tools/build_model.py` 生成 7-sheet Excel；LibreOffice 重新计算公式；`tools/validate_model.py` 逐年比较 57 行 × 三情景，Excel IRR 与 Python 独立计算 3/3 一致，公式错误 0；`tests/run_tests.py` 为 150 PASS / 0 FAIL / 3 SKIP；`tools/count_report_words.py` 统计正文中文字符 23,993，达到 15,000 字要求。
+
+**仍未完成事项**：本次验证是基于仓库中已整理的 508601 披露锚点与模型参数进行的模型/报告回归，不等于重新下载并逐页 OCR 原始 PDF 的全量端到端复核。原始 PDF 不在仓库提交内容中；需要在运行环境提供 `doc_root` 后，才能完成材料逐份可读性与事实重新抽取。二级市场 XIRR 仍因缺少实际买入、分派支付和退出日期而不计算。
 
 
 ## 5. Iteration 4 — 投资决策导向与报告一致性（2026-11-10）
