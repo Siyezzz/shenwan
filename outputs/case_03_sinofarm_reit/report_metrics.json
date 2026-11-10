@@ -4,7 +4,7 @@
   "cjk_total_estimate": 27841,
   "markdown_total_chars_estimate": 60602,
   "min_required": 15000,
-  "count_status": "PROVISIONAL_MANUAL_COUNT_NOT_VERIFIED_BY_tools/count_report_words.py",
+  "count_status": "NEEDS_RECOUNT_AFTER_V1_2",
   "report_word_count_pass": null,
-  "notes": "The report remains above the requested 15,000-character threshold by a manual count; run tools/count_report_words.py before claiming formal count acceptance."
+  "notes": "Version 1.2 edits changed body text; rerun tools/count_report_words.py on the final file before claiming formal count acceptance."
 }
