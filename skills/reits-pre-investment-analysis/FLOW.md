@@ -25,7 +25,7 @@
 **形成统一事实底稿**
 - 区分历史披露、管理人/评估机构预测、独立研究假设；统一单位但不混淆单季/累计、时点/期间口径。
 - 每项指标记录定义、分子分母、期间属性和来源。缺失区分未披露、不适用、文件缺失、扫描件未识别和来源冲突，并写明影响的模型/结论。
-- 不要求生成仓库中不存在的 `dataset/facts.yaml` / `dataset/facts.csv`。本流程以案例目录的 `source_index.csv` 作为来源索引、`assumptions.csv` 作为研究假设底稿、`claims_verdict.csv` 作为结论证据裁决；事实数值保留在有页码锚点的来源引用和模型输入中。若未来增加独立 facts 文件，必须先实现并验证生成脚本，再将其写入本流程。
+- 本流程以案例目录的 `source_index.csv` 作为来源索引、`assumptions.csv` 作为研究假设底稿、`claims_verdict.csv` 作为结论证据裁决；事实数值必须保留具体文件、页码和表格锚点，并在模型输入中标明来源。
 [输出]：案例来源索引、假设登记、关键事实与证据锚点
 
 # Step 1：产品、结构与资产
@@ -199,7 +199,7 @@
 - 核对材料清单、数字锚点、期间/单位/分母口径、模型公式、情景传导、IRR 现金流和结论一致性。
 - 对账报告、assumptions、claims、source_index、run_log、模型工作簿和情景 CSV：基金代码/文件数量/版本日期/章节编号/关键数字必须一致；任何过期索引、旧运行日志、错章节引用或模型输出不一致，都必须修正或明确标为未验证。
 - 抽查关键数字能否从原文复现；检查是否把预测写成事实、缺失写成零、可供分配写成实际分派。
-- 交付到 `outputs/{case_dir}/`：`source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`、`figures/`。模型与情景文件按脚本实际配置路径生成；当前 508601 案例为 `models/cash_flow_model.xlsx` 和 `models/scenario_2028.csv`。不得交付未生成的 `facts.yaml` / `facts.csv`。
+- 交付到 `outputs/{case_dir}/`：`source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`、`figures/`。模型与情景文件按脚本实际配置路径生成；当前 508601 案例为 `models/cash_flow_model.xlsx` 和 `models/scenario_2028.csv`。
 - 未完成或证据不足的部分明确标记，不以格式完整代替分析完成。
 - 如果模型工作簿仍是旧版、关键数字与权威情景 CSV 不一致，或报告中的二级市场回报没有真实现金流日期，必须标为 PARTIAL；不得以报告已写完代替投资分析已验证。
 [输出]：复核记录与交付文件清单
