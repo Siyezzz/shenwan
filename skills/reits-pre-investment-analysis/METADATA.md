@@ -51,7 +51,6 @@ investment_decision_contract:
 # 注意：data_requirements 中的 source_id 是来源渠道/发现入口映射，不是具体文件证据 ID。
 # 每次运行必须将字段映射到 outputs/{case_dir}/source_index.csv 中真实存在的来源记录，并记录文件名、页码/表格及原文定位。
 # 未完成该映射的字段不得标记为 CONFIRMED。
-# 本 Skill 当前不生成 dataset/facts.yaml、dataset/facts.csv 或 source_manifest.csv；不得引用这些未实现路径。
 
 data_requirements:
   - name: 基金募集规模
