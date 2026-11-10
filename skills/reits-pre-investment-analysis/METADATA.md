@@ -8,7 +8,7 @@ description: "公募REITs投前深度分析：基于招募说明书、法律意�
 
 domain: 公募REITs投前
 
-source_report: "内部方法论（口径依据《公开募集基础设施证券投资基金指引》、沪深交易所REITs业务办法、资产评估执业准则）"
+source_report: "内部方法论；具体监管规则、交易所业务办法及评估准则须在每次运行的 REFERENCE_MAP/来源清单中登记全称、发布机构、文号或版本、生效日期、条款及官方 URL。不得将此描述当作已完成的法规引用。"
 
 script_permission: true
 
@@ -27,6 +27,10 @@ inputs:
     description: 投资者要求的分派率下限（%），用于 #21 判断是否满足投资门槛。为空时不作门槛判断
   - name: holding_years
     description: 拟持有期（年），默认 3。用于 #22 持有期回报测算
+
+# 注意：data_requirements 中的 source_id 是来源渠道/发现入口映射，不是具体文件证据 ID。
+# 每次运行必须将字段映射到 source_manifest.csv 中真实存在的 source_id，并记录文件名、页码/表格及原文定位。
+# 未完成该映射的字段不得标记为 CONFIRMED。
 
 data_requirements:
   - name: 基金募集规模
