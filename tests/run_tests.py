@@ -130,18 +130,18 @@ def t_calc():
             spec.loader.exec_module(bm)
         finally:
             sys.stdout = old
-        close(bm.IRR0, 0.026628364, 0.000001, "T-CALC-11",
-              "508601 IRR（19 期、无终值）= 2.66%")
-        close(sum(r["dist"] for r in bm.ROWS) / 1e8, 35.9927, 0.01, "T-CALC-12",
-              "508601 19 年累计可供分派 = 35.9927 亿元（募集的约 131.4%）")
-        close(bm.PV_NOI5 / 1e8, 25.3120, 0.01, "T-CALC-13",
-              "508601 毛 NOI@5% = 25.31 亿元（评估值 27.03 亿，−6.4%）")
-        close(bm.PV5 / 1e8, 22.0413, 0.01, "T-CALC-14",
-              "508601 净可供分配@5% = 22.0413 亿元（相对评估值约 −18.5%）")
-        close(bm.PRICE_AT_560 / 1e8, 20.9101, 0.01, "T-CALC-15",
-              "508601 IRR=5.60% 的可承受发行规模 = 20.91 亿元")
-        close(bm.TV_FOR_560 / 1e8, 18.2651, 0.0001, "T-CALC-16",
-              "508601 使 IRR=5.60% 所需 2044 年末终值 = 18.27 亿元")
+        close(bm.IRR0, 0.005986806, 0.000001, "T-CALC-11",
+              "508601 中性情景年度期数 IRR（19 期、无终值）= 0.60%")
+        close(sum(r["dist"] for r in bm.ROWS) / 1e8, 29.1154, 0.01, "T-CALC-12",
+              "508601 中性情景 19 年累计可供分配 = 29.12 亿元")
+        chk("T-CALC-13", "不将 EBITDA 直接当作 NOI 进行物业估值",
+            not hasattr(bm, "PV_NOI5"), "模型不再生成 EBITDA 折现复现物业评估值")
+        close(bm.PV5 / 1e8, 18.2710, 0.01, "T-CALC-14",
+              "508601 中性情景可供分配现金流@5%折现参考 = 18.27 亿元（非物业估值）")
+        close(bm.PRICE_AT_560 / 1e8, 17.3835, 0.01, "T-CALC-15",
+              "508601 中性情景 IRR=5.60% 对应可承受初始投资额 = 17.38 亿元")
+        close(bm.TV_FOR_560 / 1e8, 28.1955, 0.01, "T-CALC-16",
+              "508601 中性情景使 IRR=5.60% 所需 2044 年末假设终值 = 28.20 亿元")
     except Exception as e:  # noqa
         skip("T-CALC-11..16", "508601 模型断言", "导入 build_model.py 失败：%r" % e)
 
@@ -159,14 +159,15 @@ def t_calc():
     pas, m27 = 0.81, 174883323.29 / 254760101.02
     close(pas / m27, 1.1800, 0.001, "T-CALC-20",
           "508601 收入→EBITDA 弹性 = 1.18（0.81 ÷ 68.65%）")
-    eb28, cx28, it28 = 179745080.0, 9164485.0, 14020888.0
+    neutral = bm.bottomup.build("中性")[2]
+    eb28, cx28, it28 = neutral["ebitda"], neutral["capex"], neutral["intax"]
     base = (eb28 - cx28 - it28) / 2739656060.87
     m = 0.90
     v = (eb28 * (1 + pas / m27 * (m - 1)) - cx28 * m - it28) / 2739656060.87
-    close(v, 0.0497, 0.0002, "T-CALC-21",
-          "508601 租金 −10% → 2028E 分派率 4.97%")
-    close(base - v, 0.0074, 0.0002, "T-CALC-22",
-          "508601 租金每 −10% → 分派率 −0.74pct")
+    close(v, 0.04469, 0.0002, "T-CALC-21",
+          "508601 中性情景收入乘数 −10% → 2028E 分派率约 4.47%")
+    close(base - v, 0.00673, 0.0002, "T-CALC-22",
+          "508601 中性情景收入乘数每 −10% → 分派率下降约 0.67pct")
 
 
 # ============================================================
@@ -601,7 +602,7 @@ def t_report():
         bb = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(bb)
         pre = read(path("outputs", "case_03_sinofarm_reit", "report_508601.md"))
-        for name, want in (("中性", 0.46), ("悲观", -2.68), ("乐观", 2.10)):
+        for name, want in (("中性", 0.60), ("悲观", -2.51), ("乐观", 2.23)):
             rows = bb.build(name)
             got = bb.irr_of(rows) * 100
             chk("T-REPORT-09", "IRR 可重算：%s 情景 %.2f%%" % (name, want),
