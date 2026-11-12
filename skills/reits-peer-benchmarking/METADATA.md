@@ -2,9 +2,9 @@ type: flow
 
 name: reits-peer-benchmarking
 
-version: 1.0.0
+version: 2.0.0
 
-description: "公募REITs横向基准：构造可解释的可比样本，用三个收益率口径与四个资产质量维度定位，用最小二乘残差判断定价偏离，用四问框架拆商业模式优劣，输出相对位置判断与本项目的可改进项。"
+description: "公募REITs横向基准：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由，用三个收益率口径与排名极差定位、四维资产质量位次、最小二乘残差判断定价偏离、四问框架拆商业模式，输出相对位置与本项目的可改进项。"
 
 domain: 公募REITs横向比较
 
@@ -12,30 +12,47 @@ source_report: "内部方法论（无单一来源研报）。口径依据《公�
 
 script_permission: true
 
-output_dir: ./output
+output_dir: outputs/{case_dir}
 
 inputs:
-  - name: project_funds
+  # 只有 focus_funds 必填。用户说的话可能只有一句"我关心 508056 和 180302"，
+  # 其余四项由流程自行推导并回报，不得因缺省而缩小范围或改用印象中的样本。
+  - name: focus_funds
     required: true
-    description: 本项目标的，代码列表，如 ["508056","180302"]。报告的所有"位置"判断围绕这几只展开
-  - name: peer_universe
-    required: true
-    description: 对标范围。可给资产类型标签（如"仓储物流"）或代码清单。给标签时本 skill 必须自行全量枚举候选池并回报
+    description: 用户感兴趣的标的，1 只或几只，代码或简称皆可（如 "508056,180302" 或 "普洛斯、深国际"）。报告中称"本项目组"。简称须先解析为代码并回显确认
   - name: as_of
-    required: true
-    description: 比较时点，格式 YYYY-MM-DD（时点指标基准日）＋ YYYY 年度（期间指标）。两者必须配对使用
+    default: 最近一个完整财年
+    description: 比较时点。给日期即锁定该财年年报；不给则取焦点标的最近一个完整财年的年度报告。半年报与年报不得拼成"年度"
+  - name: peer_scope
+    default: auto
+    description: "auto = 由流程按焦点标的的资产类型全量枚举同类并自行筛选（默认，用户无须提供样本）；list = 仅用用户给定的名单，此时仍须做 #4 的五项筛查并说明为何未全量枚举"
   - name: asset_type
-    required: true
-    description: 资产类型边界，如 仓储物流 / 产业园 / 消费基础设施。决定哪些指标有意义（出租率只对租赁型资产有意义）
+    default: 由 focus_funds 推导
+    description: 资产类型边界。决定哪些指标有意义（出租率只对租赁型资产有意义），也决定候选池的关键词与筛子。推导结果须在报告第二节写明
+  - name: focus_role
+    default: 本项目组
+    description: 焦点标的在报告中的角色标签。仅影响表述，不改变计算口径；多只焦点标的按组合处理时，须补互补性矩阵
   - name: min_area
     default: 100000
-    description: 规模下限（可租面积 ㎡）。低于此值的不纳入，避免单位化指标失真；连续型资产改用产能或里程门槛
+    description: 规模下限（可租面积 ㎡）。低于此值不纳入，避免单位化指标失真；连续型资产改用产能或里程门槛
   - name: comparability_thresholds
     default: {area_ratio: 3.0, rank_range: 2}
     description: area_ratio = 最大/最小面积倍数上限，超过即强制单位化；rank_range = 排名极差告警阈值
   - name: doc_root
     default: ./source_documents
-    description: 披露文件根目录。本 skill 优先从一手年报取数，取不到才降级到仓库内既有报告
+    description: 披露文件根目录。优先从一手年报取数，取不到才降级到仓库内既有报告
+
+baseline_contract:
+  # 报告的"结论质量"由这六项共同决定，缺任一项即不得出定位结论
+  required_outputs:
+    - position_table: 四个坐标（收益率/C2 现金分派率/资产质量位次/定价残差）各自的位次与排名极差；每行须带"判断依据指向哪一节"
+    - sample_provenance: 候选池数量、纳入与排除数量、每条排除的三级理由、至少一只标的的边界检验结论
+    - caliber_log: 五处换算方式、市值反推的分子分母来源、每只标的分派率的分母口径
+    - distribution_composition: 可供分配按四类来源（当年经营/往年结转/会计调整/第三方补足）的占比
+    - conditional_verdict: 模式优劣的"适用条件/代价/验证指标"三列，不得出现评分或评级
+    - invalidation: 每个结论句的限定词，以及下一期可观测的改写条件（指标+阈值+会改写哪一句）
+  decision_rule: "四个坐标必须同时给出才能声称'确认了相对位置'；只有分派率一个坐标时，只能称'单口径观察'。任何排名第一的句子都必须带分子构成与极差。"
+  non_goals: "不给买入建议、不给目标价、不给商业模式总分、不做显著性检验。四项须在报告第一节显式声明。"
 
 data_requirements:
 

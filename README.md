@@ -24,7 +24,7 @@ reits-research-skills/
 │   ├── reits-pre-investment-analysis/    # Skill B 投前深度分析（FLOW #1–#26）
 │   ├── research-report-to-flow/          # Skill C 研报转 FLOW 方法论（FLOW #1–#18）
 │   ├── reits-report-writing/             # Skill D 研报撰写（FLOW #1–#13，与 A/B 搭配）
-│   └── reits-peer-benchmarking/          # Skill E 横向基准（FLOW #1–#11，多只标的相对位置）
+│   └── reits-peer-benchmarking/          # Skill E 横向基准（FLOW #1–#20，只给标的即自动选样成report）
 ├── template/
 │   ├── template_convention_audit.md      # 继承规范（写作约束 + 机器校验清单）
 │   ├── report_style_analysis.md          # 11 份卖方研报的文风统计（规则出处）
@@ -62,7 +62,7 @@ reits-research-skills/
 | 八、最终目录 | **完成** | 见上节目录结构 |
 | 九、汇报材料 | **完成（两版）** | `presentation/management_briefing.md`（管理层版：5 页提纲 + 1,342 字口述稿 + 数据卡 + 12 条追问 + 边界声明）；`presentation/teacher_briefing.md`（老师版：纯口语 3,204 字，按「流程/思路/亮点/疑惑」四段，约 14 分钟，含 3 档时长裁剪 + 7 条追问备用） |
 | 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（**25 项：22 PASS / 3 PARTIAL / 0 FAIL**）；来源真实性另有 `outputs/source_data_audit.md` 十项全量核验 |
-| 十一、横向基准（第七轮新增） | **完成** | `skills/reits-peer-benchmarking/`（FLOW #1–#11）＋ `outputs/case_04_peer_benchmarking/`：6 只仓储物流 REIT 同口径对比，报告正文 **15,130** 中文字符、5 张图、自包含 HTML。核心动作是**选样可复现**（10 只候选池全量枚举 → 6 只纳入的逐条理由 → 顺丰 180305 边界检验）、**三口径排名 + 极差**（六只极差均 3–4 位，无一只稳定）、**定价残差**（`CFO/㎡ = 0.0269×市值/㎡ + 78.97`，唯二离群的 −10.9% 与 +13.3% 恰为本项目两只） |
+| 十一、横向基准（第七轮新增） | **完成** | `skills/reits-peer-benchmarking/`（FLOW #1–#20）＋ `outputs/case_04_peer_benchmarking/`：6 只仓储物流 REIT 同口径对比，报告正文 **15,295** 中文字符、5 张图、自包含 HTML。核心动作是**选样可复现**（10 只候选池全量枚举 → 6 只纳入的逐条理由 → 顺丰 180305 边界检验）、**三口径排名 + 极差**（六只极差均 3–4 位，无一只稳定）、**定价残差**（`CFO/㎡ = 0.0269×市值/㎡ + 78.97`，唯二离群的 −10.9% 与 +13.3% 恰为本项目两只） |
 
 ## 自检
 
