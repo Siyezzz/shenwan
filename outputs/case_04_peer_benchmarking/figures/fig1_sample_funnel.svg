@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="640" viewBox="0 0 940 640" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect width="940" height="640" fill="#ffffff"/>
+<text x="36" y="34" font-size="17" font-weight="700" fill="#1b2733">图 1　可比样本的构造：从 10 只到 6 只</text>
+<text x="36" y="56" font-size="11.5" fill="#6b7a88">候选池＝A 股名称含“仓储/物流”的全部公募 REIT；纳入需同时满足 5 项条件</text>
+<rect x="36" y="96" width="176" height="25" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="47" y="113" font-size="11" fill="#1b2733">508056　中金普洛斯</text>
+<line x1="212" y1="108.5" x2="300" y2="108.5" stroke="#2c5f8a" stroke-width="1" opacity="0.5"/>
+<rect x="36" y="132" width="176" height="25" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="47" y="149" font-size="11" fill="#1b2733">180301　红土盐田港</text>
+<line x1="212" y1="144.5" x2="300" y2="144.5" stroke="#2c5f8a" stroke-width="1" opacity="0.5"/>
+<rect x="36" y="168" width="176" height="25" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="47" y="185" font-size="11" fill="#1b2733">180302　华夏深国际</text>
+<line x1="212" y1="180.5" x2="300" y2="180.5" stroke="#2c5f8a" stroke-width="1" opacity="0.5"/>
+<rect x="36" y="204" width="176" height="25" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="47" y="221" font-size="11" fill="#1b2733">508098　嘉实京东</text>
+<line x1="212" y1="216.5" x2="300" y2="216.5" stroke="#2c5f8a" stroke-width="1" opacity="0.5"/>
+<rect x="36" y="240" width="176" height="25" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="47" y="257" font-size="11" fill="#1b2733">180303　华泰宝湾</text>
+<line x1="212" y1="252.5" x2="300" y2="252.5" stroke="#2c5f8a" stroke-width="1" opacity="0.5"/>
+<rect x="36" y="276" width="176" height="25" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="47" y="293" font-size="11" fill="#1b2733">508078　中航易商</text>
+<line x1="212" y1="288.5" x2="300" y2="288.5" stroke="#2c5f8a" stroke-width="1" opacity="0.5"/>
+<rect x="36" y="312" width="176" height="25" rx="4" fill="#f6f7f8" stroke="#c2ccd6" stroke-width="1"/>
+<text x="47" y="329" font-size="11" fill="#8b95a1">180305　南方顺丰</text>
+<line x1="212" y1="324.5" x2="262" y2="324.5" stroke="#c2ccd6" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="268" y="328.5" font-size="10.5" fill="#98a3ae">✕ 排除</text>
+<rect x="36" y="348" width="176" height="25" rx="4" fill="#f6f7f8" stroke="#c2ccd6" stroke-width="1"/>
+<text x="47" y="365" font-size="11" fill="#8b95a1">180306　华夏安博</text>
+<line x1="212" y1="360.5" x2="262" y2="360.5" stroke="#c2ccd6" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="268" y="364.5" font-size="10.5" fill="#98a3ae">✕ 排除</text>
+<rect x="36" y="384" width="176" height="25" rx="4" fill="#f6f7f8" stroke="#c2ccd6" stroke-width="1"/>
+<text x="47" y="401" font-size="11" fill="#8b95a1">180307　中金菜鸟</text>
+<line x1="212" y1="396.5" x2="262" y2="396.5" stroke="#c2ccd6" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="268" y="400.5" font-size="10.5" fill="#98a3ae">✕ 排除</text>
+<rect x="36" y="420" width="176" height="25" rx="4" fill="#f6f7f8" stroke="#c2ccd6" stroke-width="1"/>
+<text x="47" y="437" font-size="11" fill="#8b95a1">508090　中银中外运</text>
+<line x1="212" y1="432.5" x2="262" y2="432.5" stroke="#c2ccd6" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="268" y="436.5" font-size="10.5" fill="#98a3ae">✕ 排除</text>
+<rect x="300" y="96" width="72" height="455" rx="6" fill="#f2f6fa" stroke="#2c5f8a" stroke-width="1"/>
+<text x="336" y="330" font-size="11.5" fill="#2c5f8a" text-anchor="middle" transform="rotate(-90 336 330)" letter-spacing="3">5 项纳入条件</text>
+<text x="590" y="92" font-size="11.5" font-weight="700" fill="#1b2733">纳入面板（n=6）</text>
+<rect x="590" y="110" width="176" height="28" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+<text x="678" y="129" font-size="11.5" text-anchor="middle" fill="#c0392b" font-weight="700">普洛斯</text>
+<line x1="766" y1="124" x2="800" y2="124" stroke="#e3e8ee"/>
+<text x="806" y="128" font-size="10.5" fill="#6b7a88">116 万㎡</text>
+<rect x="590" y="168" width="176" height="28" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="678" y="187" font-size="11.5" text-anchor="middle" fill="#1b2733" font-weight="400">盐田港</text>
+<line x1="766" y1="182" x2="800" y2="182" stroke="#e3e8ee"/>
+<text x="806" y="186" font-size="10.5" fill="#6b7a88">32 万㎡</text>
+<rect x="590" y="226" width="176" height="28" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+<text x="678" y="245" font-size="11.5" text-anchor="middle" fill="#c0392b" font-weight="700">深国际</text>
+<line x1="766" y1="240" x2="800" y2="240" stroke="#e3e8ee"/>
+<text x="806" y="244" font-size="10.5" fill="#6b7a88">35 万㎡</text>
+<rect x="590" y="284" width="176" height="28" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="678" y="303" font-size="11.5" text-anchor="middle" fill="#1b2733" font-weight="400">京东仓储</text>
+<line x1="766" y1="298" x2="800" y2="298" stroke="#e3e8ee"/>
+<text x="806" y="302" font-size="10.5" fill="#6b7a88">34 万㎡</text>
+<rect x="590" y="342" width="176" height="28" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="678" y="361" font-size="11.5" text-anchor="middle" fill="#1b2733" font-weight="400">宝湾物流</text>
+<line x1="766" y1="356" x2="800" y2="356" stroke="#e3e8ee"/>
+<text x="806" y="360" font-size="10.5" fill="#6b7a88">31 万㎡</text>
+<rect x="590" y="400" width="176" height="28" rx="4" fill="#eef3f8" stroke="#2c5f8a" stroke-width="1"/>
+<text x="678" y="419" font-size="11.5" text-anchor="middle" fill="#1b2733" font-weight="400">中航易商</text>
+<line x1="766" y1="414" x2="800" y2="414" stroke="#e3e8ee"/>
+<text x="806" y="418" font-size="10.5" fill="#6b7a88">38 万㎡</text>
+<path d="M372,108.5 C460,108.5 490,124 586,124" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.4"/>
+<path d="M372,144.5 C460,144.5 490,182 586,182" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.4"/>
+<path d="M372,180.5 C460,180.5 490,240 586,240" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.4"/>
+<path d="M372,216.5 C460,216.5 490,298 586,298" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.4"/>
+<path d="M372,252.5 C460,252.5 490,356 586,356" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.4"/>
+<path d="M372,288.5 C460,288.5 490,414 586,414" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.4"/>
+<rect x="36" y="484" width="101" height="23" rx="11.5" fill="#f2f6fa" stroke="#2c5f8a" stroke-width="0.8"/>
+<text x="45" y="499.5" font-size="10.5" fill="#2c5f8a">① 仓储物流资产</text>
+<rect x="146" y="484" width="110" height="23" rx="11.5" fill="#f2f6fa" stroke="#2c5f8a" stroke-width="0.8"/>
+<text x="155" y="499.5" font-size="10.5" fill="#2c5f8a">② 2025 完整财年</text>
+<rect x="265" y="484" width="121" height="23" rx="11.5" fill="#f2f6fa" stroke="#2c5f8a" stroke-width="0.8"/>
+<text x="274" y="499.5" font-size="10.5" fill="#2c5f8a">③ 2025 年报可获取</text>
+<rect x="36" y="514" width="132" height="23" rx="11.5" fill="#f2f6fa" stroke="#2c5f8a" stroke-width="0.8"/>
+<text x="45" y="529.5" font-size="10.5" fill="#2c5f8a">④ 可租面积 ≥10 万㎡</text>
+<rect x="177" y="514" width="112" height="23" rx="11.5" fill="#f2f6fa" stroke="#2c5f8a" stroke-width="0.8"/>
+<text x="186" y="529.5" font-size="10.5" fill="#2c5f8a">⑤ 有可比运营披露</text>
+<text x="36" y="560" font-size="10.5" fill="#1b2733">排除 4 只：1 只报告期仅 280 天（已在 §2.4 做边界检验），3 只截至 2026-04-30 未披露 2025 年报。</text>
+<text x="36" y="577" font-size="10.5" fill="#6b7a88">红色为本项目组；右侧面积为可租面积，仅用于单位化，不用于规模排名。</text>
+<line x1="36" y1="600" x2="904" y2="600" stroke="#e3e8ee"/>
+<text x="36" y="618" font-size="10.5" fill="#6b7a88">来源：各基金 2025 年年度报告；候选池由 fund.eastmoney.com 基金全量清单枚举，脚本见 build_panel.py</text>
+</svg>

@@ -1,6 +1,6 @@
 # reits-research-skills
 
-公募 REITs 投研 Skills 仓库：**研报方法论迁移 + 三个业务 Skill（投后跟踪 / 投前分析 / 研报撰写）+ 三个真实案例验证**。
+公募 REITs 投研 Skills 仓库：**研报方法论迁移 + 四个业务 Skill（投后跟踪 / 投前分析 / 研报撰写 / 横向基准）+ 四个真实案例验证**。
 
 核心命题：**一份 REITs 研究报告该长什么样，才能让投资研究员拿它做决策**——而不是让读者看见流程跑了多少步。
 
@@ -23,7 +23,8 @@ reits-research-skills/
 │   ├── reits-post-investment-monitor/    # Skill A 投后定期跟踪（FLOW #1–#22）
 │   ├── reits-pre-investment-analysis/    # Skill B 投前深度分析（FLOW #1–#26）
 │   ├── research-report-to-flow/          # Skill C 研报转 FLOW 方法论（FLOW #1–#18）
-│   └── reits-report-writing/             # Skill D 研报撰写（FLOW #1–#13，与 A/B 搭配）
+│   ├── reits-report-writing/             # Skill D 研报撰写（FLOW #1–#13，与 A/B 搭配）
+│   └── reits-peer-benchmarking/          # Skill E 横向基准（FLOW #1–#11，多只标的相对位置）
 ├── template/
 │   ├── template_convention_audit.md      # 继承规范（写作约束 + 机器校验清单）
 │   ├── report_style_analysis.md          # 11 份卖方研报的文风统计（规则出处）
@@ -36,7 +37,8 @@ reits-research-skills/
 │   ├── source_data_audit.md              # 来源与数据真实性十项全量核验
 │   ├── case_01_glp_reit/
 │   ├── case_02_huaxia_shen_international/
-│   └── case_03_sinofarm_reit/
+│   ├── case_03_sinofarm_reit/
+│   └── case_04_peer_benchmarking/        # 6 只仓储物流横向基准（报告 + 5 图 + 自包含 HTML）
 ├── models/                               # 现金流模型、数据矩阵
 ├── tests/                                # 数据质量 / 计算 / 执行 / 回归测试记录
 ├── iteration_log/                       # 六轮迭代留痕 + 提交记录
@@ -60,6 +62,7 @@ reits-research-skills/
 | 八、最终目录 | **完成** | 见上节目录结构 |
 | 九、汇报材料 | **完成（两版）** | `presentation/management_briefing.md`（管理层版：5 页提纲 + 1,342 字口述稿 + 数据卡 + 12 条追问 + 边界声明）；`presentation/teacher_briefing.md`（老师版：纯口语 3,204 字，按「流程/思路/亮点/疑惑」四段，约 14 分钟，含 3 档时长裁剪 + 7 条追问备用） |
 | 十、最终验收 | **完成** | `outputs/final_acceptance_report.md`（**25 项：22 PASS / 3 PARTIAL / 0 FAIL**）；来源真实性另有 `outputs/source_data_audit.md` 十项全量核验 |
+| 十一、横向基准（第七轮新增） | **完成** | `skills/reits-peer-benchmarking/`（FLOW #1–#11）＋ `outputs/case_04_peer_benchmarking/`：6 只仓储物流 REIT 同口径对比，报告正文 **15,130** 中文字符、5 张图、自包含 HTML。核心动作是**选样可复现**（10 只候选池全量枚举 → 6 只纳入的逐条理由 → 顺丰 180305 边界检验）、**三口径排名 + 极差**（六只极差均 3–4 位，无一只稳定）、**定价残差**（`CFO/㎡ = 0.0269×市值/㎡ + 78.97`，唯二离群的 −10.9% 与 +13.3% 恰为本项目两只） |
 
 ## 自检
 
@@ -67,6 +70,12 @@ reits-research-skills/
 python tools/build_raw.py      # 重建并校验 _raw_response.txt 可逆性（期望 ALL_MATCH）
 python tools/count_report_words.py outputs/case_03_sinofarm_reit/report_508601.md --min 15000
 python tests/run_tests.py      # 153 条断言（当前基线 PASS 151 / FAIL 0 / SKIP 2；两项投后报告未使用 IRR 的检查不适用）
+
+# 横向基准可复跑（case_04）
+cd outputs/case_04_peer_benchmarking
+python build_panel.py    # 4 个 csv：panel / matrix_yield / matrix_quality / sample_funnel
+python make_figs.py      # 5 张 SVG（坐标由数据计算）
+python build_html.py     # 单文件 HTML，SVG 内联
 ```
 
 | 测试组 | 条数 | 说明文档 |
