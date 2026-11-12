@@ -19,7 +19,7 @@ description: Use when 需要对拟发行或已上市公募REITs进行投前/上�
 
 ## 执行方式
 
-按 `FLOW.md` 的 #1–#26 完成研究。最终报告写作必须衔接 `reits-report-writing`，不可将分析步骤直接拼成章节。交付不包含独立 `review_notes` 文件；必要的证据、计算、逻辑和表达核验嵌入写作/模型验证过程，并将未解决事项写入报告及 `run_log.md`。
+按 `FLOW.md` 的 #1–#26 完成研究。最终报告写作必须衔接 `reits-report-writing`，不可将分析步骤直接拼成章节。
 
 研究顺序：
 1. 确认研究基准日、资料截止日、项目/发行对应关系和投资者视角；
@@ -49,7 +49,7 @@ description: Use when 需要对拟发行或已上市公募REITs进行投前/上�
 - 正式投资分析报告（按投资决策逻辑组织，摘要可独立支持初步判断）；
 - 事实底稿、`source_index.csv`、假设登记、claim 裁决；
 - 可重算现金流模型、情景/敏感性结果；
-- `report_metrics.json` 报告指标与 `run_log.md` 执行记录；必要内容核验并入写作流程，不生成独立 review 文件。
+- `report_metrics.json` 报告指标与 `run_log.md` 执行记录；必要内容核验并入写作流程。
 
 最终报告必须给出：投资评级、适配投资者/持有期限、合理价格或目标收益条件、关键上行/下行情景、逻辑成立与失效条件。不能计算时要明确说明缺少什么，不能用“建议关注”代替判断。
 <<<END: SKILL.md>>>
@@ -86,11 +86,7 @@ deliverables:
       - models/cash_flow_model.xlsx
       - models/scenario_2028.csv
     rule: "先检查脚本实际输出配置；不得把模型文件强制复制到 outputs/{case_dir}/，也不得仅凭示例推断路径。"
-  prohibited:
-    - review_notes_r1.md
-    - review_notes_r2.md
-    - 独立轮次审稿文件
-  quality_control: "来源、计算、逻辑和表达核验嵌入 reits-report-writing 的既有步骤及模型验证；未解决且影响投资判断的问题写入正式报告和 run_log.md。"
+  quality_control: "来源、计算、逻辑和表达核验嵌入 reits-report-writing 的既有步骤及模型验证。"
 
 case_dir: "由 fund_code + fund_slug 生成，例如 case_03_sinofarm_reit；不得使用未创建的 ./output 目录。"
 
@@ -620,7 +616,6 @@ quality_states: [CONFIRMED, PARTIALLY_SUPPORTED, INDETERMINATE, NOT_COMPARABLE, 
 - 抽查关键数字能否从原文复现；检查是否把预测写成事实、缺失写成零、可供分配写成实际分派。
 - **案例目录必交付文件**：在 `outputs/{case_dir}/` 下生成 `source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`run_log.md` 和 `figures/`。其中 `figures/` 仅放报告实际引用的图表，不创建空目录充数。
 - **模型文件按脚本配置路径交付，不强行复制进案例目录**：当前仓库 508601 配置为根目录 `models/cash_flow_model.xlsx` 与 `models/scenario_2028.csv`；后续案例必须先读取实际配置/脚本输出路径，再记录真实路径。不得把路径示例当作所有案例的固定规则。
-- **明确不交付独立审稿文件**：不创建 `review_notes_r1.md`、`review_notes_r2.md` 或其他轮次 review 文件。证据、计算、逻辑和表达检查直接在报告写作与模型验证过程中完成；已修正的问题体现在正式报告/底稿中，未解决且影响判断的问题写入报告相应章节及 `run_log.md`。
 - `report_metrics.json` 保存字数、图表/表格数量及写作质量检查所需指标；它是报告统计结果，不是审稿意见文件。
 - 未完成或证据不足的部分明确标记，不以格式完整代替分析完成。
 - 模型过期、关键结果不一致或核心依据缺失时标为部分完成；预测日期可作为明示假设，不要求投前预测已有实际支付记录。不得以写完代替验证。
