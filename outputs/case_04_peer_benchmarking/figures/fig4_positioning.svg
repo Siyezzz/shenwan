@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="650" viewBox="0 0 940 650" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect width="940" height="650" fill="#ffffff"/>
+<text x="36" y="34" font-size="17" font-weight="700" fill="#1b2733">图 4　本项目在“收益率 × 资产质量”平面上的位置</text>
+<text x="36" y="56" font-size="11.5" fill="#6b7a88">横轴：资产质量位次（左＝最优）　纵轴：现金分派率 C2　气泡面积：反推市值</text>
+<line x1="118" y1="449.44444444444446" x2="872" y2="449.44444444444446" stroke="#e3e8ee"/>
+<text x="106" y="453.44444444444446" font-size="10.5" text-anchor="end" fill="#6b7a88">3.5%</text>
+<line x1="118" y1="346.66666666666663" x2="872" y2="346.66666666666663" stroke="#e3e8ee"/>
+<text x="106" y="350.66666666666663" font-size="10.5" text-anchor="end" fill="#6b7a88">4.0%</text>
+<line x1="118" y1="243.88888888888886" x2="872" y2="243.88888888888886" stroke="#e3e8ee"/>
+<text x="106" y="247.88888888888886" font-size="10.5" text-anchor="end" fill="#6b7a88">4.5%</text>
+<line x1="118" y1="141.1111111111111" x2="872" y2="141.1111111111111" stroke="#e3e8ee"/>
+<text x="106" y="145.1111111111111" font-size="10.5" text-anchor="end" fill="#6b7a88">5.0%</text>
+<line x1="118.0" y1="100" x2="118.0" y2="470" stroke="#e3e8ee" stroke-dasharray="2 4"/>
+<text x="118.0" y="490" font-size="10.5" text-anchor="middle" fill="#6b7a88">1</text>
+<line x1="306.5" y1="100" x2="306.5" y2="470" stroke="#e3e8ee" stroke-dasharray="2 4"/>
+<text x="306.5" y="490" font-size="10.5" text-anchor="middle" fill="#6b7a88">2</text>
+<line x1="495.0" y1="100" x2="495.0" y2="470" stroke="#e3e8ee" stroke-dasharray="2 4"/>
+<text x="495.0" y="490" font-size="10.5" text-anchor="middle" fill="#6b7a88">3</text>
+<line x1="683.5" y1="100" x2="683.5" y2="470" stroke="#e3e8ee" stroke-dasharray="2 4"/>
+<text x="683.5" y="490" font-size="10.5" text-anchor="middle" fill="#6b7a88">4</text>
+<line x1="872.0" y1="100" x2="872.0" y2="470" stroke="#e3e8ee" stroke-dasharray="2 4"/>
+<text x="872.0" y="490" font-size="10.5" text-anchor="middle" fill="#6b7a88">5</text>
+<text x="495.0" y="514" font-size="11" text-anchor="middle" fill="#1b2733">资产质量位次（1＝最优，5＝最差；第 4 位并列三只，横向错开仅为可读）</text>
+<text x="36" y="80" font-size="11" fill="#1b2733">现金分派率</text>
+<line x1="589.25" y1="100" x2="589.25" y2="470" stroke="#2c5f8a" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.65"/>
+<line x1="118" y1="289.1111111111111" x2="872" y2="289.1111111111111" stroke="#2c5f8a" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.65"/>
+<text x="596.25" y="113" font-size="9.5" fill="#2c5f8a">质量中位线 3.5</text>
+<text x="866" y="282.1111111111111" font-size="9.5" fill="#2c5f8a" text-anchor="end">分派率中位 4.28%</text>
+<text x="122" y="114" font-size="9.5" fill="#9aa5b1" text-anchor="start">高质量・高分派</text>
+<text x="868" y="114" font-size="9.5" fill="#9aa5b1" text-anchor="end">低质量・高分派</text>
+<text x="122" y="462" font-size="9.5" fill="#9aa5b1" text-anchor="start">高质量・低分派</text>
+<text x="868" y="462" font-size="9.5" fill="#9aa5b1" text-anchor="end">低质量・低分派</text>
+<circle cx="212.2" cy="342.6" r="17.0" fill="#2c5f8a" opacity="0.14" stroke="#2c5f8a" stroke-width="1.2"/>
+<text x="212.2" y="305.6" font-size="11.5" text-anchor="middle" fill="#2c5f8a" font-weight="400">京东仓储</text>
+<text x="212.2" y="318.6" font-size="10" text-anchor="middle" fill="#2c5f8a" opacity="0.85">4.02%</text>
+<circle cx="306.5" cy="196.6" r="15.6" fill="#2c5f8a" opacity="0.14" stroke="#2c5f8a" stroke-width="1.2"/>
+<text x="306.5" y="161.0" font-size="11.5" text-anchor="middle" fill="#2c5f8a" font-weight="400">宝湾物流</text>
+<text x="306.5" y="174.0" font-size="10" text-anchor="middle" fill="#2c5f8a" opacity="0.85">4.73%</text>
+<circle cx="589.2" cy="161.7" r="16.8" fill="#c0392b" opacity="0.26" stroke="#c0392b" stroke-width="2"/>
+<text x="613.1" y="162.7" font-size="11.5" text-anchor="start" fill="#c0392b" font-weight="700">深国际</text>
+<text x="613.1" y="175.7" font-size="10" text-anchor="start" fill="#c0392b" opacity="0.85">4.90%</text>
+<circle cx="643.5" cy="352.8" r="18.0" fill="#2c5f8a" opacity="0.14" stroke="#2c5f8a" stroke-width="1.2"/>
+<text x="618.5" y="353.8" font-size="11.5" text-anchor="end" fill="#2c5f8a" font-weight="400">盐田港</text>
+<text x="618.5" y="366.8" font-size="10" text-anchor="end" fill="#2c5f8a" opacity="0.85">3.97%</text>
+<circle cx="689.5" cy="365.2" r="18.1" fill="#2c5f8a" opacity="0.14" stroke="#2c5f8a" stroke-width="1.2"/>
+<text x="714.6" y="366.2" font-size="11.5" text-anchor="start" fill="#2c5f8a" font-weight="400">中航易商</text>
+<text x="714.6" y="379.2" font-size="10" text-anchor="start" fill="#2c5f8a" opacity="0.85">3.91%</text>
+<circle cx="723.5" cy="408.3" r="24.1" fill="#c0392b" opacity="0.26" stroke="#c0392b" stroke-width="2"/>
+<text x="754.6" y="409.3" font-size="11.5" text-anchor="start" fill="#c0392b" font-weight="700">普洛斯</text>
+<text x="754.6" y="422.3" font-size="10" text-anchor="start" fill="#c0392b" opacity="0.85">3.70%</text>
+<rect x="36" y="536" width="868" height="54" rx="4" fill="#fbfbfc" stroke="#e3e8ee"/>
+<text x="48" y="556" font-size="11" fill="#1b2733">本项目两只同处“低质量-高分派”象限，却分居上下沿：深国际 4.90% 是象限内最高，普洛斯 3.70% 是最低。</text>
+<text x="48" y="574" font-size="10.5" fill="#6b7a88">同象限、相差 1.2pct，说明这两只的“高收益”不是同一个原因，见 §4.5 与 §6.3。</text>
+<line x1="36" y1="610" x2="904" y2="610" stroke="#e3e8ee"/>
+<text x="36" y="628" font-size="10.5" fill="#6b7a88">位次见 matrix_quality.csv；分派率为 C2（经营活动现金流净额 ÷ 反推市值）；气泡面积与市值成正比</text>
+</svg>
