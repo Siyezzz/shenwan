@@ -30,11 +30,7 @@ deliverables:
       - models/cash_flow_model.xlsx
       - models/scenario_2028.csv
     rule: "先检查脚本实际输出配置；不得把模型文件强制复制到 outputs/{case_dir}/，也不得仅凭示例推断路径。"
-  prohibited:
-    - review_notes_r1.md
-    - review_notes_r2.md
-    - 独立轮次审稿文件
-  quality_control: "来源、计算、逻辑和表达核验嵌入 reits-report-writing 的既有步骤及模型验证；未解决且影响投资判断的问题写入正式报告和 run_log.md。"
+  quality_control: "来源、计算、逻辑和表达核验嵌入 reits-report-writing 的既有步骤及模型验证。"
 
 case_dir: "由 fund_code + fund_slug 生成，例如 case_03_sinofarm_reit；不得使用未创建的 ./output 目录。"
 
