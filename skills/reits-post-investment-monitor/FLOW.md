@@ -19,6 +19,13 @@
 - 缺失文件如实登记，不得用其他期次替代
 [输出]：披露文件清单 `dataset/doc_index.csv`
 
+> **落盘要求**：清单必须写成文件 `<output>/dataset/doc_index.csv`，字段固定为
+> `file, type, tag, period, disclose_date, pages, text_layer, status, url, local_path`。
+> `file` 是**完整文件名（含 .pdf）**，它同时是 #22 `source_index.csv` 的外键父表；
+> `tag` 只是机器标签（q2026Q3 / y2025），不能替代 `file` 出现在来源索引里。
+> 离线场景（doc_root 已有 PDF、无公告接口）`url` 写 `NA(offline)`，`local_path` 写相对 doc_root 的路径。
+> 只把清单写进 run_log 而不落盘，会让 #22 失去可引用的文件主键——这是可复现性最常见的断点。
+
 > **前置校验 A：枚举必须逐分类进行，不得只查一个入口。**
 > 基金公告接口按分类返回，**定期报告与基金文件不在同一分类**。只查"基金文件"一类，会拿到招募书、合同、托管协议，但**拿不到任何季报/年报**；反过来只查定期报告，会漏掉法律意见书。
 > 每一步必须记录**每类返回多少条、命中多少条**，条数为 0 的分类要写明"该分类确实为空"还是"接口未返回"。
@@ -115,18 +122,29 @@
 | 2025Q2 | overall | distributable_q | 86120000.00 | 单季（F_DIST_Q 差分） | h2025 p12 | OK |
 
 #6 --{动作}-- [非数据]
-**建立/更新 claim 表**
-* 信息来源：招募说明书预测、上期报告结论、管理层指引
-- 首次运行：从招募说明书提取可核查的经营承诺（出租率目标、租金增长、分派率预测），写成 claim
-- 后续运行：沿用 `claims.yaml`，只做裁决不重建；招募说明书更新时增量修订并升 `version`
-- 每条 claim 必须写死 `aggregation`（`each_period` / `mean` / `latest`）与 `band_ref`
-- 无对应指标的承诺（如"提升运营效率"）不得进入 claim 表
-[输出]：`claims.yaml`
-[输出示例]：
-| claim_id | statement | origin | indicator | aggregation |
-|---|---|---|---|---|
-| C1 | 整体出租率维持在 90% 以上 | 招募书 p112 预测 | occupancy | each_period |
-| C2 | 租金单价年增长 3% | 招募书 p118 | rent_yoy | latest |
+**建立/更新 claim 台账**
+* 数据依赖：`dataset/doc_index.csv`、四类披露原文（基金合同、招募书、定期报告、扩募/评估报告）
+* 权威定义：METADATA 的 `claim_schema`（v2，14 列）。本节只讲怎么抽，不重定义字段。
+
+**抽取是规则动作，不是判断动作**：给定同一批披露文件，任何人跑出来必须是同一张表。四步固定执行：
+
+1. **切句**：按「。」「；」把候选文件正文切成句，保留原文与页码（页码取 `=== Pn ===` 锚点）。
+2. **过桶**：逐句匹配四个来源桶的关键词（S1 契约义务 / S2 招募书预测 / S3 管理层表述 / S4 扩募评估），桶外一律丢弃。
+3. **过可核查项**：句内必须同时出现数字、出租率、租金、分派、面积、期限之一。只命中关键词而无指标者丢弃——「提升运营效率」这类不得入库。
+4. **去重截断**：同一 `indicator` 在同一文件内只留最新一条，旧的标 `SUPERSEDED`；总数上限 12 条，超限按 S1→S4 优先级截断，截掉的条目写进 `run_log.md`。
+
+- `claim_id = "C-" + sha1(归一化文件名 + "|" + 归一化陈述)[:6]`，同一句话跨期重跑 ID 不变；`seq` 只是展示序号，按页升序重排，**不得用序号做引用的依据**
+- `statement` ≤60 字，去主观前缀但不得改写语义；`quote` ≤40 字逐字摘录，不得转述
+- `judgment_rule` 五选一（`threshold_gte` / `threshold_lte` / `each_period_eq` / `monotonic` / `direction_only`），`rule_param` 必须来自原文数字
+- 原文没给量化阈值时**不得用行业惯例代填**，只能降级为 `direction_only` 并注明「原文未给量化阈值」
+- 首次运行全量抽取；后续运行沿用台账只做裁决；新增披露文件时增量追加，不改既有 `claim_id`
+[输出]：`claims_<code>.yaml`（台账，跨期沿用，只增不改）
+[输出示例]：字段顺序见 `claim_schema.columns`，示意前 8 列
+| seq | claim_id | statement | origin_file | origin_page | quote | source_bucket | judgment_rule |
+|---|---|---|---|---|---|---|---|
+| C1 | C-3f9a1c | 符合条件时应将 90% 以上年度可供分配金额分配 | 中金普洛斯…2025年年度报告.pdf | 12 | 应将不低于百分之九十的可供分配金额分配 | S1_契约义务 | threshold_gte |
+| C2 | C-8b2e05 | 望亭物流园 2026 年暂无年内到期面积 | 中金普洛斯…2025年年度报告.pdf | 32 | 2026 年暂无年内到期面积 | S3_管理层表述 | each_period_eq |
+| C3 | C-1d7c44 | 2023/2024 年预测现金分派率 4.52%/4.76% | 中金普洛斯…更新招募说明书.pdf | 88 | 预测现金分派率为 4.52% 和 4.76% | S2_招募书预测 | threshold_gte |
 
 # Step 1：运营指标
 
@@ -322,22 +340,38 @@
 
 #20 --{动作}-- [数据]
 **claim 逐条裁决**
-* 数据依赖：`claims.yaml`、`panel.csv`
+* 数据依赖：`claims_<code>.yaml`、`dataset/panel.csv`
+* 裁决是**确定性动作**：给定 `judgment_rule` 与 `panel` 取值，结果唯一。同样的台账跑两次必须得到同一张表，不得因叙事需要调整。
+
 - **前置校验：分母口径三问**（未答完不得进入裁决）
   1. claim 的阈值是哪个口径下给的？（招募书预测 / 实际·募集规模 / 实际·期末市值 / 实际·评估值）
   2. 观测值的分母与阈值的分母是否同一口径？不同则先换算，换算不可行则判 `NOT_COMPARABLE`
   3. 若分母随市场变化（市值），该 claim 是否只适用于"投资者实际收益率"而非"是否达标"？
-- 按每条 claim 的 `aggregation` 执行：`each_period` 逐期判定任一不满足即不通过；`mean` 取均值；`latest` 取目标期
-- 输出裁决：`CONFIRMED` / `PARTIALLY_SUPPORTED` / `INDETERMINATE` / `NOT_COMPARABLE`
+- 按 `aggregation` 取值：`each_period` 逐期执行；`mean` 取均值后执行；`latest` 只取目标期
+- **六态判据，对号入座，不得叠加主观修饰**：
+
+| 态 | 机械条件 |
+|---|---|
+| `CONFIRMED` | 所有观测期满足规则，且观测期数 ≥ 声明覆盖期一半 |
+| `REFUTED` | 任一观测期明确违反规则 |
+| `PARTIALLY_SUPPORTED` | 方向一致但幅度未达 `rule_param`；或 `direction_only` 且方向正确 |
+| `INDETERMINATE` | 观测期未到 / 指标未披露 / `rule_param` 缺失 / 只有定性无量化 |
+| `NOT_COMPARABLE` | 分母口径不同且不可换算，须在两处写清具体数值 |
+| `SUPERSEDED` | 同一 `indicator` 已有更新表述，旧条目不参与本期裁决 |
+
+- `direction_only` 永远不得判 `CONFIRMED`——没有数字就没有达标可言
+- 判 `REFUTED` 必须能指到具体的观测期与取值；指不到就是 `INDETERMINATE`
 - 数据缺失导致无法裁决的，写清缺哪个指标、缺哪期、影响哪条结论
-- 聚合方式不得在裁决时临时更改；确需更改的，回写 `claims.yaml` 并升版本
+- 规则与聚合方式不得在裁决时临时更改；确需更改的，回写台账（新增条目，旧条目标 `SUPERSEDED`），不得原地改写
 - **反例（必须避免）**：用年报的市值口径分派率（4.36%）去对标招募书的募集规模口径预测（4.81%），会得出"未达预测 0.45pct"的错误结论。溢价交易时市值口径必然低于募集规模口径，与经营好坏无关。
-[输出]：claim 裁决表
-[输出示例]：
-| claim | 规则 | 逐期结果 | 裁决 | 缺失影响 |
+[输出]：`claims_verdict_<code>.csv`（14 列，与台账同名同序）
+[输出示例]：节选关键列
+| seq | claim_id | statement | observed | verdict |
 |---|---|---|---|---|
-| C1 出租率≥90% | each_period | Q3 88.83、Q4 89.54 未达标 | 不通过（PARTIALLY_SUPPORTED 反向） | 无 |
-| C2 租金年增 3% | latest | Q4 −7.48% | 不通过 | 无 |
+| C1 | C-3f9a1c | 应将 90% 以上年度可供分配金额分配 | 2025 年归属分派 3.423 亿 ÷ 可供分配 3.352 亿 = 102.1% | CONFIRMED |
+| C2 | C-8b2e05 | 望亭 2026 年暂无年内到期面积 | 2026Q1/Q2/Q3 均为 100.00% | CONFIRMED |
+| C3 | C-1d7c44 | 预测分派率 4.52%/4.76% | 阈值分母 92.69 亿模拟市值；观测分母 44.5 亿当期市值 | NOT_COMPARABLE |
+| C4 | C-5a0b93 | 黄埔 2026Q4 出租率有较大提升 | 2026Q3 为 54.30%，Q4 未披露 | INDETERMINATE |
 
 #21 --{动作}-- [非数据]
 **风险与下一期观察指标**
@@ -357,13 +391,23 @@
 #22 --{动作}-- [非数据]
 **生成报告与配套文件**
 * 信息来源：以上全部产出
-- 输出 6 个文件到 `output/YYYYMMDD_HHMMSS/`：
-  1. `report_<code>_<period>.md` —— 投后分析报告（结论摘要、三层分析、重点季度、风险、附录）
-  2. `data_matrix_<code>.xlsx` —— 运营数据矩阵（整体/项目/收入/可供分配 4 个 sheet）
-  3. `source_index_<code>.csv` —— 数据来源索引（文件、页码、指标、取值、是否计算、公式）
-  4. `claims_verdict_<code>.csv` —— claim 裁决明细
-  5. `charts/` —— 出租率与租金双轴图、收入与可供分配柱线图
-  6. `run_log.md` —— 运行参数、数据缺口、异常与处理
+- 交付物 7 项落到 `output/YYYYMMDD_HHMMSS/`，另有一个不单列的附属目录：
+  1. `report_<code>_<period>.md` —— 投后分析报告（结论摘要、三层分析、重点季度、风险、附录），**图内嵌其中**
+  2. `report_<code>_<period>.html` —— 同一份报告的阅读版，图与表以 base64 内嵌，单文件拷走即完整
+  3. `data_matrix_<code>.xlsx` —— 运营数据矩阵（整体/项目/收入/可供分配 4 个 sheet）
+  4. `source_index_<code>.csv` —— 数据来源索引，逐条数值级，字段与校验见下方「来源索引硬规范」（METADATA 的 `source_index_schema` 为权威版）
+  5. `claims_<code>.yaml` —— claim 台账（跨期沿用，只增不改）
+  6. `claims_verdict_<code>.csv` —— 本期裁决（由台账 × panel 派生）
+  7. `run_log.md` —— 运行参数、数据缺口、异常与处理
+  - `dataset/doc_index.csv`、`dataset/panel.csv` —— 中间层，属 `dataset/`，不进交付清单
+  - `charts/` —— **报告内部资源目录，不作独立交付物**。它只被报告引用，不单独拷给读者
+
+**图表必须是报告的一部分，不是报告的附件**：
+- 正文用标准图片语法就地嵌入：`![图 1 组合出租率与租金单价](charts/fig1_occupancy_rent.png)`，图注三行紧随其后（图号标题 / 资料来源 / 口径说明）
+- **禁止指路式引用**：不得写「图 1 见 charts/fig1_occupancy_rent.svg」「文件：charts/xxx」，读者不应被要求去打开另一个文件
+- 一张图在正文出现一次，位置紧跟其论证段落；附录汇总表只列图号与标题，不重复贴图
+- 必配两张（出租率与租金双轴、收入与可供分配柱线）；自加图须在图注首句写明替代表格哪一栏、论证什么
+- 交付时只呈现报告本体与数据文件，不把 `charts/` 下的散图作为独立产物列出
 - 报告首页必须写：数据截止期、口径声明（可供分配≠分派）、不可判定项清单
 - 每条结论后带锚点；无锚点的句子不得进入结论段
 [输出]：产出清单
@@ -373,3 +417,31 @@
 | report_508056_2025Q4.md | 主报告 | 结论均带锚点 ✓ |
 | data_matrix_508056.xlsx | 4 sheet | 与 panel 一致 ✓ |
 | source_index_508056.csv | 逐条来源 | 覆盖率 100% ✓ |
+
+**来源索引硬规范**（`source_index_<code>.csv`，utf-8-sig，主键 `source_id`）
+
+| 字段 | 必填 | 规则 |
+|---|---|---|
+| `source_id` | 是 | `S0001` 递增；正文锚点引用此列 |
+| `file` | 是 | **必须是 `doc_index.csv` 的 `file` 原值**（完整文件名含 `.pdf`），外键；禁止填 `q2026Q3` 这类标签 |
+| `local_path` | 是 | 相对 `doc_root` 的路径；离线场景唯一定位手段 |
+| `url` | 是 | 原始公告 URL；无则写 `NA(offline)`，不得留空；非空时须含基金代码 |
+| `page_from` / `page_to` | 是 / 否 | 整数，`1 ≤ page_from ≤ page_to ≤ doc_index.pages`；单页缺省视为等于 `page_from` |
+| `section` | 是 | 原文小节号或表名，如 `§4.1.2 整体运营情况` |
+| `metric` | 是 | 与 `metric_naming` 的 base 对齐 |
+| `value` / `unit` | 是 | 原文数值与原文单位，不在本步换算 |
+| `kind` | 是 | 枚举：`披露原值` / `披露原值（期间均值）` / `披露原值（年初至今）` / `自算` |
+| `computed` / `formula` | 是 / 条件必填 | `computed=是` 时 `formula` 必填，写明输入列名与口径 |
+
+**五条硬校验，一次跑完才允许交付**（`tools/validate_output.py`，仅依赖标准库）：
+
+1. C1 外键：`source_index.file` 集合 ⊆ `doc_index.file` 集合
+2. C2 页码：`page_to ≤ doc_index.pages`
+3. C3 自算带公式：`computed=是` → `formula` 非空
+4. C4 URL 回验：`url` 非空且非 `NA(offline)` → `url` 含 `fund_code`
+5. C5 锚点覆盖：正文出现的每个 `<tag> p<page>` 锚点，能在 `source_index` 命中对应 `file` 且 `page` 落在 `page_from–page_to` 内
+
+> 反例（真实发生）：某案例来源索引 42 行全部只写 `q2026Q3`、`y2025` 这类标签，未写文件名，
+> 报告里每个数字都能定位到"某份季报第 12 页"，但无法定位到"哪份 PDF"——索引看似完整，回查仍要多跳一步。
+> 同一案例的来源说明写"全部记录未带公告 URL，故未执行链接回验"，把前置校验 B 静默跳过而不是标注 `NA(offline)`。
+> **校验不可执行 = 没有校验。** 引用 `tests/` 而未落盘该目录，同样算没有校验。

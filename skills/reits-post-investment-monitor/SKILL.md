@@ -14,7 +14,17 @@ description: Use when 需要对已上市公募REITs做季度/半年度/年度投
 2. `data_requirements` 中 `execution_required: true` 的条目必须已通过 `#4` 的 source 探测；未通过的，在报告首页写明 `SOURCE_UNAVAILABLE` 并在对应表格留空，不得用估算填充。
 3. 若 `end_period` 之后没有已披露的定期报告（正常情况：季度报告在季后 15 个工作日内披露），以最后一期已披露为准，并在报告首页写"数据截止期"。
 
-**输出位置**：`<doc_root>/../output/YYYYMMDD_HHMMSS/`（可在 METADATA.md 的 `output_dir` 修改）。产出 6 个文件，清单见 FLOW `#22`。
+**输出位置**：`<doc_root>/../output/YYYYMMDD_HHMMSS/`（可在 METADATA.md 的 `output_dir` 修改）。交付 7 项 + 一个不单列的 `charts/` 附属目录，清单见 FLOW `#22`。图表必须内嵌在报告正文里，不得作为独立产物单独交付。
+
+**交付前必跑两个校验**（只依赖标准库，退出码非 0 不得交付）：
+
+```bash
+python tools/check_panel.py --panel <output>/dataset/panel.csv
+python tools/validate_output.py --output <output> --doc-root <doc_root>
+```
+
+前者查面板结构（主键唯一、锚点格式、`*_cum` 单调），后者查产出契约（`doc_index.csv` 与 `source_index.csv` 的外键、页码上界、自算公式、URL 回验、正文锚点覆盖、panel 落盘位置）。
+**文字规范不等于校验**：没有可执行脚本时，同一错误会在每次运行里重犯。
 
 ---
 
@@ -41,7 +51,7 @@ description: Use when 需要对已上市公募REITs做季度/半年度/年度投
 针对 REITs 场景新增（均在 FLOW 中实际使用）：
 - `period_semantics`：声明每个字段是时点值/期间累计/单季，供 `#5` 统一换算。
 - `metric_bands`：出租率、租金同比、收缴率、WALE 的档位标尺，避免"高位/低位"无标尺。
-- `claim_schema`：以招募说明书预测与上期结论为 claim，逐期裁决（CONFIRMED / PARTIALLY_SUPPORTED / INDETERMINATE）。
+- `claim_schema`（v2，14 列）：可证伪表述的台账。四类来源封闭（契约义务/招募书预测/管理层表述/扩募评估），**按关键词与可核查项规则抽取，不按裁量挑选**，同一批文件必得同一张表；`claim_id` 由文件名与陈述的哈希生成，跨期稳定；裁决六态机械判定（`CONFIRMED` / `REFUTED` / `PARTIALLY_SUPPORTED` / `INDETERMINATE` / `NOT_COMPARABLE` / `SUPERSEDED`），判据见 METADATA 的 `verdict_rules`。
 - `formula_registry`：累计差分、单位换算、可供分配调整项的公式与生效期。
 
 ## 判读口径（经验规则，写入 FLOW 时不得省略）
