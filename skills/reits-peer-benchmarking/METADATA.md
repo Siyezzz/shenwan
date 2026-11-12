@@ -49,7 +49,9 @@ baseline_contract:
     - position_table: 四个坐标各自的位次、与中位数的差、换口径后的位次、排名极差；每行须带绝对锚一列（对国债溢价／对健康线／残差率）与"判断依据指向哪一节"。只有名次一列的表不算位置表
     - pricing_function: 拟合式 C = a×P + b、斜率读数（边际现金回报 vs 平均分派率的差额来源）、逐只拟合值与残差率、隐含应有市值的口径声明（不是目标价；残差率与市值偏离率不得混用）
     - risk_allocation: 五类风险（出租率／租金／资本开支／关联方／扩募）各自的承担者、凭据、上限；条款存在但未触发的须注明"实际仍由持有人承担"
-    - findings_brief: `findings.csv` 一行一条判断，字段含 claim_id / 一句话判断 / 用词档位 / 证据数字 / 锚点 / 反例 / 指回坐标 / 五轴 / 可迁移性；移交写作层前须齐备
+    - findings_brief: `findings.csv` 一行一条判断，字段含 finding_id / claim / evidence_state / evidence_value / source_anchor / assumptions / counterevidence / scope / coordinate / confidence_tier / primary_section / reuse_sections / depends_on / invalidation_condition；移交前须通过字段与依赖校验
+    - comparability_registry: 每个指标登记资产类型适用范围、经济含义、方向条件、单位分母、时点/期间属性、阈值来源与不可比规则；不同经济机制或分母不得合并排名
+    - evidence_dependency: 对下游计算建立前置条件；分母、时点或资产边界未核实时，阻断依赖该输入的估值/排名结论，或明确降级为不可判定
     - sample_provenance: 候选池数量、纳入与排除数量、每条排除的三级理由、至少一只标的的边界检验结论
     - scope_statement: 用户提到 ABS／类 REITs／境外 REITs 时的收敛与排除说明（成交结构、披露口径、市值可比性三条理由至少给两条）；只字不提即为擅自更换问题
     - caliber_log: 五处换算方式、市值反推的分子分母来源、每只标的分派率的分母口径、proxy 指标清单
@@ -59,7 +61,7 @@ baseline_contract:
     - advantage_test: 每条独特优势须同时满足"组内唯一（两只以上具备即降为较好）+ 可核对 + 消失条件"；缺任一条即删除
     - model_diversity: 样本内模式是否同质；同质时的参照标的清单及其"不入排名"声明
     - invalidation: 每个结论句的限定词，以及下一期可观测的改写条件（指标+阈值+会改写哪一句）
-  decision_rule: "判定用词随证据升级：只有 L1 位次称'组内排序'；L1 + L2 绝对锚称'相对位置'；三层齐备才称'确认了位置'。跳级用词（只有名次就写'处于中游''明显占优'）一律改写。任何排名第一的句子都必须带分子构成、与中位差与极差。"
+  decision_rule: "判定用词受证据边界约束：只有 L1 位次称'组内排序'；位次加可核实的 L2 绝对锚称'相对位置'；L3 模型结果只称'模型条件下的偏离'，不得因三层齐备就自动称'确认了位置'。来源可靠性、样本覆盖、假设依赖与稳健性不足时继续降级。跳级用词（只有名次就写'处于中游''明显占优'）一律改写。任何排名第一的句子都必须带分子构成、与中位差与极差。"
   anchor_rule: "绝对锚必须与样本无关，不随纳入哪几只而变；不得因样本普遍偏低而下调健康线。全部样本一起低于国债 + 风险溢价时，组内第一只能称'组内最高'。"
   length_rule: "篇幅由内容决定，不设字数下限，也不设上限。删减只删重复判断，不删证据、口径与反例；不得为凑长度增写方法论述。"
   non_goals: "不给买入建议、不给目标价、不给商业模式总分、不做显著性检验。四项须在报告第一节显式声明。隐含应有市值只作位置度量，不得写成涨跌空间。"
@@ -341,7 +343,8 @@ output_contract:
   sample_funnel: "sample_funnel.csv"
   length: "不设字数下限与目标；按 tools/count_report_words.py 的正文口径统计一次写入封面，仅作记录"
   figures: 5
-  figure_rule: "坐标由脚本计算；HTML 版内联，Markdown 版走相对路径"
+  figure_rule: "坐标由脚本计算；图片作为内部素材移交写作层，必须嵌入最终报告对应正文，不默认单独呈现。HTML 版内联，Markdown 版走相对图片引用并随报告打包资源；交付前检查引用与渲染有效。"
+  figure_manifest: "figure_id / path / finding_ids / section_id / caption / source_anchor / disposition；由写作层完成章节映射和采用状态登记"
   forbidden:
     - "给商业模式打总分或评级"
     - "用 n<10 的样本做分位表述或显著性检验"

@@ -282,7 +282,8 @@ def t_dq():
 # ============================================================
 def t_skill():
     names = ["research-report-to-flow", "reits-post-investment-monitor",
-             "reits-pre-investment-analysis", "reits-report-writing"]
+             "reits-pre-investment-analysis", "reits-peer-benchmarking",
+             "reits-report-writing"]
     for n in names:
         base = path("skills", n)
         for f in ("SKILL.md", "METADATA.md", "FLOW.md", "_raw_response.txt"):
@@ -310,12 +311,49 @@ def t_skill():
                                               "claim_schema", "formula_registry"],
             "reits-pre-investment-analysis": ["step0_required", "assumption_register",
                                               "valuation_params", "scenario_set"],
+            "reits-peer-benchmarking": ["baseline_contract", "comparability_registry",
+                                        "evidence_dependency", "output_contract"],
             "reits-report-writing": ["report_input_contract", "outline_schema",
-                                     "section_contract", "style_rules", "banned_patterns",
+                                     "section_contract", "comparison_handoff_policy",
+                                     "style_rules", "banned_patterns",
                                      "word_count_policy", "review_checklist"],
         }[n]
         miss = [k for k in must if k not in md]
         chk("T-SKILL-04", "%s METADATA 必备字段齐全" % n, not miss, "缺：%s" % miss)
+
+        if n == "reits-peer-benchmarking":
+            fl_text = read(os.path.join(base, "FLOW.md"))
+            chk("T-SKILL-07", "peer 底稿含稳定 finding 字段与证据状态",
+                all(k in fl_text for k in ("finding_id", "evidence_state", "source_anchor",
+                                           "primary_section", "reuse_sections", "depends_on",
+                                           "invalidation_condition")), "检查 finding 交接字段")
+            peer_sk = read(os.path.join(base, "SKILL.md"))
+            peer_md = read(os.path.join(base, "METADATA.md"))
+            chk("T-SKILL-08", "peer 区分排名样本与参照样本并登记指标适用性",
+                "不可进入统一排名”不等于“不可作为模式/背景参照" in fl_text and
+                "跨资产比较先建指标适用性表" in fl_text and
+                "参照标的必须标明用途且排除于排名和结论" in fl_text,
+                "检查跨资产比较边界")
+            chk("T-SKILL-09", "peer 不因三层齐备自动升级为确认结论",
+                "不得因三层材料齐备就自动写\"确认了位置\"" in fl_text and
+                "不得使用暗示确定性的 `confirmed_position`" in fl_text and
+                "L3 模型结果只称'模型条件下的偏离'" in peer_md and
+                "模型条件下的偏离" in peer_sk,
+                "检查结论档位与证据约束")
+        elif n == "reits-report-writing":
+            handoff = read(os.path.join(base, "METADATA.md"))
+            chk("T-SKILL-10", "写作层要求 finding 双向章节映射与同源标签",
+                all(k in handoff for k in ("finding_id → primary_section + reuse_sections",
+                                           "双向清点", "同一张锁定的数据表或脚本输出")),
+                "检查写作消费与复核契约")
+
+        if n in ("reits-peer-benchmarking", "reits-report-writing"):
+            chk("T-SKILL-FIGURE", "%s 图片嵌入报告并限制独立交付" % n,
+                "嵌入" in fl and "不默认单独呈现" in (fl + md + sk) and
+                "finding_ids" in md and
+                ("figure_delivery_policy" in md if n == "reits-report-writing"
+                 else "figure_manifest" in md),
+                "检查图表交接、正文嵌入与默认呈现约束；实际报告仍需渲染验收")
 
         # _raw_response 可逆性：用与 tools/build_raw.py 同构的逐行状态机解析。
         # 不能用正则——FLOW/SKILL 正文里会出现 `<<<FILE: x>>>` 这样的说明性示例，
@@ -433,7 +471,6 @@ def t_reg():
         "outputs/case_03_sinofarm_reit/run_log.md",
         "outputs/case_03_sinofarm_reit/assumptions.csv",
         "outputs/case_03_sinofarm_reit/figures/transaction_structure.svg",
-        "presentation/management_briefing.md",
         "outputs/final_acceptance_report.md",
     ]
     miss = [m for m in must_exist if not os.path.exists(path(*m.split("/")))]

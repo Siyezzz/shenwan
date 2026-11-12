@@ -158,7 +158,7 @@
 
 ## 五、交付物清单（T-REG-11，1 条）
 
-**检验**：11 项关键交付物必须全部存在。
+**检验**：10 项当前必要交付物必须全部存在。管理层简报不再是项目必需交付物，也不作为本测试的验收门槛。
 
 | 类别 | 文件 |
 |---|---|
@@ -167,12 +167,11 @@
 | 案例运行记录 | 三个 `run_log.md` |
 | 假设登记 | `outputs/case_03_sinofarm_reit/assumptions.csv` |
 | 图表 | `outputs/case_03_sinofarm_reit/figures/transaction_structure.svg` |
-| 汇报 | `presentation/management_briefing.md` |
 | 验收 | `outputs/final_acceptance_report.md` |
 
-**这条断言本轮抓到两个真实缺口**：`management_briefing.md` 与 `final_acceptance_report.md` 当时都还没创建。创建后 PASS。
+**历史说明**：早期验收曾把 `presentation/management_briefing.md` 列为交付物；当前项目不再要求单独的 presentation 文件，故从现行清单移除。历史迭代和验收记录保留当时的事实，不代表当前仍需生成该文件。
 
-**为什么只列 11 项而不是全部文件**：全列会变成"文件清单快照"，任何一次结构调整都要改断言，维护成本高于收益。这 11 项选的是"**缺了就意味着某个阶段没交付**"的最小集。
+**为什么只列 10 项而不是全部文件**：全列会变成"文件清单快照"，任何一次结构调整都要改断言，维护成本高于收益。这 10 项选的是"**缺了就意味着某个阶段没交付**"的最小集。
 
 ---
 
