@@ -85,6 +85,8 @@ deliverables:
     current_508601:
       - models/cash_flow_model.xlsx
       - models/scenario_2028.csv
+      - models/MODEL_DISCLAIMER.md
+      - models/formula_registry.csv
     rule: "先检查脚本实际输出配置；不得把模型文件强制复制到 outputs/{case_dir}/，也不得仅凭示例推断路径。"
   quality_control: "来源、计算、逻辑和表达核验嵌入 reits-report-writing 的既有步骤及模型验证。"
 
