@@ -270,7 +270,7 @@ for i, row in enumerate(ROWS):
         formula = "=C%d-E%d-F%d-%s$B$%d+%s$B$%d" % (r, r, r, H, R["wc27"], H, R["cashadj27"])
     else:
         scenario_row = 24 + (y - 2026)
-        formula = "='5_到期重定价'!G%d" % scenario_row
+        formula = "='5_到期重定价'!H%d" % scenario_row
     wm.cell(row=r, column=7, value=formula)
     wm.cell(row=r, column=8, value=i + 1)
     wm.cell(row=r, column=9, value="=1/(1+%s$B$%d)^H%d" % (H, R["disc"], r))
@@ -531,36 +531,36 @@ for i, w in enumerate([20, 14, 14, 14, 14, 16, 4, 4, 4, 22, 18], 1):
 
 # ================= 5 到期重定价情景（来自 build_bottomup.py） =================
 ws5 = wb.create_sheet("5_到期重定价")
-title(ws5, "Maturity repricing scenarios｜2028 年租约到期重定价", 9,
+title(ws5, "Maturity repricing scenarios｜2028 年租约到期重定价", 10,
       "本表直接读取 tools/build_bottomup.py 的悲观/中性/乐观三情景。2026–2027 为披露数据规范化，2028 起为研究情景；不得将情景当作管理人预测。")
-hdr(ws5, 4, ["情景", "年份", "营业收入", "EBITDA", "资本性支出", "利息及所得税", "可供分配", "分派率", "数据性质"])
+hdr(ws5, 4, ["情景", "年份", "营业收入", "EBITDA", "资本性支出", "利息及所得税", "营运资金变动", "可供分配", "分派率", "数据性质"])
 scenario_rows = {}
 rr = 5
 for scenario_name in ("悲观", "中性", "乐观"):
     scenario_rows[scenario_name] = []
     for item in bottomup.build(scenario_name):
         vals = [scenario_name, item["year"], item["rev"], item["ebitda"],
-                item["capex"], item["intax"], item["dist"], item["rate"], item["src"]]
+                item["capex"], item["intax"], item["wc"], item["dist"], item["rate"], item["src"]]
         for cc, value in enumerate(vals, 1):
             cell = ws5.cell(row=rr, column=cc, value=value)
             cell.border = BORDER
             cell.font = Font(size=9)
-            if cc in (3, 4, 5, 6, 7):
+            if cc in (3, 4, 5, 6, 7, 8):
                 cell.number_format = "#,##0"
-            elif cc == 8:
+            elif cc == 9:
                 cell.number_format = "0.00%"
         scenario_rows[scenario_name].append(rr)
         rr += 1
-for cc, width in enumerate([14, 10, 18, 18, 18, 18, 18, 12, 18], 1):
+for cc, width in enumerate([14, 10, 18, 18, 18, 18, 16, 18, 12, 24], 1):
     ws5.column_dimensions[get_column_letter(cc)].width = width
 ws5.freeze_panes = "A5"
-ws5.auto_filter.ref = "A4:I%d" % (rr - 1)
+ws5.auto_filter.ref = "A4:J%d" % (rr - 1)
 
 # ================= 6 情景回报（Excel IRR） =================
 ws6 = wb.create_sheet("6_情景回报")
-title(ws6, "Scenario returns｜三情景发行价年度期数 IRR", 6,
+title(ws6, "Scenario returns｜三情景发行价年度期数 IRR", 7,
       "t=0 为募集规模流出，2026–2044 每年可供分配为流入，期末无终值。此为年度期数 IRR，不是实际支付日期 XIRR。")
-hdr(ws6, 4, ["情景", "年度期数 IRR", "19 年累计可供分配", "2028 可供分配", "2028 分派率", "现金流说明"])
+hdr(ws6, 4, ["情景", "年度期数 IRR（100%可供分配）", "19 年累计可供分配", "2028 可供分配", "2028 分派率", "分配比例说明", "营运资金口径"])
 cashflow_start = 12
 for idx, scenario_name in enumerate(("悲观", "中性", "乐观")):
     data_rows = scenario_rows[scenario_name]
@@ -571,17 +571,18 @@ for idx, scenario_name in enumerate(("悲观", "中性", "乐观")):
     ws6.cell(row=summary_row, column=2).number_format = "0.00%"
     ws6.cell(row=summary_row, column=3, value="=SUM(C%d:U%d)" % (cf_row, cf_row))
     ws6.cell(row=summary_row, column=3).number_format = "#,##0"
-    ws6.cell(row=summary_row, column=4, value="='5_到期重定价'!G%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=4, value="='5_到期重定价'!H%d" % data_rows[2])
     ws6.cell(row=summary_row, column=4).number_format = "#,##0"
-    ws6.cell(row=summary_row, column=5, value="='5_到期重定价'!H%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=5, value="='5_到期重定价'!I%d" % data_rows[2])
     ws6.cell(row=summary_row, column=5).number_format = "0.00%"
-    ws6.cell(row=summary_row, column=6, value="t=0 募集规模流出；2026–2044 年度分派流入")
+    ws6.cell(row=summary_row, column=6, value="暂按 100% 可供分配金额流入；实际比例按合同及实际决议")
+    ws6.cell(row=summary_row, column=7, value="2028 年后暂按 ΔNWC=0；未验证")
     for cc in range(1, 7):
         ws6.cell(row=summary_row, column=cc).border = BORDER
     ws6.cell(row=cf_row, column=1, value=scenario_name)
     ws6.cell(row=cf_row, column=2, value=-A["raise"])
     for j, data_row in enumerate(data_rows):
-        ws6.cell(row=cf_row, column=3 + j, value="='5_到期重定价'!G%d" % data_row)
+        ws6.cell(row=cf_row, column=3 + j, value="='5_到期重定价'!H%d" % data_row)
         ws6.cell(row=cf_row, column=3 + j).number_format = "#,##0"
     for cc in range(1, 22):
         ws6.cell(row=cf_row, column=cc).border = BORDER
