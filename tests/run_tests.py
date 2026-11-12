@@ -355,6 +355,19 @@ def t_skill():
                  else "figure_manifest" in md),
                 "检查图表交接、正文嵌入与默认呈现约束；实际报告仍需渲染验收")
 
+        if n == "reits-peer-benchmarking":
+            chk("T-SKILL-SOURCE", "peer 记录引用出处与资料到判断的关联",
+                all(k in md for k in ("reference_provenance:", "3246547", "不是交易所 REITs 名录",
+                                      "artifact_contract:", "observation_id", "source_id",
+                                      "input_observation_ids", "threshold_id", "未提供外部权威验证")) and
+                "约两万条" not in fl and "已检索候选池" in fl,
+                "检查来源性质、样本覆盖与底稿关联契约；不替代运行时原文核验")
+        elif n == "reits-report-writing":
+            chk("T-SKILL-SOURCE", "写作层区分资料、数值、判断及未复核引用",
+                all(k in md for k in ("reference_and_artifact_policy", "source_index → panel",
+                                      "原始 PDF 未随仓库提交", "缺键/未核实引用先修复或降级")),
+                "检查引用边界与底稿消费约定")
+
         # _raw_response 可逆性：用与 tools/build_raw.py 同构的逐行状态机解析。
         # 不能用正则——FLOW/SKILL 正文里会出现 `<<<FILE: x>>>` 这样的说明性示例，
         # 正则会把示例当成真实分块，产生"x"这种不存在的段（真实踩过）。

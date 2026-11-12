@@ -28,6 +28,14 @@ outputs:
 | `IN-5` | 来源索引 | 每条含 `文件名 / 类型 / 日期 / 页数 / URL / 本地路径 / 状态`，不适用项注明 | 可由已有原文锚点补索引；不可回查的关键证据限制相应结论 |
 | `IN-6` | 论证底稿（横向基准专用） | `findings.csv` 每行含 `finding_id / claim / evidence_state / evidence_value / source_anchor / assumptions / counterevidence / scope / coordinate / confidence_tier / primary_section / reuse_sections / depends_on / invalidation_condition` | 缺判断、证据状态或来源锚点的行不得作为确定结论；缺口或假设必须按原状态表达。依赖未满足时阻断下游结论或明确降级，不得在本层补造数字或把推断改成事实 |
 
+## reference_and_artifact_policy
+
+- 引用文件路径均以仓库根目录为基准；运行前核对文件实际存在，外部引用须含发布主体、标题、版本/日期、完整 URL、获取日期及可回查锚点。法规仅有名称/年报仅有示例章节号时，不视为已核验依据。
+- `source_index.csv` 是一行一份资料的目录（来源、日期、URL、本地副本与状态）；`panel.csv` 是一行一个指标观测值的数值表（observation_id、source_id、期间、单位、口径和页码）；`findings.csv` 是一行一条判断的论证表（证据、限定、档位和失效条件）。三者均为内部底稿，不能相互替代，也不作为默认独立成品呈现。
+- 横向基准按 `skills/reits-peer-benchmarking/METADATA.md` 的 artifact_contract 关联：source_index → panel → matrix_*.csv → findings → report。追查关键结论至原件，缺键/未核实引用先修复或降级；旧索引允许用唯一 local_path 映射 source_id。
+- 写作风格出处为 `template/report_style_analysis.md` 的历史统计记录（11 份/408 页/327 张图表）；原始 PDF 未随仓库提交，因此不能声称本次独立复核了这些统计。记者腔、章节骨架和其他编辑要求是内部规则，不冒充外部研究结论。
+- 对阈值、案例经验和模型公式登记内部方法或外部出处；内部假设不得写成监管标准、公认健康线或已证实因果。模型计算须保留脚本/公式及输入引用。
+
 ## outline_schema
 
 两套写作层独立骨架，按报告类型选用，不套用取数层 METADATA 的指标 schema。**章节编号是给读者的，不是给流程的**——章节按投资问题组织；影响判断的口径、参数和证据限制须进入相应正文，不以工序名替代分析。下列章节字数区间仅为早期篇幅分配建议，不是上下限或逐章验收配额；投前中文正文合计至少 15,000 字且无上限，投后按任务和论证需要展开。

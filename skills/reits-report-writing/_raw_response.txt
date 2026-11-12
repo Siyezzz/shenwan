@@ -87,7 +87,7 @@ description: Use when 需要把 FLOW 的执行结果写成一份可交付的正�
 
 ## 学谁的行文
 
-本 skill 的文风规则基于对 11 份卖方行业深度报告的结构统计（共 408 页、327 张图表）。原始研报未随仓库提交，保留的统计口径和方法记录见 `template/report_style_analysis.md`。主要可迁移的四条：
+本 skill 的文风参考仓库历史结构统计记录（11 份卖方报告，共 408 页、327 张图表），不是本次独立复核结果。原始研报未随仓库提交，保留的统计口径和方法记录见 `template/report_style_analysis.md`（仓库根目录相对路径）；原件缺失时不得将其说成已复验的外部依据。其他编辑规则属于内部方法，执行前按 `METADATA.reference_and_artifact_policy` 核对引用与资料、数值、判断底稿的关系。主要可迁移的四条：
 
 1. **投资摘要先给判断**：概括产品、现金流、估值、主要风险和价格条件，条数按材料复杂度决定。
 2. **标题帮助读者定位**：证据充分时可用判断式标题，但法律、结构和测算章节可使用准确的描述式标题。
@@ -128,6 +128,14 @@ outputs:
 | `IN-4` | claim 裁决表 | 每条含 `aggregation / threshold / observed / verdict / evidence_ref` | 可沿用等价结论证据；缺少支撑的判断降低确定性或保留为不可判定 |
 | `IN-5` | 来源索引 | 每条含 `文件名 / 类型 / 日期 / 页数 / URL / 本地路径 / 状态`，不适用项注明 | 可由已有原文锚点补索引；不可回查的关键证据限制相应结论 |
 | `IN-6` | 论证底稿（横向基准专用） | `findings.csv` 每行含 `finding_id / claim / evidence_state / evidence_value / source_anchor / assumptions / counterevidence / scope / coordinate / confidence_tier / primary_section / reuse_sections / depends_on / invalidation_condition` | 缺判断、证据状态或来源锚点的行不得作为确定结论；缺口或假设必须按原状态表达。依赖未满足时阻断下游结论或明确降级，不得在本层补造数字或把推断改成事实 |
+
+## reference_and_artifact_policy
+
+- 引用文件路径均以仓库根目录为基准；运行前核对文件实际存在，外部引用须含发布主体、标题、版本/日期、完整 URL、获取日期及可回查锚点。法规仅有名称/年报仅有示例章节号时，不视为已核验依据。
+- `source_index.csv` 是一行一份资料的目录（来源、日期、URL、本地副本与状态）；`panel.csv` 是一行一个指标观测值的数值表（observation_id、source_id、期间、单位、口径和页码）；`findings.csv` 是一行一条判断的论证表（证据、限定、档位和失效条件）。三者均为内部底稿，不能相互替代，也不作为默认独立成品呈现。
+- 横向基准按 `skills/reits-peer-benchmarking/METADATA.md` 的 artifact_contract 关联：source_index → panel → matrix_*.csv → findings → report。追查关键结论至原件，缺键/未核实引用先修复或降级；旧索引允许用唯一 local_path 映射 source_id。
+- 写作风格出处为 `template/report_style_analysis.md` 的历史统计记录（11 份/408 页/327 张图表）；原始 PDF 未随仓库提交，因此不能声称本次独立复核了这些统计。记者腔、章节骨架和其他编辑要求是内部规则，不冒充外部研究结论。
+- 对阈值、案例经验和模型公式登记内部方法或外部出处；内部假设不得写成监管标准、公认健康线或已证实因果。模型计算须保留脚本/公式及输入引用。
 
 ## outline_schema
 

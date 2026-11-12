@@ -10,6 +10,28 @@ domain: 公募REITs横向比较
 
 source_report: "内部方法论（无单一来源研报）。口径依据《公开募集基础设施证券投资基金指引》与沪深交易所定期报告编制要求；残差方法为常规 OLS，不涉及推断统计"
 
+reference_provenance:
+  policy: "外部资料逐项记录发布主体、标题、发布日期/版本、完整 URL、本地副本、获取日期、用途与核验状态；内部文件标注仓库根目录相对路径、生成者与上游依赖。URL 可访问不等于内容已核验；第三方转载不冒充一手发布。"
+  fund_discovery: "https://fund.eastmoney.com/js/fundcode_search.js 是东方财富/天天基金的基金检索静态列表（JavaScript 数组），不是交易所 REITs 名录。引入出处：提交 3246547、outputs/case_04_peer_benchmarking/run_log.md 与 build_panel.py；2026-11-12 实际访问确认结构。仅用于候选发现，数量与覆盖须每次重新核验。"
+  disclosure_channels: "https://api.fund.eastmoney.com/f10/JJGG 与 https://np-cnotice-fund.eastmoney.com/api/content/ann 是案例四使用的第三方公告检索/附件解析渠道；经验记录见该案例 run_log.md，已有列表实现见 tools/fetch_disclosures.py、tools/build_source_index.py。无稳定公开接口契约保证；本次未重验详情接口，不得宣称永久可用。pdf.dfcfw.com 仅为返回附件的托管域名，具体 URL 须逐文件登记。优先核对管理人/交易所发布的原件。"
+  regulations: "《公开募集基础设施证券投资基金指引》及交易所编制要求仅是待逐次定位的文件名称；使用前补发布主体、正式标题、版本/生效日期、原文 URL 与具体条款。未完成定位时不得称某个指标/阈值由其规定。年报章节号仅作查找提示，须核对实际文件。"
+  internal_method: "三层参照、四坐标、五轴、OLS 与 metric_bands 是本仓库研究方法/分析参数，不是监管标准或公认健康线。案例数值和经验来源见 outputs/case_04_peer_benchmarking/；旧案例只作方法线索，未经原文复核不可作为新报告事实。"
+
+artifact_contract:
+  source_index:
+    path: "source_documents/source_index.csv（可复用全仓索引或等价案例索引）"
+    purpose: "资料目录，一行一份原始文件/网页快照；回答材料由谁、何时发布、从哪获得和能否回查，不存指标或分析结论。由取数层维护，已有生成器 tools/build_source_index.py。"
+    fields: "source_id / publisher / file / type / period / disclose_date / url / local_path / retrieved_at / status；网页可用 snapshot/hash，PDF 另记 pages。旧索引无 source_id 时用唯一 local_path 作键并在本次运行固定映射，不强制改写历史索引。"
+  panel:
+    path: "outputs/{case_dir}/panel.csv"
+    purpose: "数值长表，一行一个标的、期间、指标与口径的观测值。由取数层从原件提取或由脚本派生，不是资料下载列表。"
+    fields: "observation_id / 标的 / 期间 / 指标 / 值 / 单位 / 口径 / source_id / 锚点 / 证据等级 / 备注；派生行另记 formula / input_observation_ids / script_ref，原始行不伪装为派生。source_id 必须解析到来源索引，锚点须定位页码/章节/表行。"
+  findings:
+    path: "outputs/{case_dir}/findings.csv"
+    purpose: "判断底稿，一行一个有证据边界的判断/缺口，记录为什么能说、能说多强和什么条件下失效；不是新的事实来源。取数层产出，写作层消费。"
+    links: "evidence_value 引 observation_id 或矩阵行键；source_anchor 指 source_id + 原文锚点；depends_on 引其他 finding_id。primary_section/reuse_sections 在取数移交时可为 none，由写作层按骨架补齐，不反向规定研究章节。"
+  lineage: "source_index（资料）→ panel（观测值）→ matrix_*.csv（脚本计算/排序）→ findings（带限定的判断）→ report（含图表的成品）；既有等价底稿可字段映射，缺引用/孤立 ID/未满足依赖必须修复或降级。"
+
 script_permission: true
 
 output_dir: outputs/{case_dir}
@@ -125,12 +147,12 @@ data_requirements:
         binding: 年报 §3.1 或 §3.3
         note: 分母可能是募集规模/评估值/市值，必须查清并登记
       - id: mcap
-        name: 市值（反推）
+        name: 市值（须核实分母与基准日）
         unit: 元
         comparability: 时点可比
         criticality: critical
-        binding: 派生：可供分配 ÷ 分派率
-        note: 反推而非取行情，保证与分派率同时点。代价是不可跨期使用
+        binding: 同基准日行情 × 总份额；或原文证实为市值分母后核验的反推值
+        note: 可供分配 ÷ 分派率首先只是隐含分母，不自动等于市值；分母性质/日期未核实则阻断依赖计算
       - id: rf_10y
         name: 10 年期国债到期收益率
         unit: %
@@ -296,6 +318,7 @@ data_requirements:
         note: NOI 补足、管理费豁免等。金额与占可供分配比例都要给
 
 metric_bands:
+  provenance: "以下数值均为本仓库方法参数，部分源自案例四经验，未提供外部权威验证，不得称监管要求/行业健康线。每次使用前登记 threshold_id / value / unit / rationale / source_anchor / asset_scope / as_of / sensitivity；无外部依据时标 assumed，仅作情景或敏感性切分，不能支持绝对优劣结论。不适用时弃用，不为迁就结果调参。"
   occupancy:
     high: 95
     mid: 90
