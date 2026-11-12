@@ -246,7 +246,7 @@ def main():
         print(hdr)
         for r in rows:
             if r["year"] in (2026, 2027, 2028, 2029, 2030, 2035, 2040, 2044):
-                print("%-6d %14.0f %14.0f %12.0f %12.0f %14.0f %7.2f%%" %
+                print("%-6d %14.0f %14.0f %12.0f %12.0f %12.0f %14.0f %7.2f%%" %
                       (r["year"], r["rev"], r["ebitda"], r["capex"],
                        r["intax"], r["wc"], r["dist"], r["rate"] * 100))
         print("  2028 收入同比 %+.2f%%；2028 分派率较 2027 变动 %+.2f pct" %
