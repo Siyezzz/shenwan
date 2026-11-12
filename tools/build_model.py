@@ -59,27 +59,9 @@ M27 = A["eb27"] / A["rev27"]     # EBITDA 率 68.65%
 PASS_THROUGH = 0.81              # 收入每变动 1 元，EBITDA 变动 0.81 元
 
 
-def series(eb_rate=None, g1=None, g2=None, cxr=None):
-    """返回 19 年（2026-2044）逐年 dict 列表"""
-    rate = M27 if eb_rate is None else eb_rate
-    g1 = A["g1"] if g1 is None else g1
-    g2 = A["g2"] if g2 is None else g2
-    cxr = A["cxr"] if cxr is None else cxr
-    out, rev = [], A["rev26"]
-    for y in range(2026, 2026 + A["years"]):
-        if y == 2026:
-            rev, eb, cx, it = A["rev26"], A["eb26"], A["cx26"], A["it26"]
-        elif y == 2027:
-            rev, eb, cx, it = A["rev27"], A["eb27"], A["cx27"], A["it27"]
-        else:
-            rev = rev * (1 + (g1 if y <= 2035 else g2))
-            eb, cx = rev * rate, rev * cxr
-            it = it * (1 + A["itg"])
-        wc = A["wc26"] if y == 2026 else (A["wc27"] if y == 2027 else 0.0)
-        cashadj = A["cashadj27"] if y == 2027 else 0.0
-        out.append(dict(year=y, rev=rev, eb=eb, cx=cx, it=it, wc=wc, cashadj=cashadj,
-                        dist=eb - cx - it - wc + cashadj))
-    return out
+def series(long_g=None):
+    """Return 2026-2044 neutral maturity-repricing scenario; long_g is an explicit revenue-growth sensitivity."""
+    return bottomup.build("中性", long_g=long_g)
 
 
 def pv(rows, d, tv=0.0):
@@ -107,15 +89,13 @@ TOTAL_DIST = sum(r["dist"] for r in ROWS)
 TV_GAP_560 = A["raise"] - pv(ROWS, 0.056)          # 现值缺口
 TV_FOR_560 = TV_GAP_560 * (1.056 ** A["years"])   # 对应的 2044 年末终值
 PRICE_AT_560 = pv(ROWS, 0.056)
-# 毛 NOI 折现（复现评估值口径）
-NOI_ROWS = [dict(dist=r["eb"]) for r in ROWS]
-PV_NOI5 = pv(NOI_ROWS, 0.05)
+# 不计算物业 NOI / 物业评估值：未取得完整资产评估报告及 NOI 口径桥接；EBITDA 不等于 NOI。
 
 print("EBITDA率 2027 = %.4f" % M27)
 print("规范化 2026 可供分配 = %.0f  分派率 %.2f%%" % (ROWS[0]["dist"], ROWS[0]["dist"] / A["raise"] * 100))
 print("规范化 2027 可供分配 = %.0f  分派率 %.2f%%" % (ROWS[1]["dist"], ROWS[1]["dist"] / A["raise"] * 100))
 print("19年累计可供分配 = %.4f亿  占募集 %.1f%%" % (TOTAL_DIST / 1e8, TOTAL_DIST / A["raise"] * 100))
-print("PV@5%% (可供分配) = %.4f亿 ; PV@5%% (毛NOI) = %.4f亿 (评估值 27.03亿)" % (PV5 / 1e8, PV_NOI5 / 1e8))
+print("PV@5%% (中性情景可供分配现金流，仅作折现参考) = %.4f亿" % (PV5 / 1e8))
 print("IRR(无终值) = %.4f%%" % (IRR0 * 100))
 print("使 IRR=5.60%% 所需终值(2044末) = %.4f亿 (现值缺口 %.4f亿) ; 可承受发行规模 %.4f亿" % (TV_FOR_560/1e8, TV_GAP_560/1e8, PRICE_AT_560/1e8))
 for tv in [0, 5e8, 1e9, 1.65e9, 1.75e9, 2e9, A["appraisal"]]:
@@ -153,9 +133,9 @@ wb = Workbook()
 # ================= 0 说明 =================
 ws0 = wb.active
 ws0.title = "0_说明"
-title(ws0, "中信建投首农商业REIT（508601）现金流与估值模型  v2.0", 3,
-      "口径：EBITDA − 资本性支出 − 利息及所得税 − 经营性应收应付变动 + 披露的期初现金调节；2028 年起按评估假设平滑外推。"
-      "本工作簿 2_模型/3_输出 是评估增长基准，不是租约重定价中性预测；到期重定价三情景另列 5_到期重定价/6_情景回报。")
+title(ws0, "中信建投首农商业REIT（508601）现金流与估值模型 v2.1", 3,
+      "2026–2027 按招募书披露调整项规范化；2028–2044 采用到期重定价中性情景。"
+      "不将评估现金流 CAGR 当作营业收入增长率，不以 EBITDA 替代 NOI；长期结果是条件情景，不是确定预测。")
 notes = [
     ("模型版本", "v2.0 / 2026-11-05（v1.0 已废止，修正口径见下列第 ④⑤⑥ 条）"),
     ("标的", "中信建投首农食品集团封闭式商业不动产证券投资基金（508601）；底层资产：北京昌平龙德广场"),
@@ -173,18 +153,18 @@ notes = [
     ("④ 资本性支出口径修正",
      "测算表口径 2026 年 15,460,400.00 元（不含税），2027 年起为收入的 3.5%（约 886 万元/年）；"
      "现金流量表的 21,047,778.55 元为含税/含长期待摊口径，两者相差 5,587,378.55 元，不可混用。"),
-    ("⑤ 增长率两段",
-     "2026–2035：2.78%（披露的预测现金流年复合增长率）；2036–2045：2.25%（披露的长期增长率，"
-     "同业区间 2.25%–2.75% 的下沿）。v1.0 把 2.78% 用到全程，会系统性高估估值。"),
-    ("⑥ 本模型新增的核心指标：IRR",
-     "持有到期（2026–2044 共 19 期分派、期末无残值），按募集规模 27.40 亿元计算的年度期数内部收益率约 2.66%，"
-     "低于 2027E 分派率 5.60% 约 2.94pct。差额取决于现金流路径、19 期时点及期末零终值假设。"),
+    ("⑤ 评估增长参数的使用边界",
+     "招募说明书转引 2.78% 预测期现金流 CAGR、2.25% 长期增长率。它们是评估现金流参数，"
+     "不是已证实的营业收入增长率；未取得原评估报告并确认定义前，本模型不将其用于收入外推。"),
+    ("⑥ 本模型的 IRR",
+     "采用 2028 年租约到期中性情景，2026–2044 共 19 期年度现金流，期末不计终值。"
+     "这是年度期数 IRR 情景，不是实际投资者 XIRR；期末零终值仅为压力情景，不代表法律上资产价值为零。"),
     ("⑦ 终值敏感性", "若 2045 年存在终值，IRR 显著上升；见 3_输出 的「终值—IRR」表。"),
     ("⑧ 已知局限（一）", "2018–2025 年历史 capex 年均 3,151.46 万元，其中升级改造约 2,614.70 万元、日常大修约 536.77 万元。"
                         "评估假设 886 万元约为日常大修均值的 1.65 倍；历史总均值不能直接作为未来维护性 capex 基准，仍需工程尽调核验。"),
     ("⑨ 已知局限（二）", "本工作簿的评估假设基准不含租约到期重定价；2028 年租约到期情景以 tools/build_bottomup.py 与 models/scenario_2028.csv 为准。"),
-    ("⑩ 可重算性", "2_模型 与 3_输出 的 IRR 均为公式；修改 1_假设 黄色单元格后自动联动。"
-                  "4_敏感性 亦为公式，参数为收入传导系数 0.81。"),
+    ("⑩ 可重算性与局限", "年度折现和 IRR 公式可重算；到期重定价情景由 build_bottomup.py 生成并写入情景表，"
+                  "修改 Python 情景参数后须重新运行构建脚本。2028 年后营运资金变动暂按零处理，属于未验证简化假设。"),
 ]
 hdr(ws0, 4, ["项目", "内容", ""])
 r = 5
@@ -222,8 +202,8 @@ items = [
     ("经营性应收应付变动 2026E", A["wc26"], "锚点", "招募书可供分配测算表调整项"),
     ("经营性应收应付变动 2027E", A["wc27"], "锚点", "同上"),
     ("期初现金调节 2027E", A["cashadj27"], "锚点", "招募书可供分配测算表调整项"),
-    ("收入增长率 2026–2035", A["g1"], "锚点", "招募书：预测现金流年复合增长率 2.78%"),
-    ("收入增长率 2036–2045", A["g2"], "锚点", "招募书：长期增长率 2.25%（同业 2.25%–2.75% 下沿）"),
+    ("评估预测期现金流 CAGR（不作收入增长率）", A["g1"], "披露参数", "招募书转引 2.78%；原评估现金流定义未核验，本模型不用于收入外推"),
+    ("评估长期现金流增长率（不作收入增长率）", A["g2"], "披露参数", "招募书转引 2.25%；原评估现金流定义未核验，本模型不用于收入外推"),
     ("资本性支出占收入比", A["cxr"], "锚点", "评估取值：2027 年起 3.5%"),
     ("利息及所得税年递增", A["itg"], "研究假设", "—"),
     ("EBITDA 率（2028 起）", M27, "披露推算", "推导：EBITDA2027 ÷ 收入2027 = 68.65%"),
@@ -257,9 +237,9 @@ H = "'1_假设'!"
 
 # ================= 2 模型 =================
 wm = wb.create_sheet("2_模型")
-title(wm, "Model｜2026E–2044E 逐年测算（规范化口径，不设终值）", 11,
-      "B/C/E/F 为公式或锚点，G 按年度调整项计算，J = G × I，K = G ÷ 募集规模。I 列为折现因子，"
-      "引用 1_假设 的折现率。2026/2027 蓝色底色为披露锚点，其余为模型外推。")
+title(wm, "Model｜2026E–2044E 中性到期重定价情景", 11,
+      "2026/2027 为披露数据规范化；2028–2044 直接引用 5_到期重定价中的中性情景。"
+      "G 为可供分配金额；I/J 仅为指定折现率下的数学折现参考，不代表物业评估值。")
 hdr(wm, 4, ["年份", "营业收入", "EBITDA", "EBITDA 率", "资本性支出", "利息及所得税",
             "可供分配", "期数", "折现因子", "现值", "分派率"])
 r = 5
@@ -277,18 +257,20 @@ for i, row in enumerate(ROWS):
         wm.cell(row=r, column=5, value="=%sB%d" % (H, R["cx27"]))
         wm.cell(row=r, column=6, value="=%sB%d" % (H, R["it27"]))
     else:
-        wm.cell(row=r, column=2, value="=B%d*(1+IF(A%d<=2035,%s$B$%d,%s$B$%d))"
-                % (r - 1, y, H, R["g1"], H, R["g2"]))
-        wm.cell(row=r, column=3, value="=B%d*%s$B$%d" % (r, H, R["m"]))
-        wm.cell(row=r, column=5, value="=B%d*%s$B$%d" % (r, H, R["cxr"]))
-        wm.cell(row=r, column=6, value="=F%d*(1+%s$B$%d)" % (r - 1, H, R["itg"]))
+        # 中性情景在 5_到期重定价 中由统一 Python 引擎生成；这里仅链接，不重复造一套公式。
+        scenario_row = 24 + (y - 2026)
+        wm.cell(row=r, column=2, value="='5_到期重定价'!C%d" % scenario_row)
+        wm.cell(row=r, column=3, value="='5_到期重定价'!D%d" % scenario_row)
+        wm.cell(row=r, column=5, value="='5_到期重定价'!E%d" % scenario_row)
+        wm.cell(row=r, column=6, value="='5_到期重定价'!F%d" % scenario_row)
     wm.cell(row=r, column=4, value="=C%d/B%d" % (r, r))
     if y == 2026:
         formula = "=C%d-E%d-F%d-%s$B$%d" % (r, r, r, H, R["wc26"])
     elif y == 2027:
         formula = "=C%d-E%d-F%d-%s$B$%d+%s$B$%d" % (r, r, r, H, R["wc27"], H, R["cashadj27"])
     else:
-        formula = "=C%d-E%d-F%d" % (r, r, r)
+        scenario_row = 24 + (y - 2026)
+        formula = "='5_到期重定价'!G%d" % scenario_row
     wm.cell(row=r, column=7, value=formula)
     wm.cell(row=r, column=8, value=i + 1)
     wm.cell(row=r, column=9, value="=1/(1+%s$B$%d)^H%d" % (H, R["disc"], r))
@@ -326,8 +308,8 @@ for c in range(1, 12):
     if c == 11:
         wm.cell(row=tot, column=c).number_format = "0.00%"
 wm.cell(row=tot + 2, column=1,
-        value="注：2044 年为最后一个分派年度；商业土地使用权 2045-03-29 到期，评估不设终值。"
-              "地下车库 2055-03-29 到期，占比小，未单独建模。").font = Font(size=9, italic=True, color="C00000")
+        value="注：2044 年为最后一个完整年度情景；商业土地使用权 2045-03-29 到期。"
+              "未建立 2045 年部分年度现金流、续期成本或处置回收模型；期末零终值仅为情景假设。地下车库期限不同，未单独建模。").font = Font(size=9, italic=True, color="C00000")
 for i, w in enumerate([10, 18, 16, 11, 16, 16, 16, 7, 11, 16, 10], 1):
     wm.column_dimensions[get_column_letter(i)].width = w
 
@@ -451,30 +433,24 @@ wo.cell(row=r, column=1,
 wo.merge_cells(start_row=r, start_column=1, end_row=r + 1, end_column=6)
 wo.cell(row=r, column=1).alignment = Alignment(wrap_text=True, vertical="top")
 
-# --- DCF 对照 ---
+# --- 基金层可供分配现金流折现参考（不代表物业估值） ---
 r += 3
-wo.cell(row=r, column=1, value="表 4　DCF 对照：毛 NOI vs 净可供分配").font = Font(bold=True, size=11)
+wo.cell(row=r, column=1, value="表 4　中性情景可供分配现金流折现参考（非物业估值）").font = Font(bold=True, size=11)
 r += 1
-hdr(wo, r, ["折现率", "对毛 NOI 折现", "对净可供分配折现", "净/毛", "说明", ""], 22)
+hdr(wo, r, ["折现率", "可供分配现金流现值", "相对 5% 现值", "说明", "", ""], 22)
 r += 1
 for d in [0.045, 0.050, 0.055, 0.060]:
-    a = pv(NOI_ROWS, d)
     b = pv(ROWS, d)
     wo.cell(row=r, column=1, value=d).number_format = "0.0%"
-    wo.cell(row=r, column=2, value=a).number_format = "#,##0"
-    wo.cell(row=r, column=3, value=b).number_format = "#,##0"
-    wo.cell(row=r, column=4, value=b / a).number_format = "0.0%"
-    wo.cell(row=r, column=5,
-            value="评估值 27.03 亿" if d == 0.05 else "").font = Font(size=9)
-    for i in range(1, 6):
+    wo.cell(row=r, column=2, value=b).number_format = "#,##0"
+    wo.cell(row=r, column=3, value=b / PV5).number_format = "0.0%"
+    wo.cell(row=r, column=4, value="折现参考；折现率须与投资者要求回报匹配").font = Font(size=9)
+    for i in range(1, 5):
         wo.cell(row=r, column=i).border = BORDER
     r += 1
 wo.cell(row=r, column=1,
-        value="读法：用 5%% 折现毛 NOI 得 %.2f 亿元，接近评估值 27.03 亿元（差 %.1f%%），说明评估值可复现；"
-              "用同一个 5%% 折现净可供分配只得 %.2f 亿元（低 %.1f%%）。两者之差就是资本性支出、"
-              "利息及所得税的资本化价值——也是分派率与 IRR 之差的来源。"
-              % (PV_NOI5 / 1e8, (PV_NOI5 / A["appraisal"] - 1) * 100,
-                 PV5 / 1e8, (PV5 / A["appraisal"] - 1) * 100)).font = Font(size=9, italic=True, color="C00000")
+        value="重要：此表只是对基金层可供分配现金流作数学折现敏感性展示，不是物业 NOI 估值、NAV 或合理市值。"
+              "未取得原始资产评估报告并完成物业层 NOI 定义及现金流桥接前，不得用 EBITDA 折现复现评估值。").font = Font(size=9, italic=True, color="C00000")
 wo.merge_cells(start_row=r, start_column=1, end_row=r + 1, end_column=6)
 wo.cell(row=r, column=1).alignment = Alignment(wrap_text=True, vertical="top")
 for i, w in enumerate([26, 20, 22, 14, 26, 26], 1):
@@ -530,25 +506,25 @@ ws.cell(row=r + 1, column=1,
 
 # 表 2 折现率 × 增长率（模型估值，亿元）
 r += 3
-ws.cell(row=r, column=1, value="表 2　模型估值：折现率 × 收入增长率（亿元，净可供分配口径）").font = Font(bold=True, size=11)
+ws.cell(row=r, column=1, value="表 2　情景现金流现值敏感性：折现率 × 2029 年后收入增长率（亿元）").font = Font(bold=True, size=11)
 r += 1
-hdr(ws, r, ["折现率＼增长率", "1.5%", "2.25%", "2.78%", "3.5%", ""], 20)
+hdr(ws, r, ["折现率＼收入增长", "-1.0%", "0.0%", "1.0%", "2.25%", ""], 20)
 for d in [0.040, 0.045, 0.050, 0.055, 0.060]:
     r += 1
     ws.cell(row=r, column=1, value="%.1f%%" % (d * 100)).font = Font(size=10)
-    for j, g in enumerate([0.015, 0.0225, 0.0278, 0.035]):
-        val = pv(series(g1=g, g2=g), d) / 1e8
+    for j, g in enumerate([-0.010, 0.0, 0.010, 0.0225]):
+        val = pv(series(long_g=g), d) / 1e8
         c = ws.cell(row=r, column=j + 2, value=round(val, 2))
         c.number_format = "0.00"
         c.font = Font(size=10)
         c.alignment = Alignment(horizontal="center")
         c.border = BORDER
-        c.fill = GREEN if val >= 27.03 else (RED if val < 23 else AMBER)
+        c.fill = GREY
     ws.cell(row=r, column=1).border = BORDER
 r += 2
 ws.cell(row=r, column=1,
-        value="基准格（5.0%% × 2.78%%/2.25%% 两段）对应估值 %.2f 亿元；评估值 27.03 亿元；募集规模 27.40 亿元。"
-              "表中假设全期单一增长率，故与 2_模型 的两段增长率结果略有差异。" % (PV5 / 1e8)).font = Font(size=9, italic=True)
+        value="以上仅为中性租约到期情景下的现金流折现敏感性；2029 年后增长率是研究情景输入，不是评估报告已披露的收入增长率。"
+              "结果不代表物业评估值、基金 NAV 或市场合理价值。").font = Font(size=9, italic=True)
 for i, w in enumerate([20, 14, 14, 14, 14, 16, 4, 4, 4, 22, 18], 1):
     ws.column_dimensions[get_column_letter(i)].width = w
 
