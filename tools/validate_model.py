@@ -21,6 +21,8 @@ def main():
     with open(CSV, encoding="utf-8") as f:
         csv_lines = [x.strip() for x in f if x.strip()]
     assert len(csv_lines) == 58, "expected header + 57 scenario-year rows"
+    assert csv_lines[0] == "scenario,year,revenue,ebitda,capex,intax,wc_change,distributable,rate,source"
+    assert abs(build_bottomup.validate_revenue_bridge() - build_bottomup.D["rev_2027"]) < 1.0
 
     wb_formula = load_workbook(XLSX, data_only=False)
     wb_values = load_workbook(XLSX, data_only=True)
@@ -37,10 +39,12 @@ def main():
             assert ws.cell(row, 1).value == name
             assert int(ws.cell(row, 2).value) == item["year"]
             for col, key in ((3, "rev"), (4, "ebitda"), (5, "capex"),
-                             (6, "intax"), (7, "dist")):
+                             (6, "intax"), (7, "wc"), (8, "dist")):
                 assert close(ws.cell(row, col).value, item[key]), (
                     name, item["year"], key, ws.cell(row, col).value, item[key])
-            assert close(ws.cell(row, 8).value, item["rate"], 1e-7)
+            assert close(ws.cell(row, 9).value, item["rate"], 1e-7)
+            if item["year"] >= 2028:
+                assert close(item["wc"], 0.0, 1e-9)  # 显式占位假设，不是披露事实
 
     # Formula cells must be present and recalculated to numeric cached values.
     wf = wb_formula["6_情景回报"]
@@ -58,8 +62,10 @@ def main():
         assert all(isinstance(wv.cell(cf_row, c).value, (int, float))
                    for c in range(3, 22))
 
-    # Sensitivity sheet must reference the neutral 2028 repricing row, not the
-    # appraisal-growth baseline in sheet 2_模型.
+    # 2_模型 的 2028 起现金流必须链接到中性情景输出，不再使用评估现金流 CAGR 外推收入。
+    assert "5_到期重定价" in str(wb_formula["2_模型"]["G7"].value)
+    assert "H26" in str(wb_formula["2_模型"]["G7"].value)
+    # Sensitivity sheet must reference the neutral 2028 repricing row, not the appraisal-growth baseline.
     sens = wb_formula["4_敏感性"]
     assert "5_到期重定价" in str(sens["K5"].value)
     assert "5_到期重定价" in str(sens["K6"].value)
