@@ -560,34 +560,38 @@ ws5.auto_filter.ref = "A4:J%d" % (rr - 1)
 ws6 = wb.create_sheet("6_情景回报")
 title(ws6, "Scenario returns｜三情景发行价年度期数 IRR", 7,
       "t=0 为募集规模流出，2026–2044 每年可供分配为流入，期末无终值。此为年度期数 IRR，不是实际支付日期 XIRR。")
-hdr(ws6, 4, ["情景", "年度期数 IRR（100%可供分配）", "19 年累计可供分配", "2028 可供分配", "2028 分派率", "分配比例说明", "营运资金口径"])
+hdr(ws6, 4, ["情景", "年度期数 IRR（90%分配）", "年度期数 IRR（100%分配）", "19 年累计可供分配", "2028 可供分配", "2028 分派率", "口径说明"])
 cashflow_start = 12
 for idx, scenario_name in enumerate(("悲观", "中性", "乐观")):
     data_rows = scenario_rows[scenario_name]
     summary_row = 5 + idx
-    cf_row = cashflow_start + idx
+    cf_row_100 = cashflow_start + idx * 2
+    cf_row_90 = cf_row_100 + 1
     ws6.cell(row=summary_row, column=1, value=scenario_name)
-    ws6.cell(row=summary_row, column=2, value="=IRR(B%d:U%d)" % (cf_row, cf_row))
+    ws6.cell(row=summary_row, column=2, value="=IRR(B%d:U%d)" % (cf_row_90, cf_row_90))
+    ws6.cell(row=summary_row, column=3, value="=IRR(B%d:U%d)" % (cf_row_100, cf_row_100))
     ws6.cell(row=summary_row, column=2).number_format = "0.00%"
-    ws6.cell(row=summary_row, column=3, value="=SUM(C%d:U%d)" % (cf_row, cf_row))
-    ws6.cell(row=summary_row, column=3).number_format = "#,##0"
-    ws6.cell(row=summary_row, column=4, value="='5_到期重定价'!H%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=3).number_format = "0.00%"
+    ws6.cell(row=summary_row, column=4, value="=SUM(C%d:U%d)" % (cf_row_100, cf_row_100))
     ws6.cell(row=summary_row, column=4).number_format = "#,##0"
-    ws6.cell(row=summary_row, column=5, value="='5_到期重定价'!I%d" % data_rows[2])
-    ws6.cell(row=summary_row, column=5).number_format = "0.00%"
-    ws6.cell(row=summary_row, column=6, value="暂按 100% 可供分配金额流入；实际比例按合同及实际决议")
-    ws6.cell(row=summary_row, column=7, value="2028 年后暂按 ΔNWC=0；未验证")
-    for cc in range(1, 7):
+    ws6.cell(row=summary_row, column=5, value="='5_到期重定价'!H%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=5).number_format = "#,##0"
+    ws6.cell(row=summary_row, column=6, value="='5_到期重定价'!I%d" % data_rows[2])
+    ws6.cell(row=summary_row, column=6).number_format = "0.00%"
+    ws6.cell(row=summary_row, column=7, value="90%–100% 分配情景；不代表实际分派")
+    for cc in range(1, 8):
         ws6.cell(row=summary_row, column=cc).border = BORDER
-    ws6.cell(row=cf_row, column=1, value=scenario_name)
-    ws6.cell(row=cf_row, column=2, value=-A["raise"])
-    for j, data_row in enumerate(data_rows):
-        ws6.cell(row=cf_row, column=3 + j, value="='5_到期重定价'!H%d" % data_row)
-        ws6.cell(row=cf_row, column=3 + j).number_format = "#,##0"
-    for cc in range(1, 22):
-        ws6.cell(row=cf_row, column=cc).border = BORDER
-ws6.cell(row=10, column=1, value="现金流复算区（IRR 公式引用下方 20 期现金流）")
-for cc, width in enumerate([14, 16, 18, 18, 14, 48], 1):
+    for cf_row, ratio, label in ((cf_row_100, 1.0, "100%"), (cf_row_90, 0.9, "90%")):
+        ws6.cell(row=cf_row, column=1, value="%s-%s" % (scenario_name, label))
+        ws6.cell(row=cf_row, column=2, value=-A["raise"])
+        for j, data_row in enumerate(data_rows):
+            ws6.cell(row=cf_row, column=3 + j,
+                     value="='5_到期重定价'!H%d*%.1f" % (data_row, ratio))
+            ws6.cell(row=cf_row, column=3 + j).number_format = "#,##0"
+        for cc in range(1, 22):
+            ws6.cell(row=cf_row, column=cc).border = BORDER
+ws6.cell(row=10, column=1, value="现金流复算区：每个情景分别列示 100% 与 90% 可供分配金额流入")
+for cc, width in enumerate([14, 16, 16, 18, 18, 14, 40], 1):
     ws6.column_dimensions[get_column_letter(cc)].width = width
 ws6.column_dimensions["G"].width = 16
 ws6.freeze_panes = "A5"
