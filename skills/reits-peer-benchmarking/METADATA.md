@@ -2,9 +2,9 @@ type: flow
 
 name: reits-peer-benchmarking
 
-version: 2.0.0
+version: 2.1.0
 
-description: "公募REITs横向基准：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由，用三个收益率口径与排名极差定位、四维资产质量位次、最小二乘残差判断定价偏离、四问框架拆商业模式，输出相对位置与本项目的可改进项。"
+description: "公募REITs横向基准：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除），用三个收益率口径与排名极差定位、四维资产质量位次、最小二乘残差判断定价偏离、四问框架拆商业模式，输出相对位置与本项目的可改进项。篇幅按内容需要，不设字数下限。"
 
 domain: 公募REITs横向比较
 
@@ -43,15 +43,18 @@ inputs:
     description: 披露文件根目录。优先从一手年报取数，取不到才降级到仓库内既有报告
 
 baseline_contract:
-  # 报告的"结论质量"由这六项共同决定，缺任一项即不得出定位结论
+  # 报告的"结论质量"由这八项共同决定，缺任一项即不得出定位结论
   required_outputs:
     - position_table: 四个坐标（收益率/C2 现金分派率/资产质量位次/定价残差）各自的位次与排名极差；每行须带"判断依据指向哪一节"
     - sample_provenance: 候选池数量、纳入与排除数量、每条排除的三级理由、至少一只标的的边界检验结论
-    - caliber_log: 五处换算方式、市值反推的分子分母来源、每只标的分派率的分母口径
+    - scope_statement: 用户提到 ABS／类 REITs／境外 REITs 时的收敛与排除说明（成交结构、披露口径、市值可比性三条理由至少给两条）；只字不提即为擅自更换问题
+    - caliber_log: 五处换算方式、市值反推的分子分母来源、每只标的分派率的分母口径、proxy 指标清单
     - distribution_composition: 可供分配按四类来源（当年经营/往年结转/会计调整/第三方补足）的占比
     - conditional_verdict: 模式优劣的"适用条件/代价/验证指标"三列，不得出现评分或评级
+    - model_diversity: 样本内模式是否同质；同质时的参照标的清单及其"不入排名"声明
     - invalidation: 每个结论句的限定词，以及下一期可观测的改写条件（指标+阈值+会改写哪一句）
   decision_rule: "四个坐标必须同时给出才能声称'确认了相对位置'；只有分派率一个坐标时，只能称'单口径观察'。任何排名第一的句子都必须带分子构成与极差。"
+  length_rule: "篇幅由内容决定，不设字数下限，也不设上限。删减只删重复判断，不删证据、口径与反例；不得为凑长度增写方法论述。"
   non_goals: "不给买入建议、不给目标价、不给商业模式总分、不做显著性检验。四项须在报告第一节显式声明。"
 
 data_requirements:
@@ -155,6 +158,20 @@ data_requirements:
         criticality: critical
         binding: 年报 §4.1.2
         note: 年→天 ×365。方向随租金周期反转，位次计算需给剔除版本
+      - id: renew_spread
+        name: 续租/新签租金变动
+        unit: %
+        comparability: 需基期
+        criticality: informative
+        binding: 年报 §4.1.2 / §4.1.3
+        note: 续租单价对到期单价。前瞻性优于租金同比，有则单列，无则记 C 级缺口
+      - id: expiry_wall
+        name: 分年到期面积
+        unit: ㎡ / %
+        comparability: 时点可比
+        criticality: informative
+        binding: 年报 §4.1.2 / 招募说明书
+        note: 平均剩余租期会掩盖"次年到期四成"，有则列示，不得用均值代替分布
       - id: impairment
         name: 资产减值损失
         unit: 元
@@ -284,7 +301,7 @@ output_contract:
   matrix_yield: "matrix_yield.csv"
   matrix_quality: "matrix_quality.csv"
   sample_funnel: "sample_funnel.csv"
-  min_cjk: 15000
+  length: "不设字数下限与目标；按 tools/count_report_words.py 的正文口径统计一次写入封面，仅作记录"
   figures: 5
   figure_rule: "坐标由脚本计算；HTML 版内联，Markdown 版走相对路径"
   forbidden:
@@ -294,3 +311,6 @@ output_contract:
     - "用'排序不一致'代替相关性检验"
     - "正文出现 FLOW 编号或状态码"
     - "图作为单独附件交付"
+    - "为凑字数增写方法论述，或为压篇幅删掉口径、证据与反例"
+    - "把 proxy 指标放进排名表，把模式参照标的放进位次表或结论句"
+    - "用户提到 ABS/类 REITs 却不在第二节交代边界"

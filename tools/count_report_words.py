@@ -89,7 +89,7 @@ def longest_para(body):
     return best
 
 
-def analyze(path, min_body=15000):
+def analyze(path, min_body=0):
     text = io.open(path, encoding="utf-8").read()
     secs = split_sections(text)
     rows, body = [], []
@@ -113,7 +113,7 @@ def analyze(path, min_body=15000):
         "longest_paragraph_cjk": longest_para(body_txt),
         "duplicate_30char": dup_30(body_txt),
         "min_required": min_body,
-        "pass": len(CJK.findall(body_txt)) >= min_body,
+        "pass": (min_body <= 0) or (len(CJK.findall(body_txt)) >= min_body),
         "sections": rows,
     }
     return res
@@ -122,7 +122,7 @@ def analyze(path, min_body=15000):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("path")
-    ap.add_argument("--min", type=int, default=15000)
+    ap.add_argument("--min", type=int, default=0)
     ap.add_argument("--json", default="")
     ap.add_argument("--sections", action="store_true")
     a = ap.parse_args()
@@ -135,7 +135,8 @@ def main():
     print("=" * 68)
     print("报告：%s" % r["report"])
     print("=" * 68)
-    print("中文正文字符数        %8d   （下限 %d）" % (r["cjk_body"], r["min_required"]))
+    print("中文正文字符数        %8d   （%s）" % (r["cjk_body"],
+          ("下限 %d" % r["min_required"]) if r["min_required"] > 0 else "不设下限"))
     print("中文全文（含附录）    %8d" % r["cjk_total"])
     print("英文正文字母数        %8d" % r["latin_body"])
     print("正文数字字符数        %8d" % r["digit_body"])
