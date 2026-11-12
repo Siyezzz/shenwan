@@ -1,10 +1,10 @@
 {
   "report": "outputs/case_03_sinofarm_reit/report_508601.md",
   "cjk_body": 24488,
-  "cjk_total": 29162,
+  "cjk_total": 29163,
   "latin_body": 1067,
   "digit_body": 8346,
-  "md_total_chars": 61887,
+  "md_total_chars": 61888,
   "figures": 3,
   "tables": 25,
   "we_think_count": 0,
@@ -100,7 +100,7 @@
     },
     {
       "title": "附录 F 执行记录与自检",
-      "cjk": 802,
+      "cjk": 803,
       "body": false
     }
   ]
