@@ -2,9 +2,9 @@ type: flow
 
 name: reits-peer-benchmarking
 
-version: 2.2.0
+version: 2.3.0
 
-description: "公募REITs横向基准：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除）。位置由三层参照定义（组内位次 + 国债与健康线等绝对锚 + 残差隐含值），判定用词随证据分三档；商业模式的优劣落在五轴并可回指坐标；输出相对位置表、可改进项与独特优势。篇幅按内容需要，不设字数下限。"
+description: "公募REITs横向基准的取数层：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除）。位置由三层参照定义（组内位次 + 国债与健康线等绝对锚 + 定价函数残差），判定用词随证据分三档；商业模式先做风险归属、再走五轴、最后按可迁移性三分收口。只交论证底稿 findings.csv 与图，不写成文，正文由 reits-report-writing 按 comparison 骨架完成。篇幅按内容需要，不设字数下限。"
 
 domain: 公募REITs横向比较
 
@@ -47,19 +47,24 @@ baseline_contract:
   required_outputs:
     - comparison_standard: 三层参照各自的取值与阈值（L1 位次与幅度、L2 国债收益率与健康线及评估值、L3 拟合值与残差阈值），以及判定用词的三档定义；须在报告第三节写出，取数前定稿
     - position_table: 四个坐标各自的位次、与中位数的差、换口径后的位次、排名极差；每行须带绝对锚一列（对国债溢价／对健康线／残差率）与"判断依据指向哪一节"。只有名次一列的表不算位置表
+    - pricing_function: 拟合式 C = a×P + b、斜率读数（边际现金回报 vs 平均分派率的差额来源）、逐只拟合值与残差率、隐含应有市值的口径声明（不是目标价；残差率与市值偏离率不得混用）
+    - risk_allocation: 五类风险（出租率／租金／资本开支／关联方／扩募）各自的承担者、凭据、上限；条款存在但未触发的须注明"实际仍由持有人承担"
+    - findings_brief: `findings.csv` 一行一条判断，字段含 claim_id / 一句话判断 / 用词档位 / 证据数字 / 锚点 / 反例 / 指回坐标 / 五轴 / 可迁移性；移交写作层前须齐备
     - sample_provenance: 候选池数量、纳入与排除数量、每条排除的三级理由、至少一只标的的边界检验结论
     - scope_statement: 用户提到 ABS／类 REITs／境外 REITs 时的收敛与排除说明（成交结构、披露口径、市值可比性三条理由至少给两条）；只字不提即为擅自更换问题
     - caliber_log: 五处换算方式、市值反推的分子分母来源、每只标的分派率的分母口径、proxy 指标清单
     - distribution_composition: 可供分配按四类来源（当年经营/往年结转/会计调整/第三方补足）的占比
     - conditional_verdict: 模式优劣落在五轴（现金流可预测性／分派自给度／增长来源／利益一致性／周期弹性），每轴给方向与依据字段；另附"适用条件/代价/验证指标"三列；不得出现评分或评级
-    - improvement_chain: 每条可改进项须同时满足"坐标位次落后（带差幅）+ 五轴中某一轴落后 + 下一期可查字段与阈值"；缺任一条即删除
+    - improvement_chain: 每条可改进项须同时满足"坐标位次落后（带差幅）+ 五轴中某一轴落后 + 可迁移性归入可复制或可购买（后者给成本量级）+ 下一期可查字段与阈值"；缺任一条即删除，归入不可复制的改写为结构性差异
     - advantage_test: 每条独特优势须同时满足"组内唯一（两只以上具备即降为较好）+ 可核对 + 消失条件"；缺任一条即删除
     - model_diversity: 样本内模式是否同质；同质时的参照标的清单及其"不入排名"声明
     - invalidation: 每个结论句的限定词，以及下一期可观测的改写条件（指标+阈值+会改写哪一句）
   decision_rule: "判定用词随证据升级：只有 L1 位次称'组内排序'；L1 + L2 绝对锚称'相对位置'；三层齐备才称'确认了位置'。跳级用词（只有名次就写'处于中游''明显占优'）一律改写。任何排名第一的句子都必须带分子构成、与中位差与极差。"
   anchor_rule: "绝对锚必须与样本无关，不随纳入哪几只而变；不得因样本普遍偏低而下调健康线。全部样本一起低于国债 + 风险溢价时，组内第一只能称'组内最高'。"
   length_rule: "篇幅由内容决定，不设字数下限，也不设上限。删减只删重复判断，不删证据、口径与反例；不得为凑长度增写方法论述。"
-  non_goals: "不给买入建议、不给目标价、不给商业模式总分、不做显著性检验。四项须在报告第一节显式声明。"
+  non_goals: "不给买入建议、不给目标价、不给商业模式总分、不做显著性检验。四项须在报告第一节显式声明。隐含应有市值只作位置度量，不得写成涨跌空间。"
+  handoff_rule: "判断与用词档位在本层定稿。写作层只负责表达：不得新造数字，不得把'组内排序'升格为'有吸引力'，不得把残差写成错价。需新数字时退回本流程重算。"
+  layer_rule: "本 skill 不产出章节。九节骨架属 reits-report-writing 的 outline_schema.comparison；在取数层定章节，等于让工序顺序决定论证顺序。"
 
 data_requirements:
 
@@ -319,11 +324,17 @@ metric_bands:
     threshold: 5
     unit: "%"
     note: OLS 残差率绝对值超过此值才作为结论对象。全部落在阈值内时，只能说"定价与结构一致"，不能称"确认了位置"
+  pricing_function:
+    min_n: 6
+    amplification: "1/(1 - b/(a×P))"
+    note: 样本少于 6 只不报斜率，只报残差方向。残差率换算成市值偏离会被截距放大，两个口径只能用一个并注明；隐含应有市值不是目标价
 
 output_contract:
-  report_md: "report_peer_benchmarking_<year>.md"
-  report_html: "report_peer_benchmarking_<year>.html"
+  # 本层交付底稿与图；报告由 reits-report-writing 产出，文件名沿用其约定
+  findings: "findings.csv"
   figures_dir: "figures/"
+  report_md_owner: reits-report-writing
+  report_html_owner: reits-report-writing
   panel: "panel.csv"
   matrix_yield: "matrix_yield.csv"
   matrix_quality: "matrix_quality.csv"
@@ -345,3 +356,6 @@ output_contract:
     - "只有组内位次却写'处于中游''明显占优''性价比突出'"
     - "为迁就样本而调低健康线或国债锚"
     - "把'某轴领先但解释不了任何坐标差'写成优势"
+    - "把不可复制的项（区位、股东背景、牌照）写成可改进项"
+    - "残差率与隐含市值偏离率混用，或把隐含应有市值写成目标价"
+    - "在取数层排章节，或在成文层改动判断与用词档位"
