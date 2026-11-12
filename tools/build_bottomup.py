@@ -36,7 +36,7 @@ D = {
     "rev_2027": 254_760_101.02,
     "rent_fix_2026": 234_867_171.72,  # 营业收入预测分项
     "rent_fix_2027": 235_927_878.79,
-    "nonrent_2027": 15_982_525.26,   # 提成 2,849,696.97 + 停车 6,927,272.73 + 多经 8,305,252.53 + 其他 750,000
+    "nonrent_2027": 18_832_222.23,   # 提成 2,849,696.97 + 停车 6,927,272.73 + 多经 8,305,252.53 + 其他 750,000
     "ebitda_2026": 170_437_399.69,
     "ebitda_2027": 174_883_323.29,
     "capex_2026": 15_460_400.00,
@@ -72,7 +72,8 @@ G1_AREA = D["leased_area"] * G1["area_pct"]
 G1_RENT_2027 = D["rent_fix_2027"] * G1["rent_pct"]
 OTHER_RENT_2027 = D["rent_fix_2027"] - G1_RENT_2027
 
-# 三情景参数（研究假设，见报告第六章参数表）
+# 三情景参数（研究假设，见报告第六章参数表）。long_g 是 2029 年起总营业收入增长假设，
+# 不是招募书所称的评估现金流 CAGR；二者口径不同，不得互相替代。
 SCEN = {
     "悲观": {"renew": 0.55, "repricing": -0.15, "vacant_m": 9,
              "other_g": -0.06, "long_g": -0.010,
@@ -91,8 +92,22 @@ INTAX_STEP = 0.02
 FIRST, LAST = 2026, 2044
 
 
-def build(scen_name):
-    s = SCEN[scen_name]
+
+def validate_revenue_bridge():
+    """2027E 收入分项必须与披露总收入勾稽，容差 1 元。"""
+    component_sum = D["rent_fix_2027"] + D["nonrent_2027"]
+    if abs(component_sum - D["rev_2027"]) > 1.0:
+        raise ValueError(
+            "2027 revenue bridge mismatch: components %.2f vs disclosed %.2f" %
+            (component_sum, D["rev_2027"])
+        )
+    return component_sum
+
+def build(scen_name, long_g=None):
+    validate_revenue_bridge()
+    s = dict(SCEN[scen_name])
+    if long_g is not None:
+        s["long_g"] = float(long_g)
     rows = []
     rev_prev = D["rev_2027"]
     eb_prev = D["ebitda_2027"]
@@ -107,6 +122,8 @@ def build(scen_name):
                      "dist": dist, "rate": dist / D["size"], "src": "披露值规范化"})
 
     # 2028：到期组重定价 + 其余面积按市场趋势
+    # 注意：renew 是对到期组固定租金现金流的聚合续租代理，历史 76.83% 是面积口径，
+    # 两者并非严格同口径；在缺少逐租户面积/租金/续租数据时，仅作情景近似，不是精确预测。
     decay = 1 - s["vacant_m"] / 12.0
     g1_2028 = G1_RENT_2027 * (s["renew"] * (1 + s["repricing"])
                               + (1 - s["renew"]) * decay * (1 + s["repricing"]))
