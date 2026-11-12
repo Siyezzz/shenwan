@@ -595,6 +595,13 @@ def t_report():
             sum(1 for t in miss_terms if t in s) >= 3,
             "命中术语 %d 类" % sum(1 for t in miss_terms if t in s))
 
+    # ---------- T-MODEL-DOC 公式注册表与免责声明 ----------
+    for path_name in ("MODEL_DISCLAIMER.md", "formula_registry.csv"):
+        p = path("models", path_name)
+        chk("T-MODEL-DOC", "%s 存在且非空" % path_name,
+            os.path.isfile(p) and os.path.getsize(p) > 100,
+            "模型来源/口径说明与公式登记文件")
+
     # ---------- T-REPORT-09 现金流可重算（模型 → 报告数值） ----------
     try:
         import importlib.util
@@ -602,15 +609,21 @@ def t_report():
         bb = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(bb)
         pre = read(path("outputs", "case_03_sinofarm_reit", "report_508601.md"))
-        for name, want in (("中性", 0.60), ("悲观", -2.51), ("乐观", 2.23)):
+        for name, want100, want90 in (("中性", 0.60, -0.43),
+                                       ("悲观", -2.51, -3.51),
+                                       ("乐观", 2.23, 1.19)):
             rows = bb.build(name)
-            got = bb.irr_of(rows) * 100
-            chk("T-REPORT-09", "IRR 可重算：%s 情景 %.2f%%" % (name, want),
-                abs(got - want) <= 0.05, "模型 %.2f%% vs 报告 %.2f%%" % (got, want))
+            got100 = bb.irr_of(rows, distribution_ratio=1.00) * 100
+            got90 = bb.irr_of(rows, distribution_ratio=0.90) * 100
+            chk("T-REPORT-09", "IRR 可重算：%s 情景 100%%分配 %.2f%%" % (name, want100),
+                abs(got100 - want100) <= 0.05, "模型 %.2f%% vs 报告 %.2f%%" % (got100, want100))
+            chk("T-REPORT-09d", "IRR 可重算：%s 情景 90%%分配 %.2f%%" % (name, want90),
+                abs(got90 - want90) <= 0.05, "模型 %.2f%% vs 报告 %.2f%%" % (got90, want90))
             # 报告正文用 U+2212 减号排版负数，两种写法都接受
-            forms = ["%.2f%%" % want, ("%.2f%%" % want).replace("-", "\u2212")]
-            chk("T-REPORT-09b", "报告含该情景数值 %s" % name,
-                any(fm in pre for fm in forms), "")
+            for ratio, want in (("100%", want100), ("90%", want90)):
+                forms = ["%.2f%%" % want, ("%.2f%%" % want).replace("-", "\u2212")]
+                chk("T-REPORT-09b", "报告含%s分配情景数值 %s" % (ratio, name),
+                    any(fm in pre for fm in forms), "")
         bg = bb.bridge()
         calc = bg["eb_cg_adj"] + bg["d_eb_rev"] - bg["om_fee"] - bg["unallocated_gap"]
         chk("T-REPORT-09c", "EBITDA 桥可闭合（备考 − 收入传导 − 运营管理费 − 残差 = 基金层）",
