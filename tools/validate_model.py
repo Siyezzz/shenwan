@@ -51,16 +51,25 @@ def main():
     wv = wb_values["6_情景回报"]
     for i, name in enumerate(("悲观", "中性", "乐观")):
         row = 5 + i
-        cf_row = 12 + i
-        formula = wf.cell(row, 2).value
-        cached = wv.cell(row, 2).value
-        expected_irr = build_bottomup.irr_of(build_bottomup.build(name))
-        assert isinstance(formula, str) and formula.startswith("=IRR("), (name, formula)
-        assert isinstance(cached, (int, float)), (name, cached)
-        assert close(cached, expected_irr, 1e-6), (name, cached, expected_irr)
-        assert wf.cell(cf_row, 2).value < 0
-        assert all(isinstance(wv.cell(cf_row, c).value, (int, float))
-                   for c in range(3, 22))
+        cf_row_100 = 12 + i * 2
+        cf_row_90 = cf_row_100 + 1
+        formula_90 = wf.cell(row, 2).value
+        formula_100 = wf.cell(row, 3).value
+        cached_90 = wv.cell(row, 2).value
+        cached_100 = wv.cell(row, 3).value
+        rows = build_bottomup.build(name)
+        expected_90 = build_bottomup.irr_of(rows, distribution_ratio=0.90)
+        expected_100 = build_bottomup.irr_of(rows, distribution_ratio=1.00)
+        assert isinstance(formula_90, str) and formula_90.startswith("=IRR("), (name, formula_90)
+        assert isinstance(formula_100, str) and formula_100.startswith("=IRR("), (name, formula_100)
+        assert close(cached_90, expected_90, 1e-6), (name, cached_90, expected_90)
+        assert close(cached_100, expected_100, 1e-6), (name, cached_100, expected_100)
+        assert wf.cell(cf_row_100, 2).value < 0 and wf.cell(cf_row_90, 2).value < 0
+        assert all(isinstance(wv.cell(cf_row_100, col).value, (int, float))
+                   for col in range(3, 22))
+        for col in range(3, 22):
+            assert close(wv.cell(cf_row_90, col).value,
+                         wv.cell(cf_row_100, col).value * 0.90, 0.02)
 
     # 2_模型 的 2028 起现金流必须链接到中性情景输出，不再使用评估现金流 CAGR 外推收入。
     assert "5_到期重定价" in str(wb_formula["2_模型"]["G7"].value)
