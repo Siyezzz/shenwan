@@ -14,6 +14,28 @@ script_permission: true
 
 output_dir: outputs/{case_dir}
 
+# 交付路径以仓库脚本实际配置为准；模型可位于案例目录之外。
+deliverables:
+  case_dir_required:
+    - source_index.csv
+    - assumptions.csv
+    - claims_verdict.csv
+    - thesis.md
+    - report_<fund_code>.md
+    - report_metrics.json
+    - run_log.md
+    - figures/
+  model_paths:
+    current_508601:
+      - models/cash_flow_model.xlsx
+      - models/scenario_2028.csv
+    rule: "先检查脚本实际输出配置；不得把模型文件强制复制到 outputs/{case_dir}/，也不得仅凭示例推断路径。"
+  prohibited:
+    - review_notes_r1.md
+    - review_notes_r2.md
+    - 独立轮次审稿文件
+  quality_control: "来源、计算、逻辑和表达核验嵌入 reits-report-writing 的既有步骤及模型验证；未解决且影响投资判断的问题写入正式报告和 run_log.md。"
+
 case_dir: "由 fund_code + fund_slug 生成，例如 case_03_sinofarm_reit；不得使用未创建的 ./output 目录。"
 
 report_output: "outputs/{case_dir}/report_<fund_code>.md；写作阶段衔接 skills/reits-report-writing，不得以模型或数据表代替报告。"
