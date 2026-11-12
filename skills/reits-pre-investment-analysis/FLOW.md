@@ -197,7 +197,10 @@
 - 核对材料清单、数字锚点、期间/单位/分母口径、模型公式、情景传导、IRR 现金流和结论一致性。
 - 对账报告、assumptions、claims、source_index、run_log、模型工作簿和情景 CSV：基金代码/文件数量/版本日期/章节编号/关键数字必须一致；任何过期索引、旧运行日志、错章节引用或模型输出不一致，都必须修正或明确标为未验证。
 - 抽查关键数字能否从原文复现；检查是否把预测写成事实、缺失写成零、可供分配写成实际分派。
-- 交付到 `outputs/{case_dir}/`：`source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`review_notes_r1.md`、`review_notes_r2.md`、`run_log.md`、`figures/`。模型与情景文件按脚本实际配置路径生成；当前 508601 案例为 `models/cash_flow_model.xlsx` 和 `models/scenario_2028.csv`。
+- **案例目录必交付文件**：在 `outputs/{case_dir}/` 下生成 `source_index.csv`、`assumptions.csv`、`claims_verdict.csv`、`thesis.md`、`report_<fund_code>.md`、`report_metrics.json`、`run_log.md` 和 `figures/`。其中 `figures/` 仅放报告实际引用的图表，不创建空目录充数。
+- **模型文件按脚本配置路径交付，不强行复制进案例目录**：当前仓库 508601 配置为根目录 `models/cash_flow_model.xlsx` 与 `models/scenario_2028.csv`；后续案例必须先读取实际配置/脚本输出路径，再记录真实路径。不得把路径示例当作所有案例的固定规则。
+- **明确不交付独立审稿文件**：不创建 `review_notes_r1.md`、`review_notes_r2.md` 或其他轮次 review 文件。证据、计算、逻辑和表达检查直接在报告写作与模型验证过程中完成；已修正的问题体现在正式报告/底稿中，未解决且影响判断的问题写入报告相应章节及 `run_log.md`。
+- `report_metrics.json` 保存字数、图表/表格数量及写作质量检查所需指标；它是报告统计结果，不是审稿意见文件。
 - 未完成或证据不足的部分明确标记，不以格式完整代替分析完成。
 - 模型过期、关键结果不一致或核心依据缺失时标为部分完成；预测日期可作为明示假设，不要求投前预测已有实际支付记录。不得以写完代替验证。
-[输出]：复核记录与交付文件清单
+[输出]：最终交付清单、校验状态与未解决事项（记录于 run_log.md）
