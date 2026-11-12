@@ -170,8 +170,9 @@ def irr(cfs, lo=-0.9, hi=2.0):
     return (lo + hi) / 2
 
 
-def irr_of(rows, terminal=0.0):
-    cfs = [-D["size"]] + [r["dist"] for r in rows]
+def irr_of(rows, terminal=0.0, distribution_ratio=1.0):
+    """Investor IRR with an explicit distribution ratio (e.g. 90% or 100%)."""
+    cfs = [-D["size"]] + [r["dist"] * distribution_ratio for r in rows]
     if terminal:
         cfs[-1] += terminal
     return irr(cfs)
