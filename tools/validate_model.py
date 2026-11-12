@@ -21,6 +21,8 @@ def main():
     with open(CSV, encoding="utf-8") as f:
         csv_lines = [x.strip() for x in f if x.strip()]
     assert len(csv_lines) == 58, "expected header + 57 scenario-year rows"
+    assert csv_lines[0] == "scenario,year,revenue,ebitda,capex,intax,wc_change,distributable,rate,source"
+    assert abs(build_bottomup.validate_revenue_bridge() - build_bottomup.D["rev_2027"]) < 1.0
 
     wb_formula = load_workbook(XLSX, data_only=False)
     wb_values = load_workbook(XLSX, data_only=True)
@@ -37,29 +39,42 @@ def main():
             assert ws.cell(row, 1).value == name
             assert int(ws.cell(row, 2).value) == item["year"]
             for col, key in ((3, "rev"), (4, "ebitda"), (5, "capex"),
-                             (6, "intax"), (7, "dist")):
+                             (6, "intax"), (7, "wc"), (8, "dist")):
                 assert close(ws.cell(row, col).value, item[key]), (
                     name, item["year"], key, ws.cell(row, col).value, item[key])
-            assert close(ws.cell(row, 8).value, item["rate"], 1e-7)
+            assert close(ws.cell(row, 9).value, item["rate"], 1e-7)
+            if item["year"] >= 2028:
+                assert close(item["wc"], 0.0, 1e-9)  # 显式占位假设，不是披露事实
 
     # Formula cells must be present and recalculated to numeric cached values.
     wf = wb_formula["6_情景回报"]
     wv = wb_values["6_情景回报"]
     for i, name in enumerate(("悲观", "中性", "乐观")):
         row = 5 + i
-        cf_row = 12 + i
-        formula = wf.cell(row, 2).value
-        cached = wv.cell(row, 2).value
-        expected_irr = build_bottomup.irr_of(build_bottomup.build(name))
-        assert isinstance(formula, str) and formula.startswith("=IRR("), (name, formula)
-        assert isinstance(cached, (int, float)), (name, cached)
-        assert close(cached, expected_irr, 1e-6), (name, cached, expected_irr)
-        assert wf.cell(cf_row, 2).value < 0
-        assert all(isinstance(wv.cell(cf_row, c).value, (int, float))
-                   for c in range(3, 22))
+        cf_row_100 = 12 + i * 2
+        cf_row_90 = cf_row_100 + 1
+        formula_90 = wf.cell(row, 2).value
+        formula_100 = wf.cell(row, 3).value
+        cached_90 = wv.cell(row, 2).value
+        cached_100 = wv.cell(row, 3).value
+        rows = build_bottomup.build(name)
+        expected_90 = build_bottomup.irr_of(rows, distribution_ratio=0.90)
+        expected_100 = build_bottomup.irr_of(rows, distribution_ratio=1.00)
+        assert isinstance(formula_90, str) and formula_90.startswith("=IRR("), (name, formula_90)
+        assert isinstance(formula_100, str) and formula_100.startswith("=IRR("), (name, formula_100)
+        assert close(cached_90, expected_90, 1e-6), (name, cached_90, expected_90)
+        assert close(cached_100, expected_100, 1e-6), (name, cached_100, expected_100)
+        assert wf.cell(cf_row_100, 2).value < 0 and wf.cell(cf_row_90, 2).value < 0
+        assert all(isinstance(wv.cell(cf_row_100, col).value, (int, float))
+                   for col in range(3, 22))
+        for col in range(3, 22):
+            assert close(wv.cell(cf_row_90, col).value,
+                         wv.cell(cf_row_100, col).value * 0.90, 0.02)
 
-    # Sensitivity sheet must reference the neutral 2028 repricing row, not the
-    # appraisal-growth baseline in sheet 2_模型.
+    # 2_模型 的 2028 起现金流必须链接到中性情景输出，不再使用评估现金流 CAGR 外推收入。
+    assert "5_到期重定价" in str(wb_formula["2_模型"]["G7"].value)
+    assert "H26" in str(wb_formula["2_模型"]["G7"].value)
+    # Sensitivity sheet must reference the neutral 2028 repricing row, not the appraisal-growth baseline.
     sens = wb_formula["4_敏感性"]
     assert "5_到期重定价" in str(sens["K5"].value)
     assert "5_到期重定价" in str(sens["K6"].value)

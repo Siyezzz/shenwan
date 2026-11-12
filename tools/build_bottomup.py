@@ -36,7 +36,7 @@ D = {
     "rev_2027": 254_760_101.02,
     "rent_fix_2026": 234_867_171.72,  # 营业收入预测分项
     "rent_fix_2027": 235_927_878.79,
-    "nonrent_2027": 15_982_525.26,   # 提成 2,849,696.97 + 停车 6,927,272.73 + 多经 8,305,252.53 + 其他 750,000
+    "nonrent_2027": 18_832_222.23,   # 提成 2,849,696.97 + 停车 6,927,272.73 + 多经 8,305,252.53 + 其他 750,000
     "ebitda_2026": 170_437_399.69,
     "ebitda_2027": 174_883_323.29,
     "capex_2026": 15_460_400.00,
@@ -72,7 +72,8 @@ G1_AREA = D["leased_area"] * G1["area_pct"]
 G1_RENT_2027 = D["rent_fix_2027"] * G1["rent_pct"]
 OTHER_RENT_2027 = D["rent_fix_2027"] - G1_RENT_2027
 
-# 三情景参数（研究假设，见报告第六章参数表）
+# 三情景参数（研究假设，见报告第六章参数表）。long_g 是 2029 年起总营业收入增长假设，
+# 不是招募书所称的评估现金流 CAGR；二者口径不同，不得互相替代。
 SCEN = {
     "悲观": {"renew": 0.55, "repricing": -0.15, "vacant_m": 9,
              "other_g": -0.06, "long_g": -0.010,
@@ -82,17 +83,34 @@ SCEN = {
              "basis": "以 2025 年实际续租率 76.83% 作基准；空置期用非主力店平均去化 4.3 个月作代理，主力店可能更长；非概率预测"},
     "乐观": {"renew": 0.95, "repricing": -0.03, "vacant_m": 2,
              "other_g": -0.01, "long_g": 0.0225,
-             "basis": "续租率回到 95%；价格基本守住；长期增长取评估假设 2.25%"},
+             "basis": "续租率情景 95%；价格基本守住；2.25% 是研究者设定的总收入增长上行情景，不是把评估现金流增长率换算为收入增长率"},
 }
 PASSTHROUGH = 0.81      # 收入→EBITDA 传导系数（房产税与运营管理费随收入下降）
 CAPEX_RATIO = 0.035     # 2028 年起 capex = 收入 × 3.5%
 INTAX_STEP = 0.02
+# 2028 年以后未取得可核验的营运资金预测，暂以零变动作为显式占位假设。
+# 该值不是已披露事实，必须在取得应收/应付及收缴数据后替换。
+NWC_CHANGE_2028_PLUS = 0.0
 
 FIRST, LAST = 2026, 2044
 
 
-def build(scen_name):
-    s = SCEN[scen_name]
+
+def validate_revenue_bridge():
+    """2027E 收入分项必须与披露总收入勾稽，容差 1 元。"""
+    component_sum = D["rent_fix_2027"] + D["nonrent_2027"]
+    if abs(component_sum - D["rev_2027"]) > 1.0:
+        raise ValueError(
+            "2027 revenue bridge mismatch: components %.2f vs disclosed %.2f" %
+            (component_sum, D["rev_2027"])
+        )
+    return component_sum
+
+def build(scen_name, long_g=None):
+    validate_revenue_bridge()
+    s = dict(SCEN[scen_name])
+    if long_g is not None:
+        s["long_g"] = float(long_g)
     rows = []
     rev_prev = D["rev_2027"]
     eb_prev = D["ebitda_2027"]
@@ -104,9 +122,12 @@ def build(scen_name):
         eb = D["ebitda_2026"] if y == 2026 else D["ebitda_2027"]
         rows.append({"year": y, "rev": rev, "ebitda": eb,
                      "capex": D["capex_%d" % y], "intax": D["intax_%d" % y],
-                     "dist": dist, "rate": dist / D["size"], "src": "披露值规范化"})
+                     "wc": D["wc_%d" % y], "dist": dist, "rate": dist / D["size"],
+                     "src": "披露值规范化"})
 
     # 2028：到期组重定价 + 其余面积按市场趋势
+    # 注意：renew 是对到期组固定租金现金流的聚合续租代理，历史 76.83% 是面积口径，
+    # 两者并非严格同口径；在缺少逐租户面积/租金/续租数据时，仅作情景近似，不是精确预测。
     decay = 1 - s["vacant_m"] / 12.0
     g1_2028 = G1_RENT_2027 * (s["renew"] * (1 + s["repricing"])
                               + (1 - s["renew"]) * decay * (1 + s["repricing"]))
@@ -116,10 +137,11 @@ def build(scen_name):
     eb_2028 = eb_prev + PASSTHROUGH * (rev_2028 - rev_prev)
     cx_2028 = rev_2028 * CAPEX_RATIO
     it_2028 = D["intax_2027"] * (1 + INTAX_STEP)
+    wc_2028 = NWC_CHANGE_2028_PLUS
+    dist_2028 = eb_2028 - cx_2028 - it_2028 - wc_2028
     rows.append({"year": 2028, "rev": rev_2028, "ebitda": eb_2028,
-                 "capex": cx_2028, "intax": it_2028,
-                 "dist": eb_2028 - cx_2028 - it_2028,
-                 "rate": (eb_2028 - cx_2028 - it_2028) / D["size"], "src": "本报告模型"})
+                 "capex": cx_2028, "intax": it_2028, "wc": wc_2028,
+                 "dist": dist_2028, "rate": dist_2028 / D["size"], "src": "研究情景；WC暂按0"})
 
     # 2029–2044：长期增长率
     for y in range(2029, LAST + 1):
@@ -127,9 +149,10 @@ def build(scen_name):
         eb = rows[-1]["ebitda"] + PASSTHROUGH * (rev - rows[-1]["rev"])
         cx = rev * CAPEX_RATIO
         it = rows[-1]["intax"] * (1 + INTAX_STEP)
-        dist = eb - cx - it
+        wc = NWC_CHANGE_2028_PLUS
+        dist = eb - cx - it - wc
         rows.append({"year": y, "rev": rev, "ebitda": eb, "capex": cx, "intax": it,
-                     "dist": dist, "rate": dist / D["size"], "src": "本报告模型"})
+                     "wc": wc, "dist": dist, "rate": dist / D["size"], "src": "研究情景；WC暂按0"})
     return rows
 
 
@@ -147,8 +170,9 @@ def irr(cfs, lo=-0.9, hi=2.0):
     return (lo + hi) / 2
 
 
-def irr_of(rows, terminal=0.0):
-    cfs = [-D["size"]] + [r["dist"] for r in rows]
+def irr_of(rows, terminal=0.0, distribution_ratio=1.0):
+    """Investor IRR with an explicit distribution ratio (e.g. 90% or 100%)."""
+    cfs = [-D["size"]] + [r["dist"] * distribution_ratio for r in rows]
     if terminal:
         cfs[-1] += terminal
     return irr(cfs)
@@ -206,26 +230,14 @@ def bridge():
     }
 
 
-def land_extension():
-    """若收益期为 29.24 年（与地下车库同）而非 19.24 年，估值增加多少"""
-    base = build("乐观")
-    noi_2044 = base[-1]["ebitda"]
-    rate, g = 0.05, 0.0225
-    extra = 0.0
-    for k in range(1, 11):     # 多 10 年
-        extra += noi_2044 * (1 + g) ** k / (1 + rate) ** (19 + k)
-    return {"noi_2044": noi_2044, "extra_pv": extra,
-            "pct_of_appraisal": extra / D["appraisal"]}
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--csv", default="")
     a = ap.parse_args()
 
     out = []
-    hdr = ("%-6s %14s %14s %12s %12s %14s %8s" %
-           ("年度", "营业收入", "EBITDA", "资本性支出", "利息所得税", "可供分配", "分派率"))
+    hdr = ("%-6s %14s %14s %12s %12s %12s %14s %8s" %
+           ("年度", "营业收入", "EBITDA", "资本性支出", "利息所得税", "营运资金", "可供分配", "分派率"))
     print("=" * 96)
     print("一、到期重定价三情景（2028 年起为模型，2026–2027 为披露值规范化）")
     for name in ("悲观", "中性", "乐观"):
@@ -236,7 +248,7 @@ def main():
             if r["year"] in (2026, 2027, 2028, 2029, 2030, 2035, 2040, 2044):
                 print("%-6d %14.0f %14.0f %12.0f %12.0f %14.0f %7.2f%%" %
                       (r["year"], r["rev"], r["ebitda"], r["capex"],
-                       r["intax"], r["dist"], r["rate"] * 100))
+                       r["intax"], r["wc"], r["dist"], r["rate"] * 100))
         print("  2028 收入同比 %+.2f%%；2028 分派率较 2027 变动 %+.2f pct" %
               ((rows[2]["rev"] / rows[1]["rev"] - 1) * 100,
                (rows[2]["rate"] - rows[1]["rate"]) * 100))
@@ -261,19 +273,15 @@ def main():
     print("= 基金层预测 EBITDA（2026E）                %14.0f" % b["eb_fund"])
 
     print("\n" + "=" * 96)
-    print("三、土地年限对估值的影响")
-    le = land_extension()
-    print("2044 年 EBITDA                              %14.0f" % le["noi_2044"])
-    print("若收益期延长 10 年（至 2054），新增现值      %14.0f  = 评估值的 %.1f%%" %
-          (le["extra_pv"], le["pct_of_appraisal"] * 100))
+    print("模型边界：未取得原始资产评估报告，不将 EBITDA 当作 NOI；未建模土地续期、2045 部分年度现金流和处置终值。")
 
     if a.csv:
-        lines = ["scenario,year,revenue,ebitda,capex,intax,distributable,rate,source"]
+        lines = ["scenario,year,revenue,ebitda,capex,intax,wc_change,distributable,rate,source"]
         for name, rows in out:
             for r in rows:
-                lines.append("%s,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%s" %
+                lines.append("%s,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.6f,%s" %
                              (name, r["year"], r["rev"], r["ebitda"], r["capex"],
-                              r["intax"], r["dist"], r["rate"], r["src"]))
+                              r["intax"], r["wc"], r["dist"], r["rate"], r["src"]))
         d = os.path.dirname(a.csv)
         if d and not os.path.isdir(d):
             os.makedirs(d)
