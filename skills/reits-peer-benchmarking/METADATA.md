@@ -2,9 +2,9 @@ type: flow
 
 name: reits-peer-benchmarking
 
-version: 2.4.0
+version: 2.5.0
 
-description: "公募REITs横向基准的取数层：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除）。位置由三层参照定义（组内位次 + 国债与健康线等绝对锚 + 定价函数残差），收益率名次另检查不同口径下的变动幅度；商业模式先做风险归属、再走五轴、最后按可迁移性三分收口。只交论证底稿 findings.csv 与图，不写成文，正文由 reits-report-writing 按 comparison 骨架完成。篇幅按内容需要，不设字数下限。"
+description: "公募REITs横向基准的取数层：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除）。默认围绕组内相对位置、关键绝对锚、收益与资产/现金流质量、商业模式差异展开；定价函数残差与额外风险维度按数据充分性和问题需要启用，不强制复杂模型。只交论证底稿 findings.csv 与必要图表，不写成文，正文由 reits-report-writing 按 comparison 骨架完成。篇幅按内容需要，不设字数下限。"
 
 domain: 公募REITs横向比较
 
@@ -67,9 +67,9 @@ inputs:
 baseline_contract:
   # 报告的"结论质量"由这八项共同决定，缺任一项即不得出定位结论
   required_outputs:
-    - comparison_standard: 三层参照各自的取值与阈值（L1 位次与幅度、L2 国债收益率与健康线及评估值、L3 拟合值与残差阈值），以及判定用词的三档定义；须在报告第三节写出，取数前定稿
+    - comparison_standard: 组内位次与幅度、关键绝对锚（如国债收益率、适用健康线或评估值）及判定用词的三档定义；定价残差仅在启用时登记其阈值与限制，须在取数前定稿
     - position_table: 四个坐标各自的位次、与中位数的差、换口径后的位次、名次变动幅度；每行须带绝对锚一列（对国债溢价／对健康线／残差率）与"判断依据指向哪一节"。只有名次一列的表不算位置表
-    - pricing_function: 拟合式 C = a×P + b、斜率读数（边际现金回报 vs 平均分派率的差额来源）、逐只拟合值与残差率、隐含应有市值的口径声明（不是目标价；残差率与市值偏离率不得混用）
+    - pricing_function: 可选。仅在样本量、分母口径和数据质量足够且确需解释定价差异时，提供拟合式 C = a×P + b、斜率、残差率及口径声明；否则记录跳过原因，不能把残差当成错价或目标价
     - risk_allocation: 五类风险（出租率／租金／资本开支／关联方／扩募）各自的承担者、凭据、上限；条款存在但未触发的须注明"实际仍由持有人承担"
     - findings_brief: `findings.csv` 一行一条判断，字段含 finding_id / claim / evidence_state / evidence_value / source_anchor / assumptions / counterevidence / scope / coordinate / confidence_tier / primary_section / reuse_sections / depends_on / invalidation_condition；移交前须通过字段与依赖校验
     - comparability_registry: 每个指标登记资产类型适用范围、经济含义、方向条件、单位分母、时点/期间属性、阈值来源与不可比规则；不同经济机制或分母不得合并排名
@@ -78,8 +78,8 @@ baseline_contract:
     - scope_statement: 用户提到 ABS／类 REITs／境外 REITs 时的收敛与排除说明（成交结构、披露口径、市值可比性三条理由至少给两条）；只字不提即为擅自更换问题
     - caliber_log: 五处换算方式、市值反推的分子分母来源、每只标的分派率的分母口径、proxy 指标清单
     - distribution_composition: 可供分配按四类来源（当年经营/往年结转/会计调整/第三方补足）的占比
-    - conditional_verdict: 模式优劣落在五轴（现金流可预测性／分派自给度／增长来源／利益一致性／周期弹性），每轴给方向与依据字段；另附"适用条件/代价/验证指标"三列；不得出现评分或评级
-    - improvement_chain: 每条可改进项须同时满足"坐标位次落后（带差幅）+ 五轴中某一轴落后 + 可迁移性归入可复制或可购买（后者给成本量级）+ 下一期可查字段与阈值"；缺任一条即删除，归入不可复制的改写为结构性差异
+    - conditional_verdict: 模式比较默认覆盖现金流可预测性、分派自给度、增长来源；用户问题涉及治理或周期风险且有可靠披露时，再补充利益一致性或周期弹性；每项给方向、适用条件、代价与验证指标，不得出现评分或评级
+    - improvement_chain: 每条可改进项须同时满足"坐标位次落后（带差幅）+ 某一核心商业模式维度落后 + 可迁移性归入可复制或可购买（后者给成本量级）+ 下一期可查字段与阈值"；缺任一条即删除，归入不可复制的改写为结构性差异
     - advantage_test: 每条独特优势须同时满足"组内唯一（两只以上具备即降为较好）+ 可核对 + 消失条件"；缺任一条即删除
     - model_diversity: 样本内模式是否同质；同质时的参照标的清单及其"不入排名"声明
     - invalidation: 每个结论句的限定词，以及下一期可观测的改写条件（指标+阈值+会改写哪一句）
@@ -355,6 +355,8 @@ metric_bands:
     amplification: "1/(1 - b/(a×P))"
     note: 样本少于 6 只不报斜率，只报残差方向。残差率换算成市值偏离会被截距放大，两个口径只能用一个并注明；隐含应有市值不是目标价
 
+depth_policy: "默认先完成可比性、组内位置、关键绝对锚、收益与资产/现金流质量、商业模式三项核心维度；定价残差、费用细拆、治理与周期弹性按问题需要和数据充分性启用。不得为了填满模板强行补维度；未启用的分析登记原因。"
+
 output_contract:
   # 本层交付底稿与图；报告由 reits-report-writing 产出，文件名沿用其约定
   findings: "findings.csv"
@@ -366,7 +368,7 @@ output_contract:
   matrix_quality: "matrix_quality.csv"
   sample_funnel: "sample_funnel.csv"
   length: "不设字数下限与目标；按 tools/count_report_words.py 的正文口径统计一次写入封面，仅作记录"
-  figures: 5
+  figures: "按启用的分析生成；至少覆盖选样、收益口径变化与质量对比，定价和模式图按需生成"
   figure_rule: "坐标由脚本计算；图片作为内部素材移交写作层，必须嵌入最终报告对应正文，不默认单独呈现。HTML 版内联，Markdown 版走相对图片引用并随报告打包资源；交付前检查引用与渲染有效。"
   figure_manifest: "figure_id / path / finding_ids / section_id / caption / source_anchor / disposition；由写作层完成章节映射和采用状态登记"
   forbidden:
