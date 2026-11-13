@@ -2,7 +2,7 @@
 
 ```yaml
 name: reits-report-writing
-version: 1.3.0          # 1.3.0：强化 comparison 摘要分支与名次变动的自然语言表达
+version: 1.4.0          # 1.4.0：明确 comparison 只承接上游已验证维度，不自行扩展比较方向
 layer: downstream          # 取数层（pre/post/investment）之后，交付之前
 position: 把 FLOW 产物写成正式研报
 upstream:
