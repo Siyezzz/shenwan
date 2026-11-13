@@ -2,9 +2,9 @@ type: flow
 
 name: reits-peer-benchmarking
 
-version: 2.3.0
+version: 2.4.0
 
-description: "公募REITs横向基准的取数层：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除）。位置由三层参照定义（组内位次 + 国债与健康线等绝对锚 + 定价函数残差），判定用词随证据分三档；商业模式先做风险归属、再走五轴、最后按可迁移性三分收口。只交论证底稿 findings.csv 与图，不写成文，正文由 reits-report-writing 按 comparison 骨架完成。篇幅按内容需要，不设字数下限。"
+description: "公募REITs横向基准的取数层：用户只给感兴趣的标的，流程自行枚举同类样本并说明进出理由（含 ABS/类 REITs 的收敛与排除）。位置由三层参照定义（组内位次 + 国债与健康线等绝对锚 + 定价函数残差），收益率名次另检查不同口径下的变动幅度；商业模式先做风险归属、再走五轴、最后按可迁移性三分收口。只交论证底稿 findings.csv 与图，不写成文，正文由 reits-report-writing 按 comparison 骨架完成。篇幅按内容需要，不设字数下限。"
 
 domain: 公募REITs横向比较
 
@@ -59,7 +59,7 @@ inputs:
     description: 规模下限（可租面积 ㎡）。低于此值不纳入，避免单位化指标失真；连续型资产改用产能或里程门槛
   - name: comparability_thresholds
     default: {area_ratio: 3.0, rank_range: 2}
-    description: area_ratio = 最大/最小面积倍数上限，超过即强制单位化；rank_range = 排名极差告警阈值
+    description: area_ratio = 最大/最小面积倍数上限，超过即强制单位化；rank_range = 兼容旧脚本的提醒阈值（2 位起提示口径敏感），最终表述按下方 rank_range 三档规则
   - name: doc_root
     default: ./source_documents
     description: 披露文件根目录。优先从一手年报取数，取不到才降级到仓库内既有报告
@@ -68,7 +68,7 @@ baseline_contract:
   # 报告的"结论质量"由这八项共同决定，缺任一项即不得出定位结论
   required_outputs:
     - comparison_standard: 三层参照各自的取值与阈值（L1 位次与幅度、L2 国债收益率与健康线及评估值、L3 拟合值与残差阈值），以及判定用词的三档定义；须在报告第三节写出，取数前定稿
-    - position_table: 四个坐标各自的位次、与中位数的差、换口径后的位次、排名极差；每行须带绝对锚一列（对国债溢价／对健康线／残差率）与"判断依据指向哪一节"。只有名次一列的表不算位置表
+    - position_table: 四个坐标各自的位次、与中位数的差、换口径后的位次、名次变动幅度；每行须带绝对锚一列（对国债溢价／对健康线／残差率）与"判断依据指向哪一节"。只有名次一列的表不算位置表
     - pricing_function: 拟合式 C = a×P + b、斜率读数（边际现金回报 vs 平均分派率的差额来源）、逐只拟合值与残差率、隐含应有市值的口径声明（不是目标价；残差率与市值偏离率不得混用）
     - risk_allocation: 五类风险（出租率／租金／资本开支／关联方／扩募）各自的承担者、凭据、上限；条款存在但未触发的须注明"实际仍由持有人承担"
     - findings_brief: `findings.csv` 一行一条判断，字段含 finding_id / claim / evidence_state / evidence_value / source_anchor / assumptions / counterevidence / scope / coordinate / confidence_tier / primary_section / reuse_sections / depends_on / invalidation_condition；移交前须通过字段与依赖校验
@@ -83,7 +83,7 @@ baseline_contract:
     - advantage_test: 每条独特优势须同时满足"组内唯一（两只以上具备即降为较好）+ 可核对 + 消失条件"；缺任一条即删除
     - model_diversity: 样本内模式是否同质；同质时的参照标的清单及其"不入排名"声明
     - invalidation: 每个结论句的限定词，以及下一期可观测的改写条件（指标+阈值+会改写哪一句）
-  decision_rule: "判定用词受证据边界约束：只有 L1 位次称'组内排序'；位次加可核实的 L2 绝对锚称'相对位置'；L3 模型结果只称'模型条件下的偏离'，不得因三层齐备就自动称'确认了位置'。来源可靠性、样本覆盖、假设依赖与稳健性不足时继续降级。跳级用词（只有名次就写'处于中游''明显占优'）一律改写。任何排名第一的句子都必须带分子构成、与中位差与极差。"
+  decision_rule: "判定用词受证据边界约束：只有 L1 位次称'组内排序'；位次加可核实的 L2 绝对锚称'相对位置'；L3 模型结果只称'模型条件下的偏离'，不得因三层齐备就自动称'确认了位置'。来源可靠性、样本覆盖、假设依赖与稳健性不足时继续降级。跳级用词（只有名次就写'处于中游''明显占优'）一律改写。任何排名第一的句子都必须带分子构成、与中位差与名次变动幅度。"
   anchor_rule: "绝对锚必须与样本无关，不随纳入哪几只而变；不得因样本普遍偏低而下调健康线。全部样本一起低于国债 + 风险溢价时，组内第一只能称'组内最高'。"
   length_rule: "篇幅由内容决定，不设字数下限，也不设上限。删减只删重复判断，不删证据、口径与反例；不得为凑长度增写方法论述。"
   non_goals: "不给买入建议、不给目标价、不给商业模式总分、不做显著性检验。四项须在报告第一节显式声明。隐含应有市值只作位置度量，不得写成涨跌空间。"
@@ -337,9 +337,10 @@ metric_bands:
     high: 30
     note: 超过 30% 时，EBITDA 必须回加减值，否则盈利能力被系统性低估
   rank_range:
-    stable: 1
-    unstable: 3
-    note: ≥3 位时禁止写"排第几"而不带口径
+    stable_max: 1
+    sensitive: 2
+    unstable_min: 3
+    note: 这是三个收益率口径下的名次变动幅度：0–1 位可直接描述名次；2 位须提醒名次会随口径改变；≥3 位不单独引用某一个名次，改写为不同口径下位置不稳定
   yield_spread:
     low: 150
     mid: 300
