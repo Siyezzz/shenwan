@@ -2,7 +2,7 @@
 
 ```yaml
 name: reits-report-writing
-version: 1.4.0          # 1.4.0：明确 comparison 只承接上游已验证维度，不自行扩展比较方向
+version: 1.5.0          # 新增两类独立 NPL ABS 写作路由，保留 REITs 调用兼容
 layer: downstream          # 取数层（pre/post/investment）之后，交付之前
 position: 把 FLOW 产物写成正式研报
 upstream:
@@ -14,6 +14,21 @@ outputs:
   - report_{code}.md          # 正式报告
   - report_metrics.json       # 可机读的字数与合规指标
 ```
+
+## npl_report_contract
+
+`report_type=npl_issuance | npl_monitor` 时，本节优先于 REITs 专属骨架、字数及 style_rules 中的配额。保留旧入口名用于兼容；不改变 REITs 上游的输出协议。
+
+输入为一个独立研究技能提供的 `report_handoff`（JSON 或等价结构），包含 `case_id / report_type / report_title / output_dir / report_authorized / evidence_scope`，以及已核验事实、可复算计算、假设、判断、缺口、来源索引和章节映射的真实路径。字段名有差异时显式映射，不要求为写作复制全部底稿。`report_authorized=false` 时停止。两个上游不得互为必需输入。
+
+NPL 的来源索引一行一份文件，source_id 为完整小写 SHA256；金额为元，比例存为 0—1，百分比只在展示时转换，比例差用百分点，倍数不乘100。逐值页码与原单位保留在 panel，findings.kind 为 fact/calculation/judgment；推断保留限定与未核验状态。该接口不得把来源索引当数值表，或将未核验数字升格为事实。IN-2 接受逐支付日模型表及计算程序/公式，不强制 Excel；IN-4 接受保留逐条证据与裁决的等价字段。仅与任务有关的原件才能作为金融证据。
+
+| report_type | 独立上游 | 章节骨架（按问题展开，可按证据调整） |
+|---|---|---|
+| `npl_issuance` | mortgage-npl-abs-protection | 摘要与身份边界；发行规模及分层；九项资产质量指标；结构保护及生效条件；静态本金下限与动态本息临界回收；时间/费用敏感性；风险与不可判定；来源/公式/假设附录 |
+| `npl_monitor` | npl-abs-periodic-monitor | 摘要与身份/期间边界；逐期回收处置及现金；发行原始预测对照和累计偏差；优先档本息与余额/现金匹配；回收稳定性与偏差持续性；剩余资产及风险变化；后续验证与缺口；来源/口径/对账附录 |
+
+每次仅生成所选类型一篇报告：`{output_dir}/report_{code}_{report_type}.md` 与 `report_metrics_{report_type}.json`；code 未核验则使用 case_id，不以文件名解决档次冲突。HTML 在仓库工具可用时同名渲染。字数按用户任务及论证需要，不套用 pre/post 下限。不能为满足配额发明反转、差额或结论。
 
 ## report_input_contract
 
@@ -207,11 +222,11 @@ outputs:
 
 ## visual_style（阅读版 `.html`）
 
-版面不靠手写 CSS 复现，由 `tools/render_report.py` 统一产出。脚本只做四件事：markdown 块级解析（标题／表格／图／有序与无序列表／引用块／代码块／分隔线）、行内解析（图／链接／加粗／斜体／行内码）、按 md 所在目录解析图片并转 base64 内嵌、套上固定 CSS。零第三方依赖。
+版面不靠手写 CSS 复现，由 `skills/reits-report-writing/tools/render_report.py` 统一产出。脚本只做四件事：markdown 块级解析（标题／表格／图／有序与无序列表／引用块／代码块／分隔线）、行内解析（图／链接／加粗／斜体／行内码）、按 md 所在目录解析图片并转 base64 内嵌、套上固定 CSS。零第三方依赖。
 
 ```bash
-python tools/render_report.py report_XXXXXX.md                       # 输出同名 .html
-python tools/render_report.py report.md -o out/r.html --title "…"    # 指定路径与标签标题
+python skills/reits-report-writing/tools/render_report.py report_XXXXXX.md                       # 输出同名 .html
+python skills/reits-report-writing/tools/render_report.py report.md -o out/r.html --title "…"    # 指定路径与标签标题
 ```
 
 | 项 | 值 |

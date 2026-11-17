@@ -1,9 +1,20 @@
 ---
 name: reits-report-writing
-description: Use when 需要把 FLOW 的执行结果写成一份可交付的正式研究报告时（投前投资分析报告、投后跟踪报告、横向基准对比报告、专题深度）。负责章节骨架、论断式标题、论证段落、图表与资料来源、记者腔改写、语言清洗、字数核验与内嵌质量检查，把"我执行了哪些步骤"改写成"这个资产处在什么处境"。含六种模型腔的改写法与三条机械编辑动作（换标测试、删首段、删尾句）。不负责取数与判断——那是 reits-pre-investment-analysis / reits-post-investment-monitor / reits-peer-benchmarking 的职责。适用于"把分析写成报告""这份研报不像研报""全是 AI 腔""重写报告正文""审稿"。
+description: Use when 需要把 FLOW 的执行结果写成一份可交付的正式研究报告时（投前投资分析报告、投后跟踪报告、横向基准对比报告、专题深度）。负责章节骨架、论断式标题、论证段落、图表与资料来源、记者腔改写、语言清洗、字数核验与内嵌质量检查，把"我执行了哪些步骤"改写成"这个资产处在什么处境"。含六种模型腔的改写法与三条机械编辑动作（换标测试、删首段、删尾句）。也支持 NPL ABS 发行保护和存续期两类独立报告。不负责取数、计算与研究判断——由相应 REITs 或 NPL ABS 上游技能完成。适用于"把分析写成报告""这份研报不像研报""全是 AI 腔""重写报告正文""审稿"。
 ---
 
-# 公募 REITs 研究报告写作
+# 研究报告写作（REITs / NPL ABS）
+
+## 报告类型路由（先于下文案例范式）
+
+保留 `reits-report-writing` 作为兼容入口，避免改变现有 REITs 技能调用；本技能的写作能力也接收独立 NPL ABS 研究底稿。运行时先读取 `report_handoff` 的 `report_type`、`report_authorized`、`report_title`、`output_dir` 与证据边界。未授权正式报告时停止，不把交接等同于写作授权。
+
+- `npl_issuance`：只需 `mortgage-npl-abs-protection` 或等价的独立研究底稿，采用 METADATA 的发行资产质量与保护机制骨架。
+- `npl_monitor`：只需 `npl-abs-periodic-monitor` 或等价的独立研究底稿，采用 METADATA 的存续期跟踪骨架。
+- 每个 NPL 类型单独形成一篇报告，不要求另一个技能先运行，也不自动合并。输出分别为 `{output_dir}/report_{code}_{report_type}.md`，指标文件分别为 `report_metrics_{report_type}.json`；若 code 未核验，用信托级 case_id 作文件标识，标题保留身份限制。
+- NPL 的数字、计算、判断均来自该次上游研究；写作层仅组织表达，缺项退回相应上游。仅共享已核验底数与来源时，核对身份、期间、口径及字段映射。
+- NPL 使用两类各自的章节和指标，不采用下文 REITs 专属的租金、出租率、分派、估值或七章/五段配额，也不强制寻找“看似好、实际不可持续”的反转。必要口径与临界回收条件必须留在正文；图表只在确有对应披露值时说明差额。共享的证据追溯、事实/计算/判断区分及语言清理规则继续适用。
+- `pre / post / comparison` 仍按原 REITs 流程执行。仓库工具命令以仓库根目录为工作目录；单独分发技能而无 `tools/` 时，明确工具不可用，可交付经人工核验的 Markdown，不声称完成 HTML 渲染或自动检查。
 
 本 skill 是一个 flow（可执行写作流程），**处在取数层的下游**。
 
@@ -19,7 +30,7 @@ description: Use when 需要把 FLOW 的执行结果写成一份可交付的正�
 3. 结论先于文字。`#2` 的论点树没定下来之前，不写任何一段正文。
 4. **判断的档位也不许改。** 上游标"组内排序"的，正文只能写位次与幅度；要升级用词，退回上游补绝对锚。
 
-**输出位置**：上游约定的 `outputs/{case}/`，文件名沿用既有命名（`report_{code}.md`）。同时产出 `report_metrics.json`（字数、图表数、禁用词命中数），供自动化测试读取。阅读版 `.html` 用 `python tools/render_report.py <report.md>` 生成（图 base64 内嵌、零依赖，几何与配色见 `METADATA.md` 的 `visual_style`），不手写 CSS、不手改 html。
+**输出位置**：上游约定的 `outputs/{case}/`，文件名沿用既有命名（`report_{code}.md`）。同时产出 `report_metrics.json`（字数、图表数、禁用词命中数），供自动化测试读取。阅读版 `.html` 用 `python skills/reits-report-writing/tools/render_report.py <report.md>` 生成（图 base64 内嵌、零依赖，几何与配色见 `METADATA.md` 的 `visual_style`），不手写 CSS、不手改 html。
 
 ---
 
