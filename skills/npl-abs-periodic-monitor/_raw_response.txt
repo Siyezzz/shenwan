@@ -1,0 +1,399 @@
+<<<FILE: SKILL.md>>>
+---
+name: npl-abs-periodic-monitor
+description: 适用于不良贷款ABS成立后连续受托报告的分期、半年度与累计监测，独立核对资产池回收、处置现金流、逐档本息及余额、发行原始预测偏差趋势和剩余资产质量。基于运行时指定附件封闭取证，独立完成研究、计算与判断，输出可重跑底稿；用户要求报告时交给reits-report-writing独立生成一篇存续期报告，无须先运行其他研究技能。
+agent_created: true
+---
+
+# 不良 ABS 存续期定期监测
+
+将存续期披露整理为“实际回收 → 原始预测对照 → 资金分配与证券余额 → 剩余资产质量”的可复核流程。阅读 [FLOW.md](FLOW.md)，按 #1—#12 执行；字段、公式及验收规则以 [METADATA.md](METADATA.md) 为准，写作衔接阅读 [references/report-handoff.md](references/report-handoff.md)。
+
+运行前锁定附件路径、请求标的、截止范围和授权模式。用户只要求编写或修改技能时，仅编辑技能定义，不读取案例正文、不抽取真实指标、不生成案例底稿或报告。执行监测时默认止于底稿与 handoff；只有用户明确要求写报告后才进入写作层。
+
+## 证据与身份门槛
+
+仅将运行时 `evidence_scope` 登记、用户授权的附件成员作为金融事实证据；`archive_path`、`doc_root`、预期报告清单及截止范围按项目配置，不设产品、路径或期数默认值。参考仓库只提供技能与文风格式，不能成为金融论据，不联网补金融资料。新增附件须由用户明确扩展证据边界后再登记。建鑫验收配置集中在 [references/report-handoff.md](references/report-handoff.md) 的案例区，仅在任务明确指定该案例时使用。
+
+保留 `requested_identity` 与 `verified_identity`。文件名中的全称、代码或档次与请求不一致时登记待核冲突，不能直接判定代码对应档次。核对发行说明书证券分层、发行结果与受托报告正文中的全称、代码、档次及初始余额；未解冲突只允许资产池层面独立可核数据，不得跨档加总、拼接本息、余额、兑付率或安全性结论。
+
+执行时必须重新枚举授权附件、核页、抽取并对关键数字原页复核；候选文档清单与份数只是待核线索，不视为正文核验。PDF 工具不可用、无文字层或 OCR 未核实，登记对应不可读状态，禁止凭文件名或模型记忆填值。
+
+## 必须保留的分析边界
+
+- 报告序号不等于自然半年。分别核对归集期、报告覆盖期、分配/支付日、时点余额及累计起点；首期、过渡期等短区间不得硬套完整半年。无法精确拆分自然半年时保留原区间，不按天或线性分配现金。
+- 同一资产边界、期间起点、毛净口径和单位才允许差分。分期实际与预计、累计实际与预计在同表并列；累计差额由同范围累计数相减，不再累加历期累计值。
+- 分开回收本金、回收利息及其他款、本息回收、毛/净回收、处置笔数、处置债权本金、减记本金；费用、税费、回款划转、储备、待付款与证券分配各有层级，不能互相替代。
+- 原始发行预测、修订预测、评级情景与契约义务分别登记。评级预测不能替代发行基准；只有年度或终值预测时保留共同可比区间，不造半年预测。
+- 实付不等于应付；建立现金桥与逐档证券本金桥，保留残差及原因状态，不以“其他”强行填平。未核实应付利息不得仅凭实付推断足额兑息。
+- 用同区间指标描述稳定性，日均值只作观察辅助，不能推成线性回收预测；剩余池质量变化须考虑较易处置资产先退出的选择效应。司法、房价或服务机构执行原因只在附件有证据时确认；推断、未披露与披露事实分列。
+
+## 上下游分工与交付
+
+本技能从授权附件独立完成存续期研究、计算与判断，无须先运行 `mortgage-npl-abs-protection`。已有同一附件、同一身份和基准日的已核验上游底稿时可选择复用并复核引用链；新增发行资产九维度或临界回收测算属于另行研究范围，按任务需要再转接，不阻断本技能独立结论，不把历史临界回收阈值当成当前契约。
+
+向现有 `reits-report-writing` 主入口交接标准底稿及 `report_handoff`。用户要求成稿时，由写作技能独立组织一篇完整的 ABS 存续期报告，研究底稿与交接包不能替代成稿。仅迁移结论先行、证据引用、图表内嵌和语言规则，不套 REIT 七章、运营指标或强制反转；写作层只能使用已验证原值及可复算派生值，不新增数字或提升判断强度。
+
+与保护技能共享信托级case_id、文件SHA256 source_id、比例0—1和findings.kind的fact/calculation/judgment三层；推断以判断子类型记录，逐值证据定位与详细状态按METADATA保留。跨技能交接先核对身份、期间和口径，不重复转换比例。
+
+本技能定义 `source_index、panel、period_map、forecast_baseline、period_comparison、cash_reconciliation、security_bridge、claims_verdict、findings、assumptions、gaps、report_handoff` 十二类底稿。未捆绑执行脚本；不得声称运行了不存在的校验脚本或已分析过示例案例。按 METADATA 的验收规则逐项复算，记录实际使用工具和未完成项。
+<<<END: SKILL.md>>>
+<<<FILE: METADATA.md>>>
+# METADATA — npl-abs-periodic-monitor
+
+```yaml
+type: flow
+name: npl-abs-periodic-monitor
+version: 1.1.0
+description: 不良ABS存续期回收、原始预测偏差、偿付与剩余资产质量监测
+domain: 不良贷款资产支持证券投后
+source_report: 运行时evidence_scope内授权附件的原始披露；参考技能只提供结构与表达规则
+script_permission: false
+output_dir: 运行时用户工作目录下独立版本目录，不写入技能安装目录
+inputs:
+  mode: skill_only | monitor | monitor_and_report
+  evidence_scope: 运行时登记的用户授权附件清单、版本与内容哈希；不得套用其他案例
+  archive_path: 运行时指定压缩包路径；直接提供目录时可为null
+  doc_root: 运行时指定的授权附件根目录
+  expected_documents: 项目候选文档清单及预期份数；可为空，仅供完整性核对
+  requested_identity: 用户请求的全称、代码和档次原文
+  verified_identity: 正文核实后的产品、代码、档次与来源；未核实为null
+  start_scope: 成立起点，须由正文核验
+  end_scope: 附件内最新可核报告实际覆盖期末，不能以发布日期代替
+  focus_scope: 最新可比归集区间及最近精确半年；不可分割时沿用原区间
+  report_authorized: false
+upstream: 可选复用同证据链底稿；mortgage-npl-abs-protection不是执行前置
+downstream: reits-report-writing（独立写作主入口）
+```
+
+## document_expectations
+
+候选文档与份数来自运行时 `expected_documents`，不设固定产品、期数或发布日期。无预期清单时仍须枚举全部授权附件并登记覆盖缺口；有清单时将“预期、实际取得、正文已核验”分别记录。发行说明书/发行结果用于身份与原始基准，连续受托报告用于实际期间与偿付，审计/跟踪评级仅按披露范围交叉核验，不自动替代原值。
+
+具体案例配置见 [references/report-handoff.md](references/report-handoff.md) 的“案例验收配置”。这些观察不能成为已核事实、资产数据或其他项目的默认完整性条件。
+
+## data_requirements
+
+| 数据组 | execution_required | thesis_required | 缺失影响 |
+|---|---|---|---|
+| 文件、页数、身份映射与档次条款 | true | true | 身份未解阻断相应证券层结论；不可读影响相应数据 |
+| 每份报告实际期间、累计起点与支付时点 | true | true | 无法精确分期或累计，保留原文但不算偏差 |
+| 实际回收分项、金额口径与费用 | true | true | 不能评价回收或净可用现金 |
+| 发行说明书原始预测表及口径 | true | true | 仍可陈述实际，不得作发行预测偏差判断 |
+| 逐档实付/应付、本金余额与储备 | true | true | 缺应付不能判足额；缺余额不能闭合本金桥 |
+| 剩余池质量、处置笔数及回款关联 | false | true | 限定质量/效率判断；未披露不补 |
+| 审计及跟踪评级 | false | false | 缺交叉复核，不能以其预测代原始发行基准 |
+
+`execution_required` 表示必须尝试定位并登记结果，不表示缺一项就放弃独立可完成部分。
+
+## artifact_contract
+
+运行监测时可采用 UTF-8 CSV 加 JSON（数组字段），或等价数据库；本次技能编写不创建任何案例底稿。所有表含公共字段 `case_id, run_id, schema_version, state, quality_status, source_ids, notes`；主键不得含可变展示序号。`case_id` 沿用保护技能已核实的信托级唯一ID；没有上游时按正文核实的信托身份建立，身份待核只用临时ID，正式映射留痕，不以请求代码直接确认。`source_ids` 为文件级 source_index.source_id 数组；逐值证据位置保留在panel，派生行通过input_refs递归到原文，陈述页码保留在claims_verdict。纯运行参数及缺口等无来源时使用空数组并说明原因，不能填伪造页码。
+
+ID规则：`source_id=sha256(文件字节)`，使用无前缀的完整小写十六进制SHA256，与保护技能共享。披露值的observation_id以source_id、PDF物理页、表名、行列、指标及必要口径生成稳定哈希；同一来源同一定位复用已有ID，不同期间/口径不得碰撞。派生观测以公式、输入ID及期间/口径生成稳定ID；其他行以表名加自然键/口径及来源指纹的完整哈希生成。重跑稳定，内容修订产生新ID，保留 `supersedes_id`；检测哈希碰撞与重复键。同一文件重复副本按内容哈希去重，不把副本当额外观测。
+
+### source_index：文件级原始来源目录
+
+主键 `source_id`，一行一份内容唯一的文件；来源主键不能混入页级证据ID。字段固定：
+
+`source_id, file, relative_path, archive_member, sha256, type, filename_date, date, report_no, pages, local_path, url, status, text_layer, read_status, verification_level, requested_identity, verified_product, verified_code, verified_tranche, identity_status, identity_evidence, supersedes_id`。
+
+- `file/type/date/sha256/local_path/status/url` 与保护技能同名；date仅存正文核实的披露日，未核为null，url固定 `NA(offline)`。source_id必须等于sha256。
+- 必须有完整文件名、相对路径、哈希、页数或不可读原因，`verification_level=FILENAME_ONLY/TEXT_CHECKED/PAGE_VERIFIED`；页数未获为null，不能设0假装已检验。文档级PAGE_VERIFIED不代表所有指标已核，逐值核验仍看panel。
+- 身份证据identity_evidence保留物理页、印刷页、小节及摘录；逐值原文、单位与原期间保留在panel；陈述证据保留在claims_verdict。各物理页均须满足 `1≤page_from≤page_to≤pages`，印刷页码仅辅助。文本抽取或OCR后关键数值须逐值 `PAGE_VERIFIED` 才能用于核心数值结论。
+- filename_date与正文确认date分开；相对路径及local_path须落在附件解压根目录，禁止目录越界。
+
+### period_map：真实区间与自然半年映射
+
+主键 `period_id`，外键 `source_id→source_index`。字段固定：
+
+`period_id, source_id, report_no, report_date, report_start, report_end, collection_start, collection_end, start_inclusive, end_inclusive, collection_days, cumulative_start, payment_date, balance_asof, calendar_buckets, mapping_status, overlap_period_ids, gap_description, allocation_method, source_ids`。
+
+日期使用ISO，未知为null；报告覆盖、现金归集、支付及余额各自独立。精确子期间披露才允许 `allocation_method=DISCLOSED_SUBPERIOD`；完整无重叠区间可 `EXACT_AGGREGATION`；不可分割为 `NONE`。天数按原文边界约定算，不擅定包含日。
+
+### panel：唯一标准数值与派生观测长表
+
+主键 `observation_id`；自然唯一键 `(entity_id, tranche_id, metric, period_id, semantic, basis_id, version)`；外键 `period_id→period_map`、`source_ids→source_index`。字段固定：
+
+`observation_id, source_id, pdf_page, page_to, printed_page, table, row, column, section, quote, raw_value, raw_unit, raw_period_text, verification_level, entity_id, tranche_id, metric, period_id, period_start, period_end, semantic, as_of, cumulative_start, basis_id, asset_scope, cash_basis, numerator, denominator, value, unit, value_kind, formula_id, expression, input_ids, input_refs, rounding_rule, version, supersedes_id`。
+
+披露观测source_id外键指向文件；pdf_page为起始物理页，与page_to组成区间，原文定位、摘录及原值必填或登记缺口。derived观测source_id可为null，但source_ids必须汇总原始文件，input_ids与input_refs中引用的观测ID一致；非panel输入在input_refs明确表/行/列。与保护技能共享case_id/source_id/pdf_page/printed_page/table/metric/as_of/period_start/period_end/raw_value/raw_unit/numerator/denominator/state/formula_id/input_ids；basis为basis_id的可读定义，导出时随行提供，不以字段更名改变口径。
+
+`semantic=period_flow/cumulative_flow/stock/count/ratio`；`value_kind=disclosed/derived/assumed`；金额元，比例以0—1约定存储（0.25表示25%，不是强行截断越界值），比率及覆盖倍数按数学值存储，比例差也存小数差；展示比例及比例差时分别乘100并标%及百分点。计数保留户/笔，日均元/日。数值列为数或null，状态单列；零只用于原文真实零或已复算零。`basis_id` 锁定本金/本息、毛净、现金/债权、资产范围、账户边界、档次和分母，不能仅用中文同名认定相同口径。derived行必须有formula_id、可执行含义明确的expression、具体输入表/行/列引用及来源链。assumed不得冒充历史事实。
+
+后续比较、桥表及判断只读取标准panel及锁定预测表；发现错数回取证步骤修订并整体重算，不在正文或后续表里手改。
+
+### forecast_baseline：预测与契约版本
+
+主键 `baseline_id`；外键 period_id、source_ids。字段固定：
+
+`baseline_id, baseline_type, scenario, issue_version, valuation_date, entity_id, tranche_id, metric, basis_id, period_id, expected_period, expected_cumulative, unit, cumulative_start, frequency, contractual_rule, threshold, trigger_conditions, assumptions_text, comparable_scope, supersedes_id`。
+
+`baseline_type=ORIGINAL_ISSUANCE/REVISED_FORECAST/RATING_SCENARIO/CONTRACT`。修订预测只替代其自身旧版本，不覆盖ORIGINAL_ISSUANCE；契约无预测值时为null。保留预测假设与费用口径，只有终值不得制造中间分期。一个情景一套序列，不跨情景拼值。
+
+### period_comparison：分期与累计同表
+
+主键 `comparison_id`；外键 `period_id, baseline_id, actual_period_observation_id, actual_cumulative_observation_id`。字段固定：
+
+`comparison_id, entity_id, tranche_id, metric, basis_id, period_id, baseline_id, actual_start, actual_end, expected_start, expected_end, cumulative_start, actual_period_observation_id, actual_cumulative_observation_id, period_actual, period_expected, period_diff, period_diff_ratio, cumulative_actual, cumulative_expected, cumulative_diff, cumulative_diff_ratio, period_status, cumulative_status, unit, formula_ids, input_refs`。
+
+分期和累计分别校验可比性，不能一个可比就默认另一个可比；不同基准/情景分别成行。不可比仍保留原值和具体原因，派生偏差为null。
+
+### cash_reconciliation：现金账户桥
+
+主键 `cash_bridge_id`；外键 `period_id`；一行一账户边界/区间。字段固定：
+
+`cash_bridge_id, account_scope, period_id, opening_cash, gross_collections, external_other_inflows, transfer_in, fees_paid, taxes_paid, security_interest_paid, security_principal_paid, subordinated_paid, external_other_outflows, transfer_out, calculated_closing_cash, reported_closing_cash, residual, reserve_open, reserve_close, payable_open, payable_close, untransferred_open, untransferred_close, component_refs, formula_id, reason, reason_status`。
+
+分项值只能由component_refs指向panel。储备已包含账户现金时只作受限金额备忘，不再扣一次；应付是负债而非已流出现金，未划转是账户时点衔接，不擅当收入/费用。尚无完整桥组件为null且列缺口，不以0补齐。`reason_status=EXPLAINED/PARTLY_EXPLAINED/UNEXPLAINED`，不能用无来源其他项消残差。
+
+### security_bridge：逐档本金、利息与覆盖
+
+主键 `security_bridge_id`；自然键 `(verified_product,tranche_id,payment_date,version)`；外键 period_id。字段固定：
+
+`security_bridge_id, verified_product, verified_code, tranche_id, period_id, payment_date, opening_principal, principal_paid, contractual_noncash_reduction, other_documented_principal_adjustment, adjustment_sign, calculated_closing_principal, reported_closing_principal, principal_residual, interest_due, interest_paid, interest_arrears_open, interest_arrears_close, principal_due, available_cash_ex_reserve, permitted_reserve_release, due_debt_service, coverage_ex_reserve, coverage_with_reserve, reserve_dependency, component_refs, formula_ids, reason_status`。
+
+不能混档；契约非现金调整必须明确原文依据和符号，无依据不能设为已发生。应付、本金计划偿还与实际偿还依条款区分；覆盖定义参见F09。
+
+### claims_verdict：原文陈述与本期裁决
+
+主键 `claim_id`；同一陈述ID跨运行稳定；外键 `origin_source_id, baseline_id（可null）`。字段固定：
+
+`claim_id, claim_type, statement, quote, origin_source_id, pdf_page, page_to, printed_page, table, section, verification_level, metric, basis_id, applicable_period_ids, rule, threshold, trigger_conditions, baseline_id, observed_refs, observed_expression, verdict, reason, supersedes_id`。
+
+`claim_type=original_forecast/revised_forecast/rating_scenario/contract/manager_statement`。所有契约、原始预测及可核量化陈述逐项登记，不能为了叙事截掉不利条目。变更陈述新增ID保留旧项；`SUPERSEDED`只用于本身已修订的陈述，不用于删除原始预测基准。
+
+### findings：事实、计算与判断分离
+
+主键 `finding_id`；字段固定：
+
+`finding_id, kind, subtype, claim, evidence_state, observation_refs, comparison_refs, bridge_refs, claim_refs, source_ids, calculation, assumptions_ids, counterevidence, scope, confidence_tier, depends_on, limitation, invalidation_condition, primary_question, permitted_wording`。
+
+`kind=fact/calculation/judgment`；`subtype=inference`仅作为judgment的可选子类型，推断不得成为第四主层。事实与计算可并列支撑判断但不混成一条；`state`按共享接口使用`verified/derived/assumed/unavailable/unverified/not_comparable/not_applicable/conflict`，导出时与`quality_status`并列保留；`confidence_tier=verified_fact/reproducible_calculation/qualified_judgment/unverified_inference`。依赖未满足限定或阻断下游，用词不得升级。没有直接附件依据的原因只作`kind=judgment, subtype=inference`，不进入确定因果结论。
+
+### assumptions：参数与内部规则
+
+主键 `assumption_id`；字段固定：
+
+`assumption_id, name, value, unit, basis, source_ids, assumption_type, affected_refs, sensitivity, status, approved_scope`。
+
+`assumption_type=disclosed_assumption/internal_observation_rule/analyst_assumption`；阈值需来源，无来源标 `UNDEFINED_THRESHOLD`；内部阈值明确为研究假设，不能冒充契约、行业或监管标准。
+
+### gaps：缺口及影响
+
+主键 `gap_id`；字段固定：
+
+`gap_id, gap_type, source_id, period_id, metric, expected_evidence, observed_problem, affected_refs, affected_conclusions, severity, remediation, status`。
+
+缺口区分未披露、未取得、工具不可用、OCR待核、身份、期间、口径、冲突与残差。影响范围写到具体结论，不用一个总体免责声明替代。
+
+### report_handoff：授权与逐条可写范围
+
+主键 `handoff_id`；字段固定：
+
+`handoff_id, report_type, writer_skill, report_title, output_dir, report_output_path, evidence_scope, requested_identity, verified_identity, identity_status, archive_hash, data_cutoff_date, covered_collection_intervals, latest_balance_asof, original_baseline_ids, artifact_paths, artifact_hashes, finding_ids, allowed_table_row_refs, blocking_gap_ids, limitations, protection_skill_inputs, writer_mapping, quality_check_results, report_authorized, next_action`。
+
+report_type固定为npl_monitor，writer_skill为reits-report-writing，report_title使用已核产品身份，output_dir使用含npl_monitor与run_id的独立目录，report_output_path为目录内报告路径，与npl_issuance报告隔离；evidence_scope传递本次已锁定授权清单；规则见references/report-handoff.md。archive_hash仅用于有压缩包的运行，无压缩包时为null；完整evidence_scope及各文件哈希随运行参数、source_index和artifact_paths交付，不因该字段强制打包。protection_skill_inputs是可选复用记录，未使用上游时为空并注明NOT_APPLICABLE，不作为报告前置条件。quality_check_results记录check_id、result、method、evidence/失败原因，`result=PASS/FAIL/BLOCKED/NOT_APPLICABLE`。必须区分实际完成的检查与仅定义的规则。写作映射详见references/report-handoff.md。
+
+## metric_naming
+
+| 标准指标 | 必须区分的口径 |
+|---|---|
+| recovery_principal / recovery_interest / recovery_other / recovery_total | 本金、利息、其他、本息合计；gross/net；现金到账与债权核销 |
+| disposal_cash / disposed_claim_principal / disposal_count / writeoff_principal | 处置回款元、已处置债权本金元、处置笔数、减记本金元，不互代 |
+| fee_paid / tax_paid / transfer_cash / cash_balance / reserve_cash / payable_cash | 费用税费、内部划转、现金、受限储备、待付不同层级 |
+| security_principal_paid / security_interest_paid / security_principal_balance | 逐档支付与余额，payment_date及asof明确 |
+| security_interest_due / security_principal_due / interest_arrears | 应付来自条款和披露，不从实付倒推 |
+| remaining_claim_principal / remaining_claim_interest / borrower_count / loan_count | 剩余本金、本息、户数/笔数分别保留 |
+| collateral_mix / region_mix / overdue_mix / concentration / resolution_stage | 按披露定义、分母、权重及时点，不合成无依据总分 |
+
+实际新增指标先登记标准名、单位、语义及basis_id，不以同名跨口径覆盖。
+
+## formula_registry
+
+公式中的所有变量必须指向底稿具体ID/列；若任一必要输入状态不合格则结果为null并继承缺口，不能跳过未知项求和。用原精度计算，输出才按登记规则舍入。
+
+| ID | 定义 | 前提与异常处理 |
+|---|---|---|
+| F01 | 当期流量 `X_(a,b)=C_(s,b)-C_(s,a)`，边界按原文包含约定实现；首期仅在确知起点累计为零或直接披露当期时取值 | 同累计起点s、指标、资产范围、档次、毛净、单位及版本；不对stock差分当现金 |
+| F02 | 累计实际 `A_(s,t)=Σ A_p`，累计预计 `E_(s,t)=Σ E_p` | p必须无重叠、无缺口、覆盖相同s至t；原披露累计优先作为独立对照，差异留痕 |
+| F03 | 分期差额 `D_p=A_p-E_p`；累计差额 `D_c=A_(s,t)-E_(s,t)` | 两者分别同范围可比；不求ΣD_c |
+| F04 | 分期偏差率 `D_p/E_p`；累计偏差率 `D_c/E_(s,t)`，均存小数比率，展示时乘100并标% | 预计>0才用于常规回收达成偏差；预计=0标ZERO_DENOMINATOR保留差额，预计<0标不适用并复核定义 |
+| F05 | 累计缺口 `G_t=max(-D_c,t,0)`；缺口变化 `G_t-G_(t-1)` | 同一原始基准和累计起点；<0为追回，>0为扩大，仍需说明当期与累计方向。连续负偏差计数只在连续可比期间递增，断档重置为未知 |
+| F06 | `closing_calc=opening_cash+gross_collections+external_other_inflows+transfer_in-fees_paid-taxes_paid-security_interest_paid-security_principal_paid-subordinated_paid-external_other_outflows-transfer_out`；`residual=reported_close-closing_calc` | 账户级现金桥；gross_collections若已净费用不得再扣；合并边界内部划转抵销，其他项须明确证据 |
+| F07 | `closing_principal_calc=opening_principal-principal_paid-contractual_noncash_reduction+signed_documented_adjustment`；`residual=reported_close-closing_calc` | 同一已核档次、同一支付窗口；非现金减记与实付分开，调整方向依原文 |
+| F08 | 回收日均 `A_p/days_p`；`mean=Σx/n`；`sd=sqrt(Σ(x-mean)^2/(n-1))`；`CV=sd/mean` | 日数边界核对；CV用相同长度/定义且n≥3的样本、mean>0。n不足标INSUFFICIENT_SAMPLE；mean=0标ZERO_MEAN，负均值或异质区间标NOT_COMPARABLE，不输出无穷或默认稳定 |
+| F09 | `due_service=interest_due+principal_due`；`coverage_ex_reserve=available_cash_ex_reserve/due_service`；`coverage_with_reserve=(available_cash_ex_reserve+permitted_reserve_release)/due_service` | 同一支付窗口和受偿顺序，cash为扣更高级税费费用后可用于该层的现金；储备不能重复计入，释放须契约允许。分母=0不适用、缺失不可判；偿债覆盖与仅利息覆盖分名列示 |
+| F10 | `recovered_share=matched_disposal_cash/matched_disposed_claim_principal`；`large_event_share=disclosed_event_cash/same_period_recovery` | 必须逐笔或相同处置集合关联，回款与债权分母口径清楚，分母>0；披露不足不算，不以笔数推金额 |
+
+现金桥与本金桥的容差只允许按各原始披露精度推导舍入上界，登记依据；无依据不设置任意“差1%以内就闭合”规则。残差即使在舍入范围内仍保留原值与原因。
+
+## verdict_rules
+
+| 裁决 | 条件 |
+|---|---|
+| CONFIRMED | 明确可核陈述在截至期已到的全部适用观测和触发前提上满足规则，必要证据完整；不以覆盖一半代替全覆盖 |
+| REFUTED | 同口径已核证据明确反驳量化/事实陈述；需具体观测ID与不满足条件 |
+| ABOVE_FORECAST / AT_FORECAST / BELOW_FORECAST | 对指定预测、情景和精确期间的差额正/零/负；零以原精度及已登记舍入界说明，不推导法律违约 |
+| PARTIALLY_SUPPORTED | 可独立证实陈述中的限定部分，明确未证部分；不能用来掩盖明确违反的条款 |
+| INDETERMINATE | 尚未到期、缺失触发条件、应付数、证据或仅无阈值定性表述 |
+| NOT_COMPARABLE | 身份、期间、资产范围、本息、毛净、分母等无法统一，明确双方口径 |
+| SUPERSEDED | 陈述自身有明确修订来源；原始发行基准保留，不因后续预测而移除 |
+
+契约与预测分开裁决。定性方向一致至多PARTIALLY_SUPPORTED，不能自动CONFIRMED；实付存在不能单独确认契约足额履行。
+
+## quality_states
+
+`VERIFIED` 原文核验；`DERIVED_VERIFIED` 输入合格且复算；`FILENAME_ONLY` 仅文件名；`NOT_DISCLOSED` 附件正文未披露；`NOT_EXTRACTED` 尚未取得；`NOT_APPLICABLE` 不适用；`SOURCE_UNAVAILABLE` 文件不可得；`TOOL_UNAVAILABLE` 工具不可用；`NO_TEXT_LAYER` 无文字层；`OCR_UNVERIFIED` OCR待原页核；`IDENTITY_UNRESOLVED` 身份冲突；`NOT_COMPARABLE` 不可比；`ZERO_DENOMINATOR` 分母零；`ZERO_MEAN` CV均值零；`INSUFFICIENT_SAMPLE` 样本不足；`DATA_CONFLICT` 披露冲突；`RECONCILIATION_GAP` 未解释桥差；`UNDEFINED_THRESHOLD` 无阈值来源。
+
+共享state取 `verified/derived/assumed/unavailable/unverified/not_comparable/not_applicable/conflict`；quality_status保留详细原因。映射：VERIFIED→verified、DERIVED_VERIFIED→derived、分析假设→assumed、文件不可得及确认未提供/未披露→unavailable、工具不可用/尚未抽取/无文字层/仅文件名/OCR待核/样本不足/身份未解→unverified、NOT_COMPARABLE→not_comparable、NOT_APPLICABLE及零分母导致的无定义比率→not_applicable、DATA_CONFLICT及未解桥差→conflict。单条观测同时多项异常时优先保留阻断用途的state，所有原因另存quality_status数组；裁决不直接冒充数值状态。判断的state表示证据是否完备，不将judgment误标derived；未证实推断只能unverified。status若作为来源/缺口处理进度字段，须单独定义，不覆盖state。
+
+质量状态与裁决、原因状态分列，不用“0/NA/未披露”混作一个值。工具不可用不能写成文件未披露；关键证据OCR待核不能标VERIFIED。
+
+## quality_checks
+
+以下为执行时必须完成并在handoff留痕的检查定义，未附可执行脚本，不宣称已自动实现。
+
+| 检查ID | 验收规则 |
+|---|---|
+| QC-SCOPE | 所有证据文件均在运行时evidence_scope内；无外部金融资料；模式与授权一致 |
+| QC-ID | PK唯一，ID跨重跑稳定；FK及input_refs全部解析，derived依赖图无环 |
+| QC-PAGE | 证据物理页在文件页数内，关键数值原页/单位/脚注已核对 |
+| QC-IDENTITY | requested与verified并存；冲突未解时无依赖该档身份的计算或结论 |
+| QC-PERIOD | 报告/归集/支付/余额/累计起点分列；报告序列未强套自然半年；重叠审计未重复求和 |
+| QC-BASIS | 本金/本息、现金/债权、毛净、计数/金额、应付/实付及单位未串用 |
+| QC-FORECAST | ORIGINAL与修订/评级/契约分开；年度终值未虚拆；原始基准不可覆盖 |
+| QC-CALC | 每个派生值有公式、输入及状态；同范围分期合计对累计，差额与偏差率复算；累计差额未累加 |
+| QC-BRIDGE | 两桥逐项可追；残差保留；跨期划转/待付/储备无双计；逐档本金与利息不混 |
+| QC-TREND | 稳定性样本和期间可比；CV异常处理；追回与累计达标分离；无虚造显著阈值 |
+| QC-CLAIM | 契约履行证据包括应付与触发；预测偏差不等于违约；事实计算判断和推断分离 |
+| QC-HANDOFF | 所有可写结论指向有效finding和底稿行；缺口影响明确；未授权无实际报告 |
+
+非核心检查失败仅阻断受影响链；核心身份、期间或口径失败必须在对应finding与handoff列明，不能用一张总表的PASS掩盖。
+<<<END: METADATA.md>>>
+<<<FILE: FLOW.md>>>
+--{abstract}--
+先核对证券身份、证据完整性与真实区间，再统一观测口径。以发行说明书可回查的原始预测作为基准，逐期并列实际与预计、累计及偏差，分别核对资产现金与证券偿付，最后讨论剩余资产质量及未来可验证事项。所有判断都从标准底稿派生，不凭报告日期拼半年，不把已实付当作应付已足额，不把预测偏差当作违约。缺口只阻断依赖它的结论，保留独立成立的研究。用户只要求技能时不执行本流程；监测运行默认止于交接。
+--{/abstract}--
+
+# Step 0：封闭证据与身份
+
+#1 --{动作}-- [非数据]
+**锁定任务模式、来源与请求身份**
+* 数据依赖：用户指令、运行时evidence_scope、METADATA inputs
+- 区分 `skill_only / monitor / monitor_and_report`；`skill_only` 立即停止案例执行，仅修改技能。
+- 锁定附件清单及哈希/文件版本、解压目录、请求代码和名称、截止范围。不得读取外部金融资料或把格式参考当证据。
+- 在运行参数记录 requested_identity；尚无正文证据时 verified_identity 保持空并登记 `IDENTITY_UNRESOLVED`。
+[输出]：运行边界与 assumptions/gaps 的模式记录。
+[输出示例]：`mode=monitor；requested_identity=用户请求原文；verified_identity=待正文核验`（字段示意，非案例事实）。
+
+#2 --{动作}-- [数据]
+**枚举附件并验证档次身份及可读性**
+* 数据依赖：附件内全部 PDF；发行说明书、发行结果、受托报告的身份页
+- 依据运行时 expected_documents 及 METADATA document_expectations 逐份登记全部授权文件，标明“预期”“仅文件名观察”与“正文已核验”；份数不符登记差异，不为凑候选份数补外部资料。
+- 分开物理页码与印刷页码；取得页数和文字层，使用可用 PDF 工具，扫描件 OCR 后回原页核对表头、单位、小数点、负号与脚注。工具失败保留失败类型，不写成“未披露”。
+- 从正文证券分层表、发行结果及偿付表核全称/代码/档次/初始余额，逐份连接对应档次。代码冲突未解不做跨档金额桥。
+[输出]：source_index 文件行及identity_evidence、panel逐值证据定位、gaps。
+[输出示例]：`source_id={完整文件SHA256}；read_status=NO_TEXT_LAYER；identity_status=IDENTITY_UNRESOLVED`。
+
+#3 --{动作}-- [数据]
+**建立报告、归集、支付与半年映射**
+* 数据依赖：已读受托报告原文及累计起点条款
+- 逐报告取实际报告期、归集期起止、支付日、余额时点、累计起点、边界包含约定；未知写明状态，不从披露日倒推。
+- 检验连续/间隔/重叠/跨自然半年，将原报告期间映射自然半年：精确覆盖可聚合，跨界无明细标 `NOT_COMPARABLE`，同时保留原报告区间。
+- 年度审计只作交叉复核或有明示修订证据的替代版本，与已覆盖受托区间不能重复相加。
+[输出]：period_map、边界与重叠 gaps。
+[输出示例]：`report_period=P-{原报告ID}；calendar_bucket=跨半年；allocation_method=NONE；status=NOT_COMPARABLE`。
+
+# Step 1：统一事实与预测
+
+#4 --{动作}-- [数据]
+**抽取回收、处置、分配与剩余资产观测值**
+* 数据依赖：可读原文、source_index、period_map、已核实身份
+- 按 METADATA metric_naming 保留原值、原单位、定义、毛净、资产/证券层级和原页来源；每个指标单行，不混用现金与债权本金。
+- 同时抽取当期/累计回收、费用税费、划转、储备、应付/实付、逐档本金余额、处置笔数与金额、剩余池户数/本息/逾期/抵押/集中度/处置阶段等实际披露项目。未披露不补齐矩阵。
+- 同一事实存在不同版本时并存 source，注明修订依据和采用版本；不能一律用评级或审计替换受托值。
+- 单位金额统一元、比例统一存储为0—1（报告展示乘100并标%），计数保留户/笔，转换公式留痕。只对满足同起点同口径条件的累计做差分；真实负数先复核，不能套“所有累计单调”硬规则。
+[输出]：panel、assumptions、数据冲突 gaps。
+[输出示例]：`metric=recovery_principal；semantic=period_flow；cash_basis=gross；value=null；quality_status=NOT_DISCLOSED`。
+
+#5 --{动作}-- [数据]
+**锁定发行原始预测及其他陈述**
+* 数据依赖：发行说明书预测表及假设页、契约条款、附件内后续修订和评级
+- 原始预测登记 `ORIGINAL_ISSUANCE`，保存表格、情景、基准日、金额定义、期间及累计起点；逐项对应实际指标，不能只取结论中的终值。
+- 修订预测、评级情景和契约分别登记；原始预测不可被后续预测覆盖。预测若只有年度/终值，不拆半年，仅找精确共同期间或保留不可比。
+- 从“预计/预测/应付/应当/不低于/保持”等候选语句与表格逐项登记可核查陈述；全量保留符合范围条目，不按叙事挑选。定性陈述无量化阈值时不得补行业标准。
+[输出]：forecast_baseline、claims_verdict 初始陈述、来源链。
+[输出示例]：`baseline_type=ORIGINAL_ISSUANCE；frequency=annual；halfyear_mapping=NOT_COMPARABLE`。
+
+#6 --{动作}-- [数据]
+**形成分期与累计实际预计对照表**
+* 数据依赖：panel、period_map、forecast_baseline
+- 按 METADATA F01—F05 计算，记录输入ID、公式、分母和状态。分期与累计并列同表，每行说明实际区间、预计区间及比较是否成立。
+- 仅将无重叠且穷尽相同范围的分期相加得到累计；累计差额直接以同范围累计实际减预计；不能加总累计差额。
+- 预计为零仍可报绝对差额，但百分比差异标 `ZERO_DENOMINATOR`；实际/预计缺失不取零；无法对齐时两值可展示，但禁止计算偏差。
+[输出]：period_comparison；对应计算 panel 行。
+[输出示例]：`period_actual=A_p；period_expected=E_p；period_diff=A_p-E_p；period_diff_ratio=(A_p-E_p)/E_p（E_p>0时，面板存0—1，展示乘100并标%）`，仅代数示意。
+
+# Step 2：回收质量与偿付验证
+
+#7 --{动作}-- [数据]
+**分析稳定性与偏差路径**
+* 数据依赖：已可比 period_comparison 与 panel
+- 描述各完整可比区间实际、日均回收及区间天数；日均只辅助说明不同长度区间，不把它用于切割半年或外推未来。
+- 按同长度同口径序列计算均值、样本标准差、CV及样本数。样本少于3仅展示观察、不判稳定；均值零时CV不定义，负均值或异质期间不可解释，不能报告无穷大为经济结论。
+- 按累计差额符号与绝对缺口变化区分连续落后、缺口追回、缺口扩大及领先；追回不自动称“完全达标”。同时展示当期偏差以免累计掩盖近期变化。
+- 单次大额处置贡献只有逐笔披露可算；否则标未披露。任何“显著/异常/稳定”档位须带来源阈值；内部观察规则单独登记，不冒充标准。
+[输出]：计算 panel 行、findings、阈值 assumptions/gaps。
+[输出示例]：`trend=累计仍落后且缺口收窄；depends_on=本期及前期可比累计comparison_id`（不预设案例结果）。
+
+#8 --{动作}-- [数据]
+**分别核对现金桥与逐档证券余额桥**
+* 数据依赖：资产现金、信托账户、费用/税费、划转/储备、分配表、逐档应付实付和余额
+- 按 METADATA F06—F09 及原文账户边界建桥，标明每项方向。内部划转在合并账户抵销，归集到支付存在跨期时通过期初/期末未划转及待付衔接，不重复计现金。
+- 逐档核实期初本金、实付本金、合同认可调整及期末本金；利息实付与应付单列。非现金减记与现金本金偿付分开；不得从本金余额减少反推全额现金兑付。
+- 将资产净现金与费用、优先利息、优先本金、次级、储备变化分别连通；不强行令资产回收等于证券分配。残差留数值、方向、来源及已证/待证原因。
+- 覆盖指标必须有应付分母与同一支付窗口的可用现金；列计入和剔除储备的口径及储备依赖。应付缺失则不判足额、违约或现金覆盖充足。
+[输出]：cash_reconciliation、security_bridge、覆盖计算 panel 行与 gaps。
+[输出示例]：`residual=reported_close-calculated_close；reason_status=UNEXPLAINED`。
+
+#9 --{动作}-- [数据]
+**跟踪剩余资产池及处置效率**
+* 数据依赖：panel 的剩余余额、户/笔数、资产分布、阶段、处置数据与发行基准
+- 按相同指标定义比较发行池与各期剩余池；加权口径、样本退出、债权本金与回款分母分别说明。资产退出不能一概视为回收完毕。
+- 在有披露数据时比较回收结构、已处置债权本金与对应回款、抵押/地区/逾期/集中度和司法阶段；错配的流量与存量不得构造处置折扣率。
+- 讨论选择效应：剩余池更难处置可能因较易资产先退出；未有逐笔迁移证据时只列可解释假设，不确认质量恶化原因。
+- 司法进度、抵押物价格、服务执行或费用变化须有附件原文及页码；无法量化影响时不得编贡献分解。不得外查房价、司法、行业或行情。
+[输出]：剩余池比较计算、findings、assumptions/gaps。
+[输出示例]：`kind=judgment；claim=剩余池变化的选择效应待核；evidence_state=INDETERMINATE；subtype=inference`。推断作为判断的子类型和证据状态记录，不另设主分类。
+
+# Step 3：裁决、复核与交接
+
+#10 --{动作}-- [非数据]
+**逐条裁决并分离事实、计算与判断**
+* 数据依赖：claims_verdict 初始陈述、已核验 panel、comparison 与桥表
+- 契约按条款触发、应付、顺序与适用日期判断；原始预测按可比偏差判断“高于/低于预测”，不得把偏差直接标违约或失信。
+- 按 METADATA verdict_rules 裁决，不以一半观测期替代全覆盖要求；未来未到、缺口、身份或期间不可比分别标记。
+- 每条 finding 保留证据、输入计算、反向证据、范围、依赖和失效条件；不将相关变化升级为司法/市场因果。
+[输出]：claims_verdict、findings。
+[输出示例]：`claim_type=original_forecast；verdict=BELOW_FORECAST；legal_conclusion=不由预测偏差推导`。
+
+#11 --{动作}-- [数据]
+**验收可重跑契约与引用链**
+* 数据依赖：全部十二类底稿及 METADATA quality_checks
+- 校验唯一主键、外键、页码、单位、身份、期间、公式输入、计算状态及不可比拦截；从原页复核关键值并独立复算核心差额和桥残差。
+- 同一附件版本、参数与公式重跑应得到同一表和稳定ID；新增披露只增版本，不静默改旧事实。保留修订前后来源和影响。
+- 将已执行检查与失败检查如实登记在 report_handoff；无校验脚本时用实际可用工具或人工逐项核查并注明方式，不写“自动校验已通过”。
+[输出]：经核验的底稿、未解决 gaps、可写范围。
+[输出示例]：`check_id=QC-IDENTITY；result=BLOCKED；affected=逐档本金桥与对应结论`。
+
+#12 --{动作}-- [非数据]
+**封装报告交接并按授权停止**
+* 数据依赖：验收后底稿、references/report-handoff.md
+- 交接身份、实际截止区间、数据截止日、原始预测版本、可写结论、不可比项及缺口影响，明确每条写作结论允许用的 finding 与表行。
+- 本技能独立完成上述研究、计算及判断；已有可复用上游时才按接口适配，不以保护技能完成为交接前提。未授权报告时停在 handoff，不创建报告、图表、Word或HTML。
+- 用户已要求成稿即记为报告授权，加载现有 reits-report-writing 主入口，由其独立完成一篇 ABS 存续期报告；交接包不能替代成稿，Markdown与阅读版是同一篇报告的不同载体。写作中需新增指标或判断时退回本技能补证复算；新增发行评价或临界回收任务才另行转接。
+[输出]：report_handoff；授权写作的转接说明。
+[输出示例]：`report_authorized=false；next_action=STOP_AT_HANDOFF`。
+<<<END: FLOW.md>>>
+<<<END>>>

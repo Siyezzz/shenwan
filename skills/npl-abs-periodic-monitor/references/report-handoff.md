@@ -2,19 +2,19 @@
 
 仅在用户授权执行监测后形成案例交接；本文件只定义接口，不是建鑫案例研究结果。`report_authorized=false` 时形成研究底稿和交接状态即停止，不自动产出报告、图表、Excel、Word、PDF或HTML。
 
-## 与 mortgage-npl-abs-protection 的衔接
+## 可选的 mortgage-npl-abs-protection 衔接
 
 接收发行资产九维度、交易结构、发行基准假设及临界回收测算时，逐项核对：同一附件成员、产品与档次、发行/资产池基准日、指标定义、单位、source_id/页码及计算输入。上游底稿不能豁免正文身份冲突核查；没有同一证据链的旧结论只能登记为待核，不能复制为已验证事实。
 
-本技能负责历史实际序列、原始预测兑现差异、当期账户现金与逐档本金桥、剩余资产变化。需要根据最新余额重算临界回收或发行资产九维度时，将已核panel行、当前余额时点、费用/应付/储备口径及缺口交回保护技能，不在监测或写作层另造模型。历史临界线不是现行契约触发线，不得直接用来判偿付正常或违约。
+本技能独立负责历史实际序列、原始预测兑现差异、当期账户现金与逐档本金桥、剩余资产变化及相应判断；缺少保护技能底稿不阻断这些研究。仅当任务额外要求发行资产九维度或最新临界回收测算时，才将已核panel行、当前余额时点、费用/应付/储备口径及缺口交给保护技能或适用研究流程，作为单独范围处理。历史临界线不是现行契约触发线，不得直接用来判偿付正常或违约。
 
-## 两技能数据适配（强制）
+## 跨技能数据适配（发生交接时必做）
 
 两技能共享case_id（信托级唯一ID）、文件级source_id=完整小写SHA256、金额元、比例0—1、findings.kind=fact/calculation/judgment。比例以小数存储，展示时才乘100并标%；比例差展示为百分点，覆盖倍数不乘100。跨技能传递不重复乘除100；保留raw_value/raw_unit和转换公式。核对口径后再拼接CSV，不能只凭同名指标合并。
 
 source_index均一行一份内容唯一文件；逐值原文定位在panel，陈述定位在claims_verdict，身份摘录在identity_evidence。以文件SHA256建立来源映射，再以PDF物理页、表名、行列、指标、原值、单位、期间和口径匹配观测；不得将observation_id当文件哈希。相同来源定位优先复用已有观测ID；已有ID不同则保留原ID并用显式crosswalk连接。
 
-交接额外提供adapter_crosswalk.csv：`case_id,from_skill,from_table,from_id,to_skill,to_table,to_id,file_sha256,source_page,metric,from_unit,to_unit,conversion_formula,basis_check,status`。事实状态、计算状态和判断类型按语义映射，不能仅凭状态字符串相似认定等价。state采用共享枚举，quality_status按METADATA保留具体异常，推断以kind=judgment及subtype=inference记录；source_ids为文件引用，observation_refs/input_ids为观测引用，不得互换。其他字段以各自METADATA为准；writer_mapping引用实际表名和行ID。适配未确认的行不得进入跨技能计算。
+实际发生跨技能字段或ID适配时提供adapter_crosswalk.csv；没有上游或无需适配时在handoff记NOT_APPLICABLE，不为形式创建空文件。适配字段为：`case_id,from_skill,from_table,from_id,to_skill,to_table,to_id,file_sha256,source_page,metric,from_unit,to_unit,conversion_formula,basis_check,status`。事实状态、计算状态和判断类型按语义映射，不能仅凭状态字符串相似认定等价。state采用共享枚举，quality_status按METADATA保留具体异常，推断以kind=judgment及subtype=inference记录；source_ids为文件引用，observation_refs/input_ids为观测引用，不得互换。其他字段以各自METADATA为准；writer_mapping引用实际表名和行ID。适配未确认的行不得进入跨技能计算。
 
 ## 向写作层交付的十二类底稿
 
@@ -35,11 +35,15 @@ source_index均一行一份内容唯一文件；逐值原文定位在panel，陈
 
 source_index直接提供“一行一份文档”的来源目录；逐值引用保留panel中的文件SHA256、物理页、表格、行列、原文值及核验状态，陈述引用保留claims_verdict页码链。不能将来源目录当数值表，不能因共享文件哈希省去逐值证据定位。等价底稿可按本契约建立明确字段映射，不为形式另取一遍数。
 
-## 逐条映射与复核
+## 独立成稿与逐条映射复核
+
+写作路由固定 `report_type=npl_monitor`、`writer_skill=reits-report-writing`，报告标题为《{已核产品全称}存续期监测报告》，`output_dir=outputs/{case_id}/npl_monitor/{run_id}/`，报告路径为目录内 `report_{code}_npl_monitor.md`，阅读版同basename；代码尚未核实时用case_id命名，不把请求代码当已核代码。发行保护报告属于 `npl_issuance`，标题为《{已核产品全称}发行资产质量与优先保护报告》，由发行研究技能另行交接。两篇报告各自完成研究和写作，不合并为一篇、也不互为必跑前置。身份冲突未解时标题与正文不得确认争议代码或档次，只使用已核信托身份，并明确证券层结论范围受限；信托身份也未核实则不创建带已确认产品身份的标题。
+
+用户明确要求报告即构成写作授权，无须在研究完成后重复询问。由现有 `reits-report-writing` 主入口读取本技能交接包、独立确定论点树和章节，生成一篇完整的 ABS 存续期报告；监控研究层不代写另一篇报告，底稿、交接说明或技能文档不能作为已成稿交付。不同阅读载体保持同篇内容一致。写作层不重取金融事实、不自行计算或升级判断，缺口按受影响结论限定，新增存续期研究需求返回本技能。
 
 1. 建立 `writer_mapping`：`finding_id → question → 主使用章节 → 摘要/表格/图注复用点 → allowed_table_row_refs → 限定语 → disposition`。每个核心判断反向对应有效finding；每个finding登记采用/限定采用/未采用及理由。
 2. 核实 `depends_on`。身份或期间不可比的链不能通过改写进入确定结论；未验证原因不得写成司法、房价、服务商执行已导致回收变化。可写独立成立的事实，明确缺口影响。
-3. 正文数字只能来自已原页核验的panel原值、已复算派生值及锁定表行。需要新比率、新半年拆分、新敏感性时返回本技能或保护技能取证计算，不在写作中口算造数。
+3. 正文数字只能来自已原页核验的panel原值、已复算派生值及锁定表行。需要新比率、新半年拆分或存续期敏感性时返回本技能取证计算；额外临界回收或发行评价任务按可选衔接处理，不在写作中口算造数。
 4. 同一判断在摘要、正文、图注复用时，数值、单位、区间、基准、方向、限定和失效条件一致；不将多个较弱finding拼成更强结论。
 5. 将内部状态转成准确自然语言，状态码留底稿/附录。保留实质限制，不能把 `TOOL_UNAVAILABLE` 翻译为“材料未披露”，不能将 `NOT_COMPARABLE` 写作“略低于预计”。
 
@@ -64,3 +68,25 @@ source_index直接提供“一行一份文档”的来源目录；逐值引用�
 - 已授权且核心链有效：`next_action=WRITE_SUPPORTED_SCOPE`，再加载写作技能。
 - 部分链受阻：`next_action=PARTIAL_SCOPE_WITH_LIMITATIONS`，明确可写与不能写的判断；不机械放弃独立可支持内容。
 - 关键正文不可读、身份未解或预测不可比：保留缺口与影响，不宣称已核原文，不制造真实指标、预测偏差、偿付安全或违约结论。
+
+写作交接的 `case_id` 来自各底稿公共字段，`output_dir` 与 `evidence_scope` 来自已锁定运行参数，显式映射到写作输入；已有handoff同名字段时直接传入，不另建底稿或复制数据。
+
+## 案例验收配置：建鑫2022年第7期（非通用默认值）
+
+以下仅保留既有任务的验收线索，未读取案例正文，不构成研究结果。只有用户明确指定该案例时才装载；其他产品使用自身运行配置，不继承路径、代码、份数、报告日期或结论。
+
+本案例准确验收标题为《22建鑫7优先存续期表现与资产质量跟踪分析报告》，仅在正文核实请求身份及优先档归属后采用。身份冲突未解时不得直接使用该标题暗认优先档，应使用已核信托身份的受限范围标题，并明确“请求优先档身份待核、证券层结论受限”；标题验收不覆盖身份门槛。
+
+```yaml
+archive_path: <runtime-user-archive>
+doc_root: <runtime-extraction-dir>
+archive_basename: 22建鑫7优先（2289267.IB）.rar
+requested_identity: 保留用户请求的建鑫2022年第7期名称、代码及优先档原文，待正文核验
+expected_pdf_count: 22
+expected_trustee_report_count: 9
+verification_level: FILENAME_ONLY
+```
+
+文件名常出现 `2289266.IB`，部分 `2289267.IB` 带“7C”，与请求“优先”存在待核冲突。必须通过发行说明书分层、发行结果及受托正文确认代码与档次；不得凭文件名指定归属。候选材料包括受托报告、发行说明书、发行结果、评级、审计及跟踪评级；实际日期与覆盖期执行时从正文重新核验，不将文件名信息写成期间或披露日事实。
+
+验收重点是代码/档次冲突保留、九份报告未机械等同九个半年、首两期短期区间不强拆、原始预测不被评级替换。实际运行仍须重新枚举全部授权成员并核页，22份和九期不能替代完整性或正文验证；技能修订模式不执行该案例。

@@ -3,46 +3,33 @@
 ```yaml
 type: flow
 name: npl-abs-periodic-monitor
-version: 1.0.0
+version: 1.1.0
 description: 不良ABS存续期回收、原始预测偏差、偿付与剩余资产质量监测
 domain: 不良贷款资产支持证券投后
-source_report: 用户唯一附件内原始披露；参考技能只提供结构与表达规则
+source_report: 运行时evidence_scope内授权附件的原始披露；参考技能只提供结构与表达规则
 script_permission: false
 output_dir: 运行时用户工作目录下独立版本目录，不写入技能安装目录
 inputs:
   mode: skill_only | monitor | monitor_and_report
-  archive_path: E:/OneDrive/申万/22建鑫7优先（2289267.IB）.rar
-  doc_root: C:/Users/pc/WorkBuddy/申万/abs-jianxin7-materials
+  evidence_scope: 运行时登记的用户授权附件清单、版本与内容哈希；不得套用其他案例
+  archive_path: 运行时指定压缩包路径；直接提供目录时可为null
+  doc_root: 运行时指定的授权附件根目录
+  expected_documents: 项目候选文档清单及预期份数；可为空，仅供完整性核对
   requested_identity: 用户请求的全称、代码和档次原文
   verified_identity: 正文核实后的产品、代码、档次与来源；未核实为null
   start_scope: 成立起点，须由正文核验
   end_scope: 附件内最新可核报告实际覆盖期末，不能以发布日期代替
   focus_scope: 最新可比归集区间及最近精确半年；不可分割时沿用原区间
   report_authorized: false
-upstream: mortgage-npl-abs-protection
-downstream: reits-report-writing 或等价写作层
+upstream: 可选复用同证据链底稿；mortgage-npl-abs-protection不是执行前置
+downstream: reits-report-writing（独立写作主入口）
 ```
 
 ## document_expectations
 
-以下仅为文件名观察的检查线索，不是已核正文事实。实际运行重新枚举并以 source_index 记录偏差，不凭这些日期创建资产数据。
+候选文档与份数来自运行时 `expected_documents`，不设固定产品、期数或发布日期。无预期清单时仍须枚举全部授权附件并登记覆盖缺口；有清单时将“预期、实际取得、正文已核验”分别记录。发行说明书/发行结果用于身份与原始基准，连续受托报告用于实际期间与偿付，审计/跟踪评级仅按披露范围交叉核验，不自动替代原值。
 
-| 候选文档 | 文件名观察日期 | 执行时核对 |
-|---|---|---|
-| 受托报告总1期 | 2023-01-16 | 初始短期、实际归集起点与首个支付日 |
-| 受托报告总2期 | 2023-04-20 | 短期/过渡区间及累计起点 |
-| 受托报告总3期 | 2023-10-19 | 实际覆盖、归集、支付与期末时点 |
-| 受托报告总4期 | 2024-04-19 | 同上 |
-| 受托报告总5期 | 2024-10-21 | 同上 |
-| 受托报告总6期 | 2025-04-21 | 同上 |
-| 受托报告总7期 | 2025-10-20 | 同上 |
-| 受托报告总8期 | 2026-04-20 | 同上 |
-| 受托报告总9期 | 2026-10-19 | 最新实际截止，不等于完整2026H2 |
-| 发行说明书、中债及中诚信评级 | 2022-10-31 | 原始预测与评级情景分开、分层身份 |
-| 发行结果 | 2022-11-08 | 实际发行代码、档次及规模 |
-| 年度审计、跟踪评级等其他附件 | 观察含2024年度审计 | 覆盖范围、修订依据、是否重叠 |
-
-候选共22PDF。`2289266.IB` 与 `2289267.IB/7C` 的文件名信息与请求“优先”的潜在冲突必须正文验证；未经核对不得确认代码归属。
+具体案例配置见 [references/report-handoff.md](references/report-handoff.md) 的“案例验收配置”。这些观察不能成为已核事实、资产数据或其他项目的默认完整性条件。
 
 ## data_requirements
 
@@ -163,9 +150,9 @@ ID规则：`source_id=sha256(文件字节)`，使用无前缀的完整小写十�
 
 主键 `handoff_id`；字段固定：
 
-`handoff_id, requested_identity, verified_identity, identity_status, archive_hash, data_cutoff_date, covered_collection_intervals, latest_balance_asof, original_baseline_ids, artifact_paths, artifact_hashes, finding_ids, allowed_table_row_refs, blocking_gap_ids, limitations, protection_skill_inputs, writer_mapping, quality_check_results, report_authorized, next_action`。
+`handoff_id, report_type, writer_skill, report_title, output_dir, report_output_path, evidence_scope, requested_identity, verified_identity, identity_status, archive_hash, data_cutoff_date, covered_collection_intervals, latest_balance_asof, original_baseline_ids, artifact_paths, artifact_hashes, finding_ids, allowed_table_row_refs, blocking_gap_ids, limitations, protection_skill_inputs, writer_mapping, quality_check_results, report_authorized, next_action`。
 
-quality_check_results记录check_id、result、method、evidence/失败原因，`result=PASS/FAIL/BLOCKED/NOT_APPLICABLE`。必须区分实际完成的检查与仅定义的规则。写作映射详见references/report-handoff.md。
+report_type固定为npl_monitor，writer_skill为reits-report-writing，report_title使用已核产品身份，output_dir使用含npl_monitor与run_id的独立目录，report_output_path为目录内报告路径，与npl_issuance报告隔离；evidence_scope传递本次已锁定授权清单；规则见references/report-handoff.md。archive_hash仅用于有压缩包的运行，无压缩包时为null；完整evidence_scope及各文件哈希随运行参数、source_index和artifact_paths交付，不因该字段强制打包。protection_skill_inputs是可选复用记录，未使用上游时为空并注明NOT_APPLICABLE，不作为报告前置条件。quality_check_results记录check_id、result、method、evidence/失败原因，`result=PASS/FAIL/BLOCKED/NOT_APPLICABLE`。必须区分实际完成的检查与仅定义的规则。写作映射详见references/report-handoff.md。
 
 ## metric_naming
 
@@ -228,11 +215,11 @@ quality_check_results记录check_id、result、method、evidence/失败原因，
 
 | 检查ID | 验收规则 |
 |---|---|
-| QC-SCOPE | 所有证据文件均为同一附件成员；无外部金融资料；模式与授权一致 |
+| QC-SCOPE | 所有证据文件均在运行时evidence_scope内；无外部金融资料；模式与授权一致 |
 | QC-ID | PK唯一，ID跨重跑稳定；FK及input_refs全部解析，derived依赖图无环 |
 | QC-PAGE | 证据物理页在文件页数内，关键数值原页/单位/脚注已核对 |
 | QC-IDENTITY | requested与verified并存；冲突未解时无依赖该档身份的计算或结论 |
-| QC-PERIOD | 报告/归集/支付/余额/累计起点分列；九报告未强套九半年；重叠审计未重复求和 |
+| QC-PERIOD | 报告/归集/支付/余额/累计起点分列；报告序列未强套自然半年；重叠审计未重复求和 |
 | QC-BASIS | 本金/本息、现金/债权、毛净、计数/金额、应付/实付及单位未串用 |
 | QC-FORECAST | ORIGINAL与修订/评级/契约分开；年度终值未虚拆；原始基准不可覆盖 |
 | QC-CALC | 每个派生值有公式、输入及状态；同范围分期合计对累计，差额与偏差率复算；累计差额未累加 |

@@ -6,7 +6,7 @@
 
 #1 --{动作}-- [非数据]
 **锁定任务模式、来源与请求身份**
-* 数据依赖：用户指令、SKILL 的附件范围、METADATA inputs
+* 数据依赖：用户指令、运行时evidence_scope、METADATA inputs
 - 区分 `skill_only / monitor / monitor_and_report`；`skill_only` 立即停止案例执行，仅修改技能。
 - 锁定附件清单及哈希/文件版本、解压目录、请求代码和名称、截止范围。不得读取外部金融资料或把格式参考当证据。
 - 在运行参数记录 requested_identity；尚无正文证据时 verified_identity 保持空并登记 `IDENTITY_UNRESOLVED`。
@@ -16,7 +16,7 @@
 #2 --{动作}-- [数据]
 **枚举附件并验证档次身份及可读性**
 * 数据依赖：附件内全部 PDF；发行说明书、发行结果、受托报告的身份页
-- 依据 METADATA document_expectations 逐份登记文件，标明“仅文件名观察”与“正文已核验”；份数不符登记差异，不为了凑22份补外部资料。
+- 依据运行时 expected_documents 及 METADATA document_expectations 逐份登记全部授权文件，标明“预期”“仅文件名观察”与“正文已核验”；份数不符登记差异，不为凑候选份数补外部资料。
 - 分开物理页码与印刷页码；取得页数和文字层，使用可用 PDF 工具，扫描件 OCR 后回原页核对表头、单位、小数点、负号与脚注。工具失败保留失败类型，不写成“未披露”。
 - 从正文证券分层表、发行结果及偿付表核全称/代码/档次/初始余额，逐份连接对应档次。代码冲突未解不做跨档金额桥。
 [输出]：source_index 文件行及identity_evidence、panel逐值证据定位、gaps。
@@ -117,6 +117,7 @@
 **封装报告交接并按授权停止**
 * 数据依赖：验收后底稿、references/report-handoff.md
 - 交接身份、实际截止区间、数据截止日、原始预测版本、可写结论、不可比项及缺口影响，明确每条写作结论允许用的 finding 与表行。
-- 按下游接口衔接保护技能和写作层；未授权报告时停在 handoff，不创建报告、图表、Word或HTML。已授权才读取写作层并按本技能 ABS 专用边界执行。
+- 本技能独立完成上述研究、计算及判断；已有可复用上游时才按接口适配，不以保护技能完成为交接前提。未授权报告时停在 handoff，不创建报告、图表、Word或HTML。
+- 用户已要求成稿即记为报告授权，加载现有 reits-report-writing 主入口，由其独立完成一篇 ABS 存续期报告；交接包不能替代成稿，Markdown与阅读版是同一篇报告的不同载体。写作中需新增指标或判断时退回本技能补证复算；新增发行评价或临界回收任务才另行转接。
 [输出]：report_handoff；授权写作的转接说明。
 [输出示例]：`report_authorized=false；next_action=STOP_AT_HANDOFF`。

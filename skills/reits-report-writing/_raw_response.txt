@@ -1,10 +1,21 @@
 <<<FILE: SKILL.md>>>
 ---
 name: reits-report-writing
-description: Use when 需要把 FLOW 的执行结果写成一份可交付的正式研究报告时（投前投资分析报告、投后跟踪报告、横向基准对比报告、专题深度）。负责章节骨架、论断式标题、论证段落、图表与资料来源、记者腔改写、语言清洗、字数核验与内嵌质量检查，把"我执行了哪些步骤"改写成"这个资产处在什么处境"。含六种模型腔的改写法与三条机械编辑动作（换标测试、删首段、删尾句）。不负责取数与判断——那是 reits-pre-investment-analysis / reits-post-investment-monitor / reits-peer-benchmarking 的职责。适用于"把分析写成报告""这份研报不像研报""全是 AI 腔""重写报告正文""审稿"。
+description: Use when 需要把 FLOW 的执行结果写成一份可交付的正式研究报告时（投前投资分析报告、投后跟踪报告、横向基准对比报告、专题深度）。负责章节骨架、论断式标题、论证段落、图表与资料来源、记者腔改写、语言清洗、字数核验与内嵌质量检查，把"我执行了哪些步骤"改写成"这个资产处在什么处境"。含六种模型腔的改写法与三条机械编辑动作（换标测试、删首段、删尾句）。也支持 NPL ABS 发行保护和存续期两类独立报告。不负责取数、计算与研究判断——由相应 REITs 或 NPL ABS 上游技能完成。适用于"把分析写成报告""这份研报不像研报""全是 AI 腔""重写报告正文""审稿"。
 ---
 
-# 公募 REITs 研究报告写作
+# 研究报告写作（REITs / NPL ABS）
+
+## 报告类型路由（先于下文案例范式）
+
+保留 `reits-report-writing` 作为兼容入口，避免改变现有 REITs 技能调用；本技能的写作能力也接收独立 NPL ABS 研究底稿。运行时先读取 `report_handoff` 的 `report_type`、`report_authorized`、`report_title`、`output_dir` 与证据边界。未授权正式报告时停止，不把交接等同于写作授权。
+
+- `npl_issuance`：只需 `mortgage-npl-abs-protection` 或等价的独立研究底稿，采用 METADATA 的发行资产质量与保护机制骨架。
+- `npl_monitor`：只需 `npl-abs-periodic-monitor` 或等价的独立研究底稿，采用 METADATA 的存续期跟踪骨架。
+- 每个 NPL 类型单独形成一篇报告，不要求另一个技能先运行，也不自动合并。输出分别为 `{output_dir}/report_{code}_{report_type}.md`，指标文件分别为 `report_metrics_{report_type}.json`；若 code 未核验，用信托级 case_id 作文件标识，标题保留身份限制。
+- NPL 的数字、计算、判断均来自该次上游研究；写作层仅组织表达，缺项退回相应上游。仅共享已核验底数与来源时，核对身份、期间、口径及字段映射。
+- NPL 使用两类各自的章节和指标，不采用下文 REITs 专属的租金、出租率、分派、估值或七章/五段配额，也不强制寻找“看似好、实际不可持续”的反转。必要口径与临界回收条件必须留在正文；图表只在确有对应披露值时说明差额。共享的证据追溯、事实/计算/判断区分及语言清理规则继续适用。
+- `pre / post / comparison` 仍按原 REITs 流程执行。仓库工具命令以仓库根目录为工作目录；单独分发技能而无 `tools/` 时，明确工具不可用，可交付经人工核验的 Markdown，不声称完成 HTML 渲染或自动检查。
 
 本 skill 是一个 flow（可执行写作流程），**处在取数层的下游**。
 
@@ -20,7 +31,7 @@ description: Use when 需要把 FLOW 的执行结果写成一份可交付的正�
 3. 结论先于文字。`#2` 的论点树没定下来之前，不写任何一段正文。
 4. **判断的档位也不许改。** 上游标"组内排序"的，正文只能写位次与幅度；要升级用词，退回上游补绝对锚。
 
-**输出位置**：上游约定的 `outputs/{case}/`，文件名沿用既有命名（`report_{code}.md`）。同时产出 `report_metrics.json`（字数、图表数、禁用词命中数），供自动化测试读取。阅读版 `.html` 用 `python tools/render_report.py <report.md>` 生成（图 base64 内嵌、零依赖，几何与配色见 `METADATA.md` 的 `visual_style`），不手写 CSS、不手改 html。
+**输出位置**：上游约定的 `outputs/{case}/`，文件名沿用既有命名（`report_{code}.md`）。同时产出 `report_metrics.json`（字数、图表数、禁用词命中数），供自动化测试读取。阅读版 `.html` 用 `python skills/reits-report-writing/tools/render_report.py <report.md>` 生成（图 base64 内嵌、零依赖，几何与配色见 `METADATA.md` 的 `visual_style`），不手写 CSS、不手改 html。
 
 ---
 
@@ -243,7 +254,7 @@ A.2 与 A.3 的分界：**A.2 是"数有问题"，A.3 是"结论做不了"**。�
 
 ```yaml
 name: reits-report-writing
-version: 1.4.0          # 1.4.0：明确 comparison 只承接上游已验证维度，不自行扩展比较方向
+version: 1.5.0          # 新增两类独立 NPL ABS 写作路由，保留 REITs 调用兼容
 layer: downstream          # 取数层（pre/post/investment）之后，交付之前
 position: 把 FLOW 产物写成正式研报
 upstream:
@@ -255,6 +266,21 @@ outputs:
   - report_{code}.md          # 正式报告
   - report_metrics.json       # 可机读的字数与合规指标
 ```
+
+## npl_report_contract
+
+`report_type=npl_issuance | npl_monitor` 时，本节优先于 REITs 专属骨架、字数及 style_rules 中的配额。保留旧入口名用于兼容；不改变 REITs 上游的输出协议。
+
+输入为一个独立研究技能提供的 `report_handoff`（JSON 或等价结构），包含 `case_id / report_type / report_title / output_dir / report_authorized / evidence_scope`，以及已核验事实、可复算计算、假设、判断、缺口、来源索引和章节映射的真实路径。字段名有差异时显式映射，不要求为写作复制全部底稿。`report_authorized=false` 时停止。两个上游不得互为必需输入。
+
+NPL 的来源索引一行一份文件，source_id 为完整小写 SHA256；金额为元，比例存为 0—1，百分比只在展示时转换，比例差用百分点，倍数不乘100。逐值页码与原单位保留在 panel，findings.kind 为 fact/calculation/judgment；推断保留限定与未核验状态。该接口不得把来源索引当数值表，或将未核验数字升格为事实。IN-2 接受逐支付日模型表及计算程序/公式，不强制 Excel；IN-4 接受保留逐条证据与裁决的等价字段。仅与任务有关的原件才能作为金融证据。
+
+| report_type | 独立上游 | 章节骨架（按问题展开，可按证据调整） |
+|---|---|---|
+| `npl_issuance` | mortgage-npl-abs-protection | 摘要与身份边界；发行规模及分层；九项资产质量指标；结构保护及生效条件；静态本金下限与动态本息临界回收；时间/费用敏感性；风险与不可判定；来源/公式/假设附录 |
+| `npl_monitor` | npl-abs-periodic-monitor | 摘要与身份/期间边界；逐期回收处置及现金；发行原始预测对照和累计偏差；优先档本息与余额/现金匹配；回收稳定性与偏差持续性；剩余资产及风险变化；后续验证与缺口；来源/口径/对账附录 |
+
+每次仅生成所选类型一篇报告：`{output_dir}/report_{code}_{report_type}.md` 与 `report_metrics_{report_type}.json`；code 未核验则使用 case_id，不以文件名解决档次冲突。HTML 在仓库工具可用时同名渲染。字数按用户任务及论证需要，不套用 pre/post 下限。不能为满足配额发明反转、差额或结论。
 
 ## report_input_contract
 
@@ -448,11 +474,11 @@ outputs:
 
 ## visual_style（阅读版 `.html`）
 
-版面不靠手写 CSS 复现，由 `tools/render_report.py` 统一产出。脚本只做四件事：markdown 块级解析（标题／表格／图／有序与无序列表／引用块／代码块／分隔线）、行内解析（图／链接／加粗／斜体／行内码）、按 md 所在目录解析图片并转 base64 内嵌、套上固定 CSS。零第三方依赖。
+版面不靠手写 CSS 复现，由 `skills/reits-report-writing/tools/render_report.py` 统一产出。脚本只做四件事：markdown 块级解析（标题／表格／图／有序与无序列表／引用块／代码块／分隔线）、行内解析（图／链接／加粗／斜体／行内码）、按 md 所在目录解析图片并转 base64 内嵌、套上固定 CSS。零第三方依赖。
 
 ```bash
-python tools/render_report.py report_XXXXXX.md                       # 输出同名 .html
-python tools/render_report.py report.md -o out/r.html --title "…"    # 指定路径与标签标题
+python skills/reits-report-writing/tools/render_report.py report_XXXXXX.md                       # 输出同名 .html
+python skills/reits-report-writing/tools/render_report.py report.md -o out/r.html --title "…"    # 指定路径与标签标题
 ```
 
 | 项 | 值 |
@@ -572,6 +598,10 @@ python tools/render_report.py report.md -o out/r.html --title "…"    # 指定�
 将研究结果组织成通用于不同公募 REITs 的报告：结论有证据，参数有依据，测算可复核，判断带档位。章节按读者的问题组织，不复制执行工序；不得套用历史案例结论。用记者腔写——主语是人与钱，不是"本报告"；每个数字带参照系。投前中文正文不少于 15,000 字符，投后不少于 3,000 字符，横向基准按内容需要不设下限；专题按任务约定，均不设上限。计数不含封面与附录，篇幅用于解释而非重复。
 --{/abstract}--
 
+## 执行前：报告类型路由
+
+先按 SKILL.md 路由。`npl_issuance / npl_monitor` 分别承接一个独立上游的 `report_handoff`；核验写作授权、证据边界、类型、标题和输出目录后，再执行 #1—#14 的可迁移写作动作。NPL 的章节使用 METADATA 同名骨架，#3 不选择 `pre/post`，#4—#5 不强套 REITs 七章标题和反转摘要；#6—#8 展示上游已算好的回收、保护或兑付结果，不新增估值/租约/分派指标；#11—#14 按 NPL 类型和用户约定验收，不套 REITs 篇幅或配额。图表如无对应披露对照值，不为满足差额格式制造数字。报告及指标文件按类型分别命名，禁止相互覆盖或合并。
+
 # Step 0：输入与论点
 
 #1 --{动作}-- [非数据]
@@ -637,7 +667,7 @@ python tools/render_report.py report.md -o out/r.html --title "…"    # 指定�
 - **图写在正文里，不写在附件里**：用 `![图 N 标题](figures/figN_xxx.png)`（投后链路为 `charts/`）就地嵌入，紧跟它所支撑的段落；图题在上、资料来源在下、口径说明第三行。
 - **口径说明必须写差额**（见 SKILL.md《成稿范式》「图：四行式」与 `figure_table_policy`）：第三行不能停在"数据来源"，要给出这张图与披露值的差多少、为什么差。写不出差额的图，说明它只是在复述披露，不构成论证。
 - **不得指路**：禁止「图 1 见 charts/xxx」「图件另存于某目录」这类写法。判断标准：把报告单独拷走，读者是否还能看到图；看不到就是没嵌进去。
-- 交付时同步生成 `.html` 单文件版（图 base64 内嵌），`.md` 与 `.html` 同源同序，不得一版有图一版无图。命令：`python tools/render_report.py report.md`（默认输出同名 `.html`；`-o` 指定路径，`--title` 覆盖标签标题）。脚本从 md 所在目录解析图片相对路径，零第三方依赖，输出后打印内嵌图数与表格数，缺图会列出路径而不是静默跳过。
+- 交付时同步生成 `.html` 单文件版（图 base64 内嵌），`.md` 与 `.html` 同源同序，不得一版有图一版无图。命令：`python skills/reits-report-writing/tools/render_report.py report.md`（默认输出同名 `.html`；`-o` 指定路径，`--title` 覆盖标签标题）。脚本从 md 所在目录解析图片相对路径，零第三方依赖，输出后打印内嵌图数与表格数，缺图会列出路径而不是静默跳过。
 [输出]：正文图表
 
 #9 --{动作}-- [非数据]
